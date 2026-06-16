@@ -1,16 +1,16 @@
 {
   "metadata": {
-    "report_name": "comparison_fengshui_V1",
+    "report_name": "comparison_fengshui_V2",
     "version": "2.0",
     "created_date": "2026-06-14",
-    "source": "master_fengshui_V1.json",
+    "source": "master_fengshui_V2.json",
     "compare_targets": [
       "尹森",
       "湯鎮瑋",
       "徐玉蘭"
     ],
     "total_topics": 160,
-    "description": "基於master_fengshui_V1.json的三位老師風水觀點深度比對報告"
+    "description": "基於master_fengshui_V2.json的三位老師風水觀點深度比對報告"
   },
   "comparison_entries": [
     {
