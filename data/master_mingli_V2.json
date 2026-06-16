@@ -1,11 +1,11 @@
 {
   "metadata": {
-    "db_name": "master_mingli_V1",
+    "db_name": "master_mingli_V2",
     "version": "2.0",
     "created_date": "2026-06-14",
     "sources": [
-      "master_bazi_V1.json",
-      "master_fengshui_V1.json"
+      "master_bazi_V2.json",
+      "master_fengshui_V2.json"
     ],
     "teachers": [
       "尹森",
