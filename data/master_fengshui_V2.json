@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "database_name": "master_fengshui_V1",
+    "database_name": "master_fengshui_V2",
     "version": "2.0",
     "created_date": "2026-06-13",
     "total_planned_entries": 160,
@@ -12,7 +12,7 @@
       "湯鎮瑋_個人風水行動手冊",
       "徐玉蘭_課程B_風水"
     ],
-    "bazi_database_link": "master_bazi_V1.json",
+    "bazi_database_link": "master_bazi_V2.json",
     "description": "整合三位老師風水知識的結構化資料庫，可與八字資料庫雙向查詢"
   },
   "categories": [
