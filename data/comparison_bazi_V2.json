@@ -1,15 +1,15 @@
 {
   "metadata": {
-    "report_name": "comparison_bazi_V1",
+    "report_name": "comparison_bazi_V2",
     "version": "2.0",
     "created_date": "2026-06-14",
-    "source": "master_bazi_V1.json",
+    "source": "master_bazi_V2.json",
     "compare_targets": [
       "湯鎮瑋",
       "徐玉蘭"
     ],
     "total_topics": 58,
-    "description": "基於master_bazi_V1.json的湯鎮瑋與徐玉蘭八字觀點深度比對報告"
+    "description": "基於master_bazi_V2.json的湯鎮瑋與徐玉蘭八字觀點深度比對報告"
   },
   "comparison_entries": [
     {
