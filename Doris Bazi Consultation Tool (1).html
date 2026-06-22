@@ -228,9 +228,7 @@ color:#8B6914;
 font-weight:600;
 width:90px;
 }
-.info-table td.value{
-background:#fff;
-}
+.info-table td.value{background:#fff;}
 
 /* 五行圖 */
 .wuxing-wrap{
@@ -239,7 +237,6 @@ gap:24px;
 align-items:stretch;
 flex-wrap:wrap;
 }
-
 .wuxing-legend{flex:1;min-width:180px;}
 .wuxing-legend h4{
 font-size:0.82rem;
@@ -311,7 +308,7 @@ margin-top:2px;
 .star-cell{font-size:0.75rem;color:#888;line-height:1.8;}
 .qiyun-row{font-size:0.85rem;color:#8B6914;font-weight:600;text-align:center;padding:10px!important;}
 
-/* ══ 歲／大運獨立表格 ══ */
+/* 歲／大運獨立表格 */
 .dayun-row-wrap{
 overflow-x:auto;
 margin-top:10px;
@@ -328,7 +325,6 @@ padding:8px 14px;
 font-size:0.85rem;
 vertical-align:middle;
 }
-/* 標題欄：固定在最右邊 */
 .dayun-row-label{
 background:#FAF6F1;
 font-size:0.78rem;
@@ -374,7 +370,6 @@ padding:8px 12px!important;
 }
 .hl-col{background:#FFF3E0!important;font-weight:700;}
 .gz-big{font-size:1.1rem;font-weight:700;}
-.spacer-row td{height:6px;background:#FAF6F1;border:none!important;}
 
 /* 分析報告 Tab */
 .tab-bar{
@@ -401,7 +396,7 @@ font-weight:700;
 border-bottom-color:#D4B896;
 }
 
-/* 報告區塊 */
+/* ══ 報告區塊 ══ */
 .report-block{
 border-left:3px solid #D4B896;
 padding:16px 20px;
@@ -420,6 +415,186 @@ font-size:0.88rem;
 line-height:1.9;
 color:#5A4030;
 }
+
+/* ══ 知識庫卡片（新增） ══ */
+.kb-card{
+background:#FFFCF8;
+border:1px solid #F0E8DC;
+border-radius:12px;
+padding:16px 20px;
+margin-bottom:16px;
+}
+.kb-card-title{
+font-size:0.9rem;
+font-weight:700;
+color:#8B6914;
+margin-bottom:10px;
+display:flex;
+align-items:center;
+gap:8px;
+}
+.kb-card-title .kb-id{
+font-size:0.7rem;
+background:#F0E8DC;
+color:#8B6914;
+padding:2px 8px;
+border-radius:20px;
+font-weight:600;
+}
+.kb-content{
+font-size:0.85rem;
+line-height:1.9;
+color:#5A4030;
+}
+.kb-content ul{
+padding-left:18px;
+margin-top:6px;
+}
+.kb-content ul li{
+margin-bottom:4px;
+}
+.kb-tag{
+display:inline-block;
+font-size:0.68rem;
+background:#FDF5EA;
+color:#B89C7D;
+border:1px solid #E8DDD0;
+padding:2px 8px;
+border-radius:20px;
+margin:4px 3px 0 0;
+}
+
+/* ══ 雙師比對（新增） ══ */
+.compare-wrap{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:12px;
+margin-top:10px;
+}
+.compare-box{
+background:#fff;
+border:1px solid #F0E8DC;
+border-radius:10px;
+padding:12px 14px;
+}
+.compare-box-title{
+font-size:0.75rem;
+font-weight:700;
+color:#8B6914;
+margin-bottom:6px;
+padding-bottom:6px;
+border-bottom:1px solid #F0E8DC;
+}
+.compare-box p{
+font-size:0.78rem;
+line-height:1.7;
+color:#5A4030;
+}
+.consensus-box{
+background:linear-gradient(135deg,#FDF5EA,#FAF6F1);
+border:1px solid #E8DDD0;
+border-radius:10px;
+padding:12px 16px;
+margin-top:10px;
+font-size:0.82rem;
+color:#8B6914;
+line-height:1.7;
+}
+.consensus-box strong{
+display:block;
+margin-bottom:4px;
+}
+
+/* ══ 區塊折疊（新增） ══ */
+details.kb-section{
+margin-bottom:16px;
+}
+details.kb-section summary{
+cursor:pointer;
+list-style:none;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:14px 18px;
+background:#FAF6F1;
+border-radius:10px;
+font-size:0.92rem;
+font-weight:700;
+color:#8B6914;
+border:1px solid #F0E8DC;
+transition:background 0.2s;
+}
+details.kb-section summary:hover{background:#F5EDE0;}
+details.kb-section summary::after{
+content:'▼';
+font-size:0.7rem;
+color:#B89C7D;
+transition:transform 0.2s;
+}
+details.kb-section[open] summary::after{
+transform:rotate(180deg);
+}
+details.kb-section .section-body{
+padding:16px 4px 4px;
+}
+
+/* ══ 流日日曆（新增） ══ */
+.liuri-grid{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:10px;
+margin-top:12px;
+}
+.liuri-card{
+background:#fff;
+border:1px solid #F0E8DC;
+border-radius:10px;
+padding:12px;
+text-align:center;
+}
+.liuri-card-icon{font-size:1.4rem;margin-bottom:4px;}
+.liuri-card-title{
+font-size:0.72rem;
+font-weight:700;
+color:#8B6914;
+margin-bottom:6px;
+}
+.liuri-card-days{
+font-size:0.78rem;
+color:#5A4030;
+line-height:1.8;
+}
+
+/* ══ 警示框（新增） ══ */
+.alert-box{
+background:#FFF8F0;
+border:1px solid #F0D0A0;
+border-left:4px solid #E8A020;
+border-radius:0 10px 10px 0;
+padding:12px 16px;
+margin-bottom:12px;
+font-size:0.84rem;
+color:#7A5020;
+line-height:1.7;
+}
+.alert-box strong{color:#C8620A;}
+
+/* ══ 知識庫載入狀態 ══ */
+.kb-loading{
+text-align:center;
+padding:40px;
+color:#B89C7D;
+font-size:0.9rem;
+}
+.kb-error{
+text-align:center;
+padding:20px;
+color:#C0392B;
+font-size:0.85rem;
+background:#FFEBEE;
+border-radius:10px;
+}
+
 .doris-quote{
 background:linear-gradient(135deg,#FDF5EA,#FAF6F1);
 border:1px solid #E8DDD0;
@@ -455,37 +630,26 @@ background:#D4B896;
 border-radius:2px;
 }
 
-/* 底部操作列 */
-.bottom-bar{
-display:flex;
-gap:10px;
-margin-top:24px;
-flex-wrap:wrap;
+/* RWD */
+@media(max-width:600px){
+.wuxing-wrap{flex-direction:column;}
+.date-row{flex-wrap:wrap;}
+.compare-wrap{grid-template-columns:1fr;}
+.liuri-grid{grid-template-columns:repeat(2,1fr);}
 }
-.bottom-bar .btn{flex:1;min-width:120px;}
 
-/* ══════════════════════════════════════
- 列印
-══════════════════════════════════════ */
+/* 列印 */
 @media print{
 .no-print{display:none!important;}
 body{background:#fff;}
 .card{box-shadow:none;border:1px solid #eee;}
 .container{padding:0;}
 .site-header{border-bottom:2px solid #D4B896;}
+details.kb-section{display:block;}
+details.kb-section summary::after{display:none;}
 }
 
-/* ══════════════════════════════════════
- RWD
-══════════════════════════════════════ */
-@media(max-width:600px){
-.wuxing-wrap{flex-direction:column;}
-.date-row{flex-wrap:wrap;}
-.bottom-bar{flex-direction:column;}
-}
 .wx-small{font-size:0.65rem;color:#aaa;margin-left:3px;vertical-align:middle;}
-.tg-char{font-size:2rem;font-weight:700;vertical-align:middle;}
-.dz-char{font-size:2rem;font-weight:700;vertical-align:middle;}
 .ms-label{font-size:0.8rem;color:#7a6652;white-space:pre-line;text-align:center;display:block;}
 .fs-item{display:inline-block;font-size:0.7rem;color:#666;margin:0 2px;}
 .canggan-cell span{font-size:0.85rem;}
@@ -497,20 +661,18 @@ body{background:#fff;}
 <!-- Loading Overlay -->
 <div id="loading-overlay" class="loading-overlay hidden">
 <div class="loading-spinner"></div>
-<p>命盤推算中⋯</p>
+<p id="loading-msg">命盤推算中⋯</p>
 </div>
 
 <div class="container">
 
-<!-- ══ Header ══ -->
+<!-- Header -->
 <div class="site-header no-print">
 <h1>源澄潤設計事務所</h1>
 <p>Doris 的八字路口相談室</p>
 </div>
 
-<!-- ══════════════════════════════════
- 畫面一：客戶列表
-══════════════════════════════════ -->
+<!-- 畫面一：客戶列表 -->
 <div id="screen-list">
 <div class="list-topbar">
 <h2>客戶列表</h2>
@@ -519,9 +681,7 @@ body{background:#fff;}
 <div id="client-list-container"></div>
 </div>
 
-<!-- ══════════════════════════════════
- 畫面二：新增客戶
-══════════════════════════════════ -->
+<!-- 畫面二：新增客戶 -->
 <div id="screen-add" class="hidden">
 <div class="page-topbar no-print">
 <button class="btn btn-ghost" onclick="showScreen('screen-list')">← 返回</button>
@@ -560,9 +720,7 @@ body{background:#fff;}
 </div>
 </div>
 
-<!-- ══════════════════════════════════
- 畫面三：報告
-══════════════════════════════════ -->
+<!-- 畫面三：報告 -->
 <div id="screen-report" class="hidden">
 
 <div class="report-topbar no-print">
@@ -575,29 +733,22 @@ body{background:#fff;}
 <!-- 基本訊息 -->
 <div class="card">
 <div class="section-title">基本訊息</div>
-<table class="info-table" id="info-table">
-<tbody></tbody>
-</table>
+<table class="info-table" id="info-table"><tbody></tbody></table>
 </div>
 
 <!-- 五行圖 -->
 <div class="card">
 <div class="section-title">五行相生相剋</div>
 <div class="wuxing-wrap">
-
-<div style="flex-shrink:0; min-width:420px; display:flex; align-items:center; justify-content:center;">
-<img 
-  src="https://raw.githubusercontent.com/aichi0121/mingli-paipan/main/wuxing-chart.png"
-  alt="五行相生相剋圖"
-  style="width:420px; max-width:100%; height:auto; object-fit:contain;"
-  onerror="this.style.display='none'; document.getElementById('wuxing-fallback').style.display='block';"
->
-<div id="wuxing-fallback" style="display:none; width:420px; height:420px; background:#FAF6F1; border-radius:12px; color:#B89C7D; font-size:0.85rem; text-align:center; padding-top:190px;">
-  圖片載入失敗
+<div style="flex-shrink:0;min-width:420px;display:flex;align-items:center;justify-content:center;">
+  <img
+    src="https://raw.githubusercontent.com/aichi0121/mingli-paipan/main/wuxing-chart.png"
+    alt="五行相生相剋圖"
+    style="width:420px;max-width:100%;height:auto;object-fit:contain;"
+    onerror="this.style.display='none';document.getElementById('wuxing-fallback').style.display='block';"
+  >
+  <div id="wuxing-fallback" style="display:none;width:420px;height:420px;background:#FAF6F1;border-radius:12px;color:#B89C7D;font-size:0.85rem;text-align:center;padding-top:190px;">圖片載入失敗</div>
 </div>
-</div>
-
-
 <div class="wuxing-legend">
   <h4>相生關係</h4>
   <div class="legend-item"><div class="legend-dot" style="background:#4CAF50"></div>木→火 燃燒木材會產生火</div>
@@ -630,7 +781,6 @@ body{background:#fff;}
     </tr>
   </thead>
   <tbody>
-    <!-- 主星行 -->
     <tr>
       <td id="ms-shi"></td>
       <td class="rizhu-bg" style="font-size:0.75rem;color:#B89C7D">日主</td>
@@ -638,7 +788,6 @@ body{background:#fff;}
       <td id="ms-nian"></td>
       <td class="col-label">主星</td>
     </tr>
-    <!-- 天干行 -->
     <tr>
       <td id="tg-shi"></td>
       <td id="tg-ri" class="rizhu-bg"></td>
@@ -646,7 +795,6 @@ body{background:#fff;}
       <td id="tg-nian"></td>
       <td class="col-label">天干</td>
     </tr>
-    <!-- 地支行 -->
     <tr>
       <td id="dz-shi"></td>
       <td id="dz-ri" class="rizhu-bg"></td>
@@ -654,7 +802,6 @@ body{background:#fff;}
       <td id="dz-nian"></td>
       <td class="col-label">地支</td>
     </tr>
-    <!-- 藏干行 -->
     <tr>
       <td id="cg-shi" class="canggan-cell"></td>
       <td id="cg-ri" class="canggan-cell rizhu-bg"></td>
@@ -662,7 +809,6 @@ body{background:#fff;}
       <td id="cg-nian" class="canggan-cell"></td>
       <td class="col-label">藏干</td>
     </tr>
-    <!-- 副星行 -->
     <tr>
       <td id="fs-shi" class="star-cell"></td>
       <td id="fs-ri" class="star-cell rizhu-bg" style="font-size:0.7rem;color:#B89C7D">—</td>
@@ -670,7 +816,6 @@ body{background:#fff;}
       <td id="fs-nian" class="star-cell"></td>
       <td class="col-label">副星</td>
     </tr>
-    <!-- 起運行 -->
     <tr>
       <td colspan="4" id="qiyun-cell" class="qiyun-row"></td>
       <td class="col-label">起運</td>
@@ -678,13 +823,10 @@ body{background:#fff;}
   </tbody>
 </table>
 </div>
-
-<!-- ══ 歲／大運獨立表格（仿徐玉蘭） ══ -->
 <div class="dayun-row-wrap">
 <table class="dayun-row-table" id="dayun-row-table"></table>
 </div>
-
-</div><!-- /card 基本排盤 -->
+</div>
 
 <!-- 大運流年 -->
 <div class="card">
@@ -694,15 +836,15 @@ body{background:#fff;}
 </div>
 </div>
 
-<!-- 分析報告 -->
+<!-- 命理分析報告 -->
 <div class="card">
 <div class="section-title">命理分析報告</div>
 <div class="tab-bar no-print">
 <button class="tab-btn active" onclick="switchTab('full',this)">📋 完整版</button>
 <button class="tab-btn" onclick="switchTab('quick',this)">⚡ 快速版</button>
 </div>
-<div id="tab-full"></div>
-<div id="tab-quick" class="hidden"></div>
+<div id="tab-full"><div class="kb-loading">知識庫載入中⋯</div></div>
+<div id="tab-quick" class="hidden"><div class="kb-loading">知識庫載入中⋯</div></div>
 </div>
 
 </div><!-- /screen-report -->
@@ -714,6 +856,7 @@ body{background:#fff;}
 // ══════════════════════════════════════════════
 const CURRENT_YEAR = 2026;
 const LS_KEY = 'doris_clients';
+const GITHUB_RAW = 'https://raw.githubusercontent.com/aichi0121/mingli-paipan/main/data/';
 
 const WX_MAP = {
 甲:'木',乙:'木',丙:'火',丁:'火',戊:'土',
@@ -722,80 +865,105 @@ const WX_MAP = {
 巳:'火',午:'火',未:'土',申:'金',酉:'金',戌:'土',亥:'水'
 };
 const WX_COLOR = {木:'#4CAF50',火:'#E53935',土:'#FB8C00',金:'#B8860B',水:'#1E88E5'};
-// 簡繁轉換對照
+
 const SIMP_TO_TRAD = {
-'比肩':'比肩','劫财':'劫財','食神':'食神','伤官':'傷官',
-'正财':'正財','偏财':'偏財','正官':'正官','七杀':'七殺',
-'正印':'正印','偏印':'偏印','枭神':'梟神'
+'劫财':'劫財','伤官':'傷官','正财':'正財',
+'偏财':'偏財','七杀':'七殺','枭神':'梟神'
 };
 function toTrad(s){
 if(!s) return s;
-return s.replace(/劫财|伤官|正财|偏财|七杀|枭神/g, m => SIMP_TO_TRAD[m]||m);
+return s.replace(/劫财|伤官|正财|偏财|七杀|枭神/g, m=>SIMP_TO_TRAD[m]||m);
 }
-const DAY_MASTER_TRAITS = {
-甲:`【甲木｜參天大樹】\n您天生具備強大的執行力與開創精神，如同一棵挺拔的大樹，勇於向上生長。優勢在於領導力強、目標明確，做事有始有終；需注意過於固執，學習彈性變通，接納不同意見，將使您走得更遠。`,
-乙:`【乙木｜藤蔓之木】\n您柔韌而有彈性，善於在環境中找到生存之道，具備良好的合作能力。優勢在於適應力強、人際圓融，能在各種環境中找到自己的位置；需注意有時缺乏主見，建立自我核心價值，讓柔韌成為您最大的力量。`,
-丙:`【丙火｜太陽之火】\n您熱情開朗，自帶光芒，天生具備領導魅力，能溫暖周圍的人。優勢在於積極樂觀、感染力強，是天生的激勵者；需注意衝動急躁，培養耐心與深思熟慮，讓熱情成為持久的動力而非短暫的火花。`,
-丁:`【丁火｜燭火之光】\n您細膩溫柔，直覺敏銳，如燭光般溫暖而持久，能照亮他人的黑暗。優勢在於感受力強、藝術天賦出眾；需注意情緒起伏，建立穩定的內心支撐，讓您的光芒更加穩定持久。`,
-戊:`【戊土｜高山厚土】\n您穩重可靠，承載力強，是眾人的依靠，如高山般屹立不搖。優勢在於踏實耐勞、信用良好，是值得信賴的夥伴；需注意過於保守，適時接受新事物與改變，讓穩重成為前進的基石而非阻礙。`,
-己:`【己土｜田園沃土】\n您包容細心，善於滋養他人，具備溫暖的照顧特質，如沃土般孕育萬物。優勢在於細心周到、包容力強；需注意優柔寡斷，學習果斷決策，讓您的包容成為他人成長的養分。`,
-庚:`【庚金｜鑄劍之金】\n您果斷剛毅，執行力強，做事俐落有效率，如利劍般直指目標。優勢在於行動力強、意志堅定；需注意過於強硬，學習柔軟與妥協的藝術，讓剛毅成為您最有力的武器。`,
-辛:`【辛金｜珠寶之金】\n您精緻敏感，美感出眾，對品質有極高要求，如珠寶般閃耀獨特。優勢在於審美力強、追求完美；需注意玻璃心，培養心理韌性，讓您的精緻成為獨特的品味而非脆弱的弱點。`,
-壬:`【壬水｜大海之水】\n您智慧靈活，包容萬物，思維廣闊如海，能容納各種可能性。優勢在於聰明機智、適應力強；需注意缺乏定性，培養專注與持續力，讓廣闊的思維聚焦成深邃的智慧。`,
-癸:`【癸水｜雨露之水】\n您滋潤細膩，直覺強烈，情感豐富而深刻，如雨露般滋養萬物。優勢在於直覺準確、同理心強，能深刻理解他人；需注意多愁善感，建立情緒管理機制，讓豐富的情感成為您的天賦而非負擔。`
-};
 
-// ══════════════════════════════════════
-// 24節氣對照表
-// ══════════════════════════════════════
+// ══════════════════════════════════════════════
+// 知識庫快取 & 載入
+// ══════════════════════════════════════════════
+const KB_CACHE = {};
+
+async function fetchKB(fileName){
+if(KB_CACHE[fileName]) return KB_CACHE[fileName];
+try{
+const res = await fetch(GITHUB_RAW + fileName);
+const json = await res.json();
+KB_CACHE[fileName] = json;
+return json;
+}catch(e){
+console.error('KB fetch error:', fileName, e);
+return null;
+}
+}
+
+function getEntry(kb, id){
+if(!kb) return null;
+const arr = kb.entries || kb.comparison_entries || [];
+return arr.find(e=>e.id===id) || null;
+}
+
+function getByCategory(kb, cat){
+if(!kb) return [];
+const arr = kb.entries || kb.comparison_entries || [];
+return arr.filter(e=>e.category===cat || e.sub_category===cat);
+}
+
+// ══════════════════════════════════════════════
+// 新知識庫橋接查詢函式
+// ══════════════════════════════════════════════
+
+// 依 sub_item + query_key 精確查詢
+function queryKB(kb, sub_item, query_key) {
+if (!kb || !kb.knowledge_base) return null;
+return kb.knowledge_base.find(entry => {
+  if (entry.sub_item !== sub_item) return false;
+  return Object.entries(query_key).every(([k, v]) => {
+    return entry.query_key && entry.query_key[k] === v;
+  });
+}) || null;
+}
+
+// 取 content 文字（自動處理空值）
+function qContent(kb, sub_item, query_key, fallback) {
+const entry = queryKB(kb, sub_item, query_key);
+return (entry && entry.content) ? entry.content : (fallback || '');
+}
+
+// 依 section 取得所有項目
+function queryKBSection(kb, section) {
+if (!kb || !kb.knowledge_base) return [];
+return kb.knowledge_base.filter(e => e.section === section);
+}
+
+// ══════════════════════════════════════════════
+// 24節氣
+// ══════════════════════════════════════════════
 const JIEQI_LIST = [
-{ name:'小寒', month:1,  day:6  },
-{ name:'大寒', month:1,  day:20 },
-{ name:'立春', month:2,  day:4  },
-{ name:'雨水', month:2,  day:19 },
-{ name:'驚蟄', month:3,  day:6  },
-{ name:'春分', month:3,  day:21 },
-{ name:'清明', month:4,  day:5  },
-{ name:'穀雨', month:4,  day:20 },
-{ name:'立夏', month:5,  day:6  },
-{ name:'小滿', month:5,  day:21 },
-{ name:'芒種', month:6,  day:6  },
-{ name:'夏至', month:6,  day:21 },
-{ name:'小暑', month:7,  day:7  },
-{ name:'大暑', month:7,  day:23 },
-{ name:'立秋', month:8,  day:7  },
-{ name:'處暑', month:8,  day:23 },
-{ name:'白露', month:9,  day:8  },
-{ name:'秋分', month:9,  day:23 },
-{ name:'寒露', month:10, day:8  },
-{ name:'霜降', month:10, day:23 },
-{ name:'立冬', month:11, day:7  },
-{ name:'小雪', month:11, day:22 },
-{ name:'大雪', month:12, day:7  },
-{ name:'冬至', month:12, day:22 },
+{name:'小寒',month:1,day:6},{name:'大寒',month:1,day:20},
+{name:'立春',month:2,day:4},{name:'雨水',month:2,day:19},
+{name:'驚蟄',month:3,day:6},{name:'春分',month:3,day:21},
+{name:'清明',month:4,day:5},{name:'穀雨',month:4,day:20},
+{name:'立夏',month:5,day:6},{name:'小滿',month:5,day:21},
+{name:'芒種',month:6,day:6},{name:'夏至',month:6,day:21},
+{name:'小暑',month:7,day:7},{name:'大暑',month:7,day:23},
+{name:'立秋',month:8,day:7},{name:'處暑',month:8,day:23},
+{name:'白露',month:9,day:8},{name:'秋分',month:9,day:23},
+{name:'寒露',month:10,day:8},{name:'霜降',month:10,day:23},
+{name:'立冬',month:11,day:7},{name:'小雪',month:11,day:22},
+{name:'大雪',month:12,day:7},{name:'冬至',month:12,day:22},
 ];
 
-function calcJieQi(year, month, day){
-const all = [];
-for(let y = year-1; y <= year+1; y++){
-JIEQI_LIST.forEach(jq=>{
-all.push({ name: jq.name, date: new Date(y, jq.month-1, jq.day) });
-});
+function calcJieQi(year,month,day){
+const all=[];
+for(let y=year-1;y<=year+1;y++){
+JIEQI_LIST.forEach(jq=>{all.push({name:jq.name,date:new Date(y,jq.month-1,jq.day)});});
 }
 all.sort((a,b)=>a.date-b.date);
-const birth = new Date(year, month-1, day);
-let qian = null;
-for(let i = all.length-1; i >= 0; i--){
-if(all[i].date < birth){ qian = all[i]; break; }
-}
-let hou = null;
-for(let i = 0; i < all.length; i++){
-if(all[i].date >= birth){ hou = all[i]; break; }
-}
-const fmt = d => `${d.getMonth()+1}月${d.getDate()}日`;
-return {
-qian: qian ? `${qian.name}（${fmt(qian.date)}）` : '—',
-hou:  hou  ? `${hou.name}（${fmt(hou.date)}）`  : '—',
+const birth=new Date(year,month-1,day);
+let qian=null,hou=null;
+for(let i=all.length-1;i>=0;i--){if(all[i].date<birth){qian=all[i];break;}}
+for(let i=0;i<all.length;i++){if(all[i].date>=birth){hou=all[i];break;}}
+const fmt=d=>`${d.getMonth()+1}月${d.getDate()}日`;
+return{
+qian:qian?`${qian.name}（${fmt(qian.date)}）`:'—',
+hou:hou?`${hou.name}（${fmt(hou.date)}）`:'—'
 };
 }
 
@@ -803,55 +971,35 @@ hou:  hou  ? `${hou.name}（${fmt(hou.date)}）`  : '—',
 // 初始化下拉選單
 // ══════════════════════════════════════════════
 function initSelects(){
-const mSel = document.getElementById('inp-month');
-mSel.innerHTML = '<option value="">月</option>';
-for(let i=1;i<=12;i++){
-const o=document.createElement('option');
-o.value=i; o.textContent=i+'月';
-mSel.appendChild(o);
-}
-const dSel = document.getElementById('inp-day');
-dSel.innerHTML = '<option value="">日</option>';
-for(let i=1;i<=31;i++){
-const o=document.createElement('option');
-o.value=i; o.textContent=i+'日';
-dSel.appendChild(o);
-}
-const hSel = document.getElementById('inp-hour');
-hSel.innerHTML = '<option value="">時</option>';
-for(let i=0;i<=23;i++){
-const o=document.createElement('option');
-o.value=i;
-o.textContent=String(i).padStart(2,'0');
-hSel.appendChild(o);
-}
-const minSel = document.getElementById('inp-min');
-minSel.innerHTML = '<option value="">分</option>';
-for(let i=0;i<=59;i++){
-const o=document.createElement('option');
-o.value=i;
-o.textContent=String(i).padStart(2,'0');
-minSel.appendChild(o);
-}
+const mSel=document.getElementById('inp-month');
+mSel.innerHTML='<option value="">月</option>';
+for(let i=1;i<=12;i++){const o=document.createElement('option');o.value=i;o.textContent=i+'月';mSel.appendChild(o);}
+const dSel=document.getElementById('inp-day');
+dSel.innerHTML='<option value="">日</option>';
+for(let i=1;i<=31;i++){const o=document.createElement('option');o.value=i;o.textContent=i+'日';dSel.appendChild(o);}
+const hSel=document.getElementById('inp-hour');
+hSel.innerHTML='<option value="">時</option>';
+for(let i=0;i<=23;i++){const o=document.createElement('option');o.value=i;o.textContent=String(i).padStart(2,'0');hSel.appendChild(o);}
+const minSel=document.getElementById('inp-min');
+minSel.innerHTML='<option value="">分</option>';
+for(let i=0;i<=59;i++){const o=document.createElement('option');o.value=i;o.textContent=String(i).padStart(2,'0');minSel.appendChild(o);}
 ['inp-year','inp-month','inp-day'].forEach(id=>{
-document.getElementById(id).addEventListener('change', updateLunarHint);
+document.getElementById(id).addEventListener('change',updateLunarHint);
 });
-document.getElementById('inp-year').addEventListener('input', updateLunarHint);
+document.getElementById('inp-year').addEventListener('input',updateLunarHint);
 }
 
 function updateLunarHint(){
-const y = parseInt(document.getElementById('inp-year').value);
-const m = parseInt(document.getElementById('inp-month').value);
-const d = parseInt(document.getElementById('inp-day').value);
-const hint = document.getElementById('lunar-hint');
-if(!y||!m||!d||y<1900||y>2100){ hint.textContent=''; return; }
+const y=parseInt(document.getElementById('inp-year').value);
+const m=parseInt(document.getElementById('inp-month').value);
+const d=parseInt(document.getElementById('inp-day').value);
+const hint=document.getElementById('lunar-hint');
+if(!y||!m||!d||y<1900||y>2100){hint.textContent='';return;}
 try{
-const solar = Solar.fromYmd(y, m, d);
-const lunar = solar.getLunar();
-hint.textContent = `對應農曆：${lunar.getYearInGanZhi()}年 ${lunar.getMonthInChinese()}月 ${lunar.getDayInChinese()}`;
-}catch(e){
-hint.textContent = '';
-}
+const solar=Solar.fromYmd(y,m,d);
+const lunar=solar.getLunar();
+hint.textContent=`對應農曆：${lunar.getYearInGanZhi()}年 ${lunar.getMonthInChinese()}月 ${lunar.getDayInChinese()}`;
+}catch(e){hint.textContent='';}
 }
 
 // ══════════════════════════════════════════════
@@ -859,7 +1007,7 @@ hint.textContent = '';
 // ══════════════════════════════════════════════
 function showScreen(id){
 ['screen-list','screen-add','screen-report'].forEach(s=>{
-document.getElementById(s).classList.toggle('hidden', s!==id);
+document.getElementById(s).classList.toggle('hidden',s!==id);
 });
 if(id==='screen-list') renderClientList();
 window.scrollTo(0,0);
@@ -869,35 +1017,35 @@ window.scrollTo(0,0);
 // 按鈕式單選
 // ══════════════════════════════════════════════
 function selectToggle(el){
-const group = el.dataset.group;
+const group=el.dataset.group;
 document.querySelectorAll(`[data-group="${group}"]`).forEach(b=>b.classList.remove('active'));
 el.classList.add('active');
 }
 function getToggleVal(group){
-const el = document.querySelector(`[data-group="${group}"].active`);
-return el ? el.dataset.val : null;
+const el=document.querySelector(`[data-group="${group}"].active`);
+return el?el.dataset.val:null;
 }
 
 // ══════════════════════════════════════════════
 // 客戶列表
 // ══════════════════════════════════════════════
-function getClients(){ return JSON.parse(localStorage.getItem(LS_KEY)||'[]'); }
-function saveClients(arr){ localStorage.setItem(LS_KEY,JSON.stringify(arr)); }
+function getClients(){return JSON.parse(localStorage.getItem(LS_KEY)||'[]');}
+function saveClients(arr){localStorage.setItem(LS_KEY,JSON.stringify(arr));}
 
 function renderClientList(){
-const clients = getClients();
-const container = document.getElementById('client-list-container');
+const clients=getClients();
+const container=document.getElementById('client-list-container');
 if(clients.length===0){
 container.innerHTML=`<div class="empty-state"><div class="emoji">🔮</div><p>尚無客戶資料</p><p style="font-size:0.8rem;margin-top:8px;color:#ccc">點擊右上角「＋ 新增客戶」開始</p></div>`;
 return;
 }
-container.innerHTML = clients.map(c=>`
+container.innerHTML=clients.map(c=>`
 <div class="client-card" onclick="loadReport('${c.id}')">
-<div class="client-info">
-  <h3>${c.name}</h3>
-  <p>${c.year}年${c.month}月${c.day}日・${c.gender}・最後諮詢 ${c.consultDate}</p>
-</div>
-<button class="btn btn-danger" onclick="event.stopPropagation();deleteClient('${c.id}')">刪除</button>
+  <div class="client-info">
+    <h3>${c.name}</h3>
+    <p>${c.year}年${c.month}月${c.day}日・${c.gender}・最後諮詢 ${c.consultDate}</p>
+  </div>
+  <button class="btn btn-danger" onclick="event.stopPropagation();deleteClient('${c.id}')">刪除</button>
 </div>
 `).join('');
 }
@@ -912,86 +1060,63 @@ renderClientList();
 // 產生報告
 // ══════════════════════════════════════════════
 async function doGenerate(){
-const name   = document.getElementById('inp-name').value.trim();
-const year   = document.getElementById('inp-year').value;
-const month  = document.getElementById('inp-month').value;
-const day    = document.getElementById('inp-day').value;
-const hour   = document.getElementById('inp-hour').value;
-const minute = document.getElementById('inp-min').value;
-const gender = getToggleVal('gender');
-
+const name=document.getElementById('inp-name').value.trim();
+const year=document.getElementById('inp-year').value;
+const month=document.getElementById('inp-month').value;
+const day=document.getElementById('inp-day').value;
+const hour=document.getElementById('inp-hour').value;
+const minute=document.getElementById('inp-min').value;
+const gender=getToggleVal('gender');
 if(!name||!year||!month||!day||hour===''||minute===''||gender===null){
-alert('請完整填寫所有欄位'); return;
+alert('請完整填寫所有欄位');return;
 }
-
-const mm  = String(month).padStart(2,'0');
-const dd  = String(day).padStart(2,'0');
-const hh  = String(hour).padStart(2,'0');
-const min = String(minute).padStart(2,'0');
-const dt  = `${year}-${mm}-${dd}T${hh}:${min}:00+08:00`;
-
-const payload = {
-dateType:'solar',
-solarDatetime:dt,
-gender:parseInt(gender),
-eightCharProviderSect:2
-};
-
-const apiUrls = [
+const mm=String(month).padStart(2,'0');
+const dd=String(day).padStart(2,'0');
+const hh=String(hour).padStart(2,'0');
+const min=String(minute).padStart(2,'0');
+const dt=`${year}-${mm}-${dd}T${hh}:${min}:00+08:00`;
+const payload={dateType:'solar',solarDatetime:dt,gender:parseInt(gender),eightCharProviderSect:2};
+const apiUrls=[
 'https://bazi.jianbao.org/api/bazi',
-'https://corsproxy.io/?url=' + encodeURIComponent('https://bazi.jianbao.org/api/bazi'),
-'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://bazi.jianbao.org/api/bazi')
+'https://corsproxy.io/?url='+encodeURIComponent('https://bazi.jianbao.org/api/bazi'),
+'https://api.allorigins.win/raw?url='+encodeURIComponent('https://bazi.jianbao.org/api/bazi')
 ];
-
-document.getElementById('loading-overlay').classList.remove('hidden');
-
-let json = null;
-let lastErr = '';
-
+setLoading(true,'命盤推算中⋯');
+let json=null,lastErr='';
 for(const url of apiUrls){
 try{
-const res = await fetch(url,{
-  method:'POST',
-  headers:{'Content-Type':'application/json'},
-  body:JSON.stringify(payload)
-});
-const text = await res.text();
-json = JSON.parse(text);
-if(json.success) break;
-}catch(e){
-lastErr = e.message;
-continue;
+  const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  const text=await res.text();
+  json=JSON.parse(text);
+  if(json.success) break;
+}catch(e){lastErr=e.message;continue;}
 }
-}
-
-document.getElementById('loading-overlay').classList.add('hidden');
-
-if(!json||!json.success){
-alert('命盤推算暫時無法連線，請稍後再試\n'+lastErr);
-return;
-}
-
-const client = {
-id: Date.now().toString(),
-name,
-year:parseInt(year), month:parseInt(month), day:parseInt(day),
-hour:parseInt(hour), minute:parseInt(minute),
-gender: gender==='1'?'男':'女',
-consultDate: new Date().toISOString().split('T')[0],
-baziData: json.data
+setLoading(false);
+if(!json||!json.success){alert('命盤推算暫時無法連線，請稍後再試\n'+lastErr);return;}
+const client={
+id:Date.now().toString(),
+name,year:parseInt(year),month:parseInt(month),day:parseInt(day),
+hour:parseInt(hour),minute:parseInt(minute),
+gender:gender==='1'?'男':'女',
+consultDate:new Date().toISOString().split('T')[0],
+baziData:json.data
 };
-
-const clients = getClients();
+const clients=getClients();
 clients.unshift(client);
 saveClients(clients);
 loadReport(client.id);
+}
+
+function setLoading(show,msg=''){
+document.getElementById('loading-overlay').classList.toggle('hidden',!show);
+if(msg) document.getElementById('loading-msg').textContent=msg;
 }
 
 // ══════════════════════════════════════════════
 // 載入並渲染報告
 // ══════════════════════════════════════════════
 function loadReport(id){
-const client = getClients().find(c=>c.id===id);
+const client=getClients().find(c=>c.id===id);
 if(!client) return;
 renderReport(client);
 showScreen('screen-report');
@@ -1001,300 +1126,631 @@ showScreen('screen-report');
 // 渲染報告主函式
 // ══════════════════════════════════════════════
 function renderReport(client){
-const bazi = client.baziData;
+const bazi=client.baziData;
+const nian=bazi['年柱']||{};
+const yue=bazi['月柱']||{};
+const ri=bazi['日柱']||{};
+const shi=bazi['时柱']||{};
+const lunar=bazi['农历']||'';
+const shengxiao=bazi['生肖']||'';
+const riTg=(ri['天干']?.['天干'])||ri['天干']||'';
+const riZhuWx=WX_MAP[riTg]||'';
+const wxColor=WX_COLOR[riZhuWx]||'#999';
+const jq=calcJieQi(parseInt(client.year),parseInt(client.month),parseInt(client.day));
 
-const nian = bazi['年柱']||{};
-const yue  = bazi['月柱']||{};
-const ri   = bazi['日柱']||{};
-const shi  = bazi['时柱']||{};
-const lunar= bazi['农历']||'';
-const shengxiao = bazi['生肖']||'';
-const qiyun = bazi['大运']?.['起运日期']
-? bazi['大运']['起运日期']+'（'+bazi['大运']['起运年龄']+'歲起運）'
-: '—';
-
-const riTg    = ri['天干']?.['天干'] || ri['天干'] || '';
-const riZhuWx = WX_MAP[riTg] || '';
-const wxColor = WX_COLOR[riZhuWx] || '#999';
-
-const jq = calcJieQi(
-parseInt(client.year),
-parseInt(client.month),
-parseInt(client.day)
-);
-
-document.getElementById('info-table').innerHTML = `
+document.getElementById('info-table').innerHTML=`
 <tr>
-<td class="label">姓名</td>
-<td class="value">${client.name}</td>
-<td class="label">性別</td>
-<td class="value">${client.gender}</td>
+  <td class="label">姓名</td><td class="value">${client.name}</td>
+  <td class="label">性別</td><td class="value">${client.gender}</td>
 </tr>
 <tr>
-<td class="label">陽曆</td>
-<td class="value">${client.year}年 ${client.month}月 ${client.day}日　${String(client.hour).padStart(2,'0')}時</td>
-<td class="label">農曆</td>
-<td class="value">${formatLunar(lunar)}</td>
+  <td class="label">陽曆</td>
+  <td class="value">${client.year}年 ${client.month}月 ${client.day}日　${String(client.hour).padStart(2,'0')}時</td>
+  <td class="label">農曆</td><td class="value">${formatLunar(lunar)}</td>
 </tr>
 <tr>
-<td class="label">生肖</td>
-<td class="value">${shengxiao}</td>
-<td class="label">五行</td>
-<td class="value"><span style="color:${wxColor};font-weight:700">${riZhuWx}</span></td>
+  <td class="label">生肖</td><td class="value">${shengxiao}</td>
+  <td class="label">五行</td>
+  <td class="value"><span style="color:${wxColor};font-weight:700">${riZhuWx}</span></td>
 </tr>
 <tr>
-<td class="label">前節氣</td>
-<td class="value">${jq.qian}</td>
-<td class="label">後節氣</td>
-<td class="value">${jq.hou}</td>
+  <td class="label">前節氣</td><td class="value">${jq.qian}</td>
+  <td class="label">後節氣</td><td class="value">${jq.hou}</td>
 </tr>
 <tr>
-<td class="label">起運日</td>
-<td class="value" colspan="3">${bazi['大运']?.['起运日期'] || '—'}（${bazi['大运']?.['起运年龄'] || ''}歲起運）</td>
+  <td class="label">起運日</td>
+  <td class="value" colspan="3">${bazi['大运']?.['起运日期']||'—'}（${bazi['大运']?.['起运年龄']||''}歲起運）</td>
 </tr>
 `;
 
-// ── 四柱 ──
-const cols = [
-{key:'nian', data:nian},
-{key:'yue',  data:yue},
-{key:'ri',   data:ri},
-{key:'shi',  data:shi}
-];
+const cols=[{key:'nian',data:nian},{key:'yue',data:yue},{key:'ri',data:ri},{key:'shi',data:shi}];
 cols.forEach(({key,data})=>{
-const tgObj = data['天干']||{};
-const dzObj = data['地支']||{};
-const tg    = tgObj['天干']||'';
-const dz    = dzObj['地支']||'';
-const tgWx  = tgObj['五行']||WX_MAP[tg]||'';
-const dzWx  = dzObj['五行']||WX_MAP[dz]||'';
-const tgC   = WX_COLOR[tgWx]||'#4A3728';
-const dzC   = WX_COLOR[dzWx]||'#4A3728';
-const cgRaw = dzObj['藏干']||{};
-const cgKeys = ['余气','中气','主气'];
-
-document.getElementById('tg-'+key).innerHTML =
-`<span class="tg-char" style="color:${tgC}">${tg}</span>`+
-`<span class="wx-label">${tgWx}</span>`;
-
-document.getElementById('dz-'+key).innerHTML =
-`<span class="dz-char" style="color:${dzC}">${dz}</span>`+
-`<span class="wx-label">${dzWx}</span>`;
-
-const cgEl = document.getElementById('cg-'+key);
-if(cgEl) cgEl.innerHTML = cgKeys.map(k=>{
-const char = cgRaw[k]?.['天干']||'';
-const wx   = cgRaw[k]?.['五行']||WX_MAP[char]||'';
-const col  = WX_COLOR[wx]||'#555';
-return char ? `<span style="color:${col}">${char}</span>` : '';
+const tgObj=data['天干']||{};
+const dzObj=data['地支']||{};
+const tg=tgObj['天干']||'';
+const dz=dzObj['地支']||'';
+const tgWx=tgObj['五行']||WX_MAP[tg]||'';
+const dzWx=dzObj['五行']||WX_MAP[dz]||'';
+const tgC=WX_COLOR[tgWx]||'#4A3728';
+const dzC=WX_COLOR[dzWx]||'#4A3728';
+const cgRaw=dzObj['藏干']||{};
+const cgKeys=['余气','中气','主气'];
+document.getElementById('tg-'+key).innerHTML=`<span class="tg-char" style="color:${tgC}">${tg}</span><span class="wx-label">${tgWx}</span>`;
+document.getElementById('dz-'+key).innerHTML=`<span class="dz-char" style="color:${dzC}">${dz}</span><span class="wx-label">${dzWx}</span>`;
+const cgEl=document.getElementById('cg-'+key);
+if(cgEl) cgEl.innerHTML=cgKeys.map(k=>{
+  const char=cgRaw[k]?.['天干']||'';
+  const wx=cgRaw[k]?.['五行']||WX_MAP[char]||'';
+  const col=WX_COLOR[wx]||'#555';
+  return char?`<span style="color:${col}">${char}</span>`:'';
 }).filter(Boolean).join(' ');
-
-const msEl = document.getElementById('ms-'+key);
-if(msEl) msEl.innerHTML = toTrad(tgObj['十神']||'—');
-
-const fsEl = document.getElementById('fs-'+key);
-if(fsEl) fsEl.innerHTML = cgKeys
-.map(k=> cgRaw[k]?.['十神']||'')
-.filter(Boolean)
-.map(s=>`<span class="fs-item">${toTrad(s)}</span>`)
-.join('') || '—';
+const msEl=document.getElementById('ms-'+key);
+if(msEl) msEl.innerHTML=toTrad(tgObj['十神']||'—');
+const fsEl=document.getElementById('fs-'+key);
+if(fsEl) fsEl.innerHTML=cgKeys.map(k=>cgRaw[k]?.['十神']||'').filter(Boolean).map(s=>`<span class="fs-item">${toTrad(s)}</span>`).join('')||'—';
 });
 
-document.getElementById('qiyun-cell').textContent = qiyun ? '起運：'+qiyun : '—';
+const qiyun=bazi['大运']?.['起运日期']?'起運：'+bazi['大运']['起运日期']+'（'+bazi['大运']['起运年龄']+'歲起運）':'—';
+document.getElementById('qiyun-cell').textContent=qiyun;
 
 renderDayun(bazi);
-renderAnalysis(client, bazi);
+renderAnalysisAsync(client, bazi);
 }
 
 // ══════════════════════════════════════════════
 // 大運流年
 // ══════════════════════════════════════════════
 function renderDayun(bazi){
-const dayunList = bazi['大运']?.['大运'] || [];
-const table = document.getElementById('dayun-table');
-
+const dayunList=bazi['大运']?.['大运']||[];
+const table=document.getElementById('dayun-table');
 if(!dayunList.length){
 table.innerHTML='<tr><td style="padding:20px;color:#999;text-align:center">大運資料無法載入</td></tr>';
 return;
 }
-
-// ── 大運流年主表 ──
-const ageRow  = ['<td class="row-label-cell">歲數</td>'];
-const yearRow = ['<td class="row-label-cell">年份</td>'];
-const gzRow   = ['<td class="row-label-cell">大運</td>'];
-const shenRow = ['<td class="row-label-cell">十神</td>'];
-
+const ageRow=['<td class="row-label-cell">歲數</td>'];
+const yearRow=['<td class="row-label-cell">年份</td>'];
+const gzRow=['<td class="row-label-cell">大運</td>'];
+const shenRow=['<td class="row-label-cell">十神</td>'];
 dayunList.forEach(dy=>{
-const startYear = dy['开始年份']||'';
-const endYear   = dy['结束']||'';
-const startAge  = dy['开始年龄']||'';
-const endAge    = dy['结束年龄']||'';
-const gz        = dy['干支']||'';
-const shen = toTrad(dy['天干十神']||'');
-const tg        = gz[0]||'';
-const tgC       = WX_COLOR[WX_MAP[tg]]||'#4A3728';
-const isCurrent = startYear && parseInt(startYear)<=CURRENT_YEAR
-                && CURRENT_YEAR<=parseInt(endYear);
-const cls = isCurrent ? 'hl-col' : '';
-
-ageRow .push(`<td class="${cls}">${startAge}～${endAge}</td>`);
+const startYear=dy['开始年份']||'';
+const endYear=dy['结束']||'';
+const startAge=dy['开始年龄']||'';
+const endAge=dy['结束年龄']||'';
+const gz=dy['干支']||'';
+const shen=toTrad(dy['天干十神']||'');
+const tg=gz[0]||'';
+const tgC=WX_COLOR[WX_MAP[tg]]||'#4A3728';
+const isCurrent=startYear&&parseInt(startYear)<=CURRENT_YEAR&&CURRENT_YEAR<=parseInt(endYear);
+const cls=isCurrent?'hl-col':'';
+ageRow.push(`<td class="${cls}">${startAge}～${endAge}</td>`);
 yearRow.push(`<td class="${cls}">${startYear}<br>～<br>${endYear}</td>`);
-gzRow  .push(`<td class="${cls}"><span class="gz-big" style="color:${tgC}">${gz}</span>${isCurrent?'<br><span style="font-size:10px;color:#C8622A">▶ 當前</span>':''}</td>`);
+gzRow.push(`<td class="${cls}"><span class="gz-big" style="color:${tgC}">${gz}</span>${isCurrent?'<br><span style="font-size:10px;color:#C8622A">▶ 當前</span>':''}</td>`);
 shenRow.push(`<td class="${cls}">${shen}</td>`);
 });
+table.innerHTML=`<tr>${ageRow.join('')}</tr><tr>${yearRow.join('')}</tr><tr>${gzRow.join('')}</tr><tr>${shenRow.join('')}</tr>`;
 
-table.innerHTML =
-`<tr>${ageRow.join('')}</tr>`+
-`<tr>${yearRow.join('')}</tr>`+
-`<tr>${gzRow.join('')}</tr>`+
-`<tr>${shenRow.join('')}</tr>`;
-
-// ── 歲／大運獨立表格（仿徐玉蘭，右→左） ──
-// 標題放最右邊，數據從左到右（小→大）
-const ageCells = [];
-const dyCells  = [];
-
+const ageCells=[],dyCells=[];
 [...dayunList].reverse().forEach(dy=>{
-const startAge  = dy['开始年龄']||'';
-const endAge    = dy['结束年龄']||'';
-const gz        = dy['干支']||'';
-const tg        = gz[0]||'';
-const tgC       = WX_COLOR[WX_MAP[tg]]||'#4A3728';
-const startYear = dy['开始年份']||'';
-const endYear   = dy['结束']||'9999';
-const isCur     = startYear &&
-                parseInt(startYear)<=CURRENT_YEAR &&
-                CURRENT_YEAR<=parseInt(endYear);
-const curCls    = isCur ? 'dayun-row-cur' : '';
-
-ageCells.push(
-`<td class="${curCls}">${startAge}～${endAge}</td>`
-);
-dyCells.push(
-`<td class="${curCls}">
-  <span style="color:${tgC};font-weight:700;font-size:1.05rem;">${gz[0]||''}</span><br>
-  <span style="color:${tgC};font-weight:700;font-size:1.05rem;">${gz[1]||''}</span>
-  ${isCur?'<br><span style="font-size:9px;color:#C8622A;">▶當前</span>':''}
-</td>`
-);
+const startAge=dy['开始年龄']||'';
+const endAge=dy['结束年龄']||'';
+const gz=dy['干支']||'';
+const tg=gz[0]||'';
+const tgC=WX_COLOR[WX_MAP[tg]]||'#4A3728';
+const startYear=dy['开始年份']||'';
+const endYear=dy['结束']||'9999';
+const isCur=startYear&&parseInt(startYear)<=CURRENT_YEAR&&CURRENT_YEAR<=parseInt(endYear);
+const curCls=isCur?'dayun-row-cur':'';
+ageCells.push(`<td class="${curCls}">${startAge}～${endAge}</td>`);
+dyCells.push(`<td class="${curCls}"><span style="color:${tgC};font-weight:700;font-size:1.05rem;">${gz[0]||''}</span><br><span style="color:${tgC};font-weight:700;font-size:1.05rem;">${gz[1]||''}</span>${isCur?'<br><span style="font-size:9px;color:#C8622A;">▶當前</span>':''}</td>`);
 });
+const rowTable=document.getElementById('dayun-row-table');
+if(rowTable) rowTable.innerHTML=`<tr>${ageCells.join('')}<td class="dayun-row-label">歲</td></tr><tr>${dyCells.join('')}<td class="dayun-row-label">大運</td></tr>`;
 
-const rowTable = document.getElementById('dayun-row-table');
-if(rowTable){
-rowTable.innerHTML =
-`<tr>${ageCells.join('')}<td class="dayun-row-label">歲</td></tr>`+
-`<tr>${dyCells.join('')}<td class="dayun-row-label">大運</td></tr>`;
-}
+let curIdx=dayunList.findIndex(dy=>dy['开始年份']&&parseInt(dy['开始年份'])<=CURRENT_YEAR&&CURRENT_YEAR<=parseInt(dy['结束']||9999));
+if(curIdx<0) curIdx=0;
+const curDy=dayunList[curIdx];
+const dyStart=parseInt(curDy['开始年份']);
+const dyEnd=parseInt(curDy['结束']||9999);
+const birthYear=parseInt((bazi['阳历']||'').match(/\d{4}/)?.[0]||'1990');
+const TG_A=['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+const DZ_A=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+function getGZ(y){return{gz:TG_A[(y-4)%10]+DZ_A[(y-4)%12],tg:TG_A[(y-4)%10]};}
 
-// ── 流年表 ──
-let curIdx = dayunList.findIndex(dy=>
-dy['开始年份'] &&
-parseInt(dy['开始年份'])<=CURRENT_YEAR &&
-CURRENT_YEAR<=parseInt(dy['结束']||9999)
-);
-if(curIdx < 0) curIdx = 0;
-
-const curDy     = dayunList[curIdx];
-const dyStart   = parseInt(curDy['开始年份']);
-const dyEnd     = parseInt(curDy['结束']||9999);
-const birthYear = parseInt((bazi['阳历']||'').match(/\d{4}/)?.[0]||'1990');
-
-const TG = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
-const DZ = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
-
-function getGZ(y){
-return { gz: TG[(y-4)%10]+DZ[(y-4)%12], tg: TG[(y-4)%10] };
-}
-
-const lyAgeRow  = ['<td class="row-label-cell">歲數</td>'];
-const lyYearRow = ['<td class="row-label-cell">年份</td>'];
-const lyGzRow   = ['<td class="row-label-cell">流年</td>'];
-
-for(let y = dyStart; y <= dyEnd; y++){
-const { gz, tg } = getGZ(y);
-const age   = y - birthYear + 1;
-const tgC   = WX_COLOR[WX_MAP[tg]] || '#4A3728';
-const isCur = y === CURRENT_YEAR;
-const cls   = isCur ? 'hl-col' : '';
-lyAgeRow .push(`<td class="${cls}">${age}</td>`);
+const lyAgeRow=['<td class="row-label-cell">歲數</td>'];
+const lyYearRow=['<td class="row-label-cell">年份</td>'];
+const lyGzRow=['<td class="row-label-cell">流年</td>'];
+for(let y=dyStart;y<=dyEnd;y++){
+const{gz,tg}=getGZ(y);
+const age=y-birthYear+1;
+const tgC=WX_COLOR[WX_MAP[tg]]||'#4A3728';
+const isCur=y===CURRENT_YEAR;
+const cls=isCur?'hl-col':'';
+lyAgeRow.push(`<td class="${cls}">${age}</td>`);
 lyYearRow.push(`<td class="${cls}">${y}</td>`);
-lyGzRow  .push(`<td class="${cls}"><span style="color:${tgC};font-weight:${isCur?'700':'400'}">${gz}</span>${isCur?'<br><span style="font-size:10px;color:#C8622A">▶今年</span>':''}</td>`);
+lyGzRow.push(`<td class="${cls}"><span style="color:${tgC};font-weight:${isCur?'700':'400'}">${gz}</span>${isCur?'<br><span style="font-size:10px;color:#C8622A">▶今年</span>':''}</td>`);
 }
-
-const old = document.getElementById('liunian-table-wrap');
+const old=document.getElementById('liunian-table-wrap');
 if(old) old.remove();
-
-const wrap = table.closest('.dayun-wrap') || table.parentElement;
-const lnDiv = document.createElement('div');
-lnDiv.id = 'liunian-table-wrap';
-lnDiv.style.cssText = 'margin-top:20px;overflow-x:auto;';
-lnDiv.innerHTML = `
+const wrap=table.closest('.dayun-wrap')||table.parentElement;
+const lnDiv=document.createElement('div');
+lnDiv.id='liunian-table-wrap';
+lnDiv.style.cssText='margin-top:20px;overflow-x:auto;';
+lnDiv.innerHTML=`
 <div style="font-size:0.8rem;font-weight:700;color:#8B6914;margin-bottom:8px;">
-當前大運（${curDy['干支']} ${curDy['天干十神']}）· 流年
+  當前大運（${curDy['干支']} ${toTrad(curDy['天干十神']||'')}）· 流年
 </div>
 <table class="dayun-table">
-<tr>${lyAgeRow.join('')}</tr>
-<tr>${lyYearRow.join('')}</tr>
-<tr>${lyGzRow.join('')}</tr>
+  <tr>${lyAgeRow.join('')}</tr>
+  <tr>${lyYearRow.join('')}</tr>
+  <tr>${lyGzRow.join('')}</tr>
 </table>
 `;
 wrap.appendChild(lnDiv);
 }
 
 // ══════════════════════════════════════════════
-// 分析報告
+// 命理輔助計算函式
 // ══════════════════════════════════════════════
-function renderAnalysis(client, bazi){
-const riZhu = bazi['日主'] || (bazi['日柱']||{})['天干']?.['天干'] || '';
-const trait = DAY_MASTER_TRAITS[riZhu] || '命盤特質分析中...';
-const traitHtml = trait.replace(/\n/g,'<br>');
+function getShishen(riTg, targetTg){
+const WX={甲:'木',乙:'木',丙:'火',丁:'火',戊:'土',己:'土',庚:'金',辛:'金',壬:'水',癸:'水'};
+const YANG=['甲','丙','戊','庚','壬'];
+const riWx=WX[riTg]; const tWx=WX[targetTg];
+const riYang=YANG.includes(riTg); const tYang=YANG.includes(targetTg);
+const same=riYang===tYang;
+const sheng={木:'火',火:'土',土:'金',金:'水',水:'木'};
+const ke={木:'土',火:'金',土:'水',金:'木',水:'火'};
+if(riWx===tWx) return same?'比肩':'劫財';
+if(sheng[riWx]===tWx) return same?'食神':'傷官';
+if(ke[riWx]===tWx) return same?'偏財':'正財';
+if(ke[tWx]===riWx) return same?'七殺':'正官';
+if(sheng[tWx]===riWx) return same?'偏印':'正印';
+return '—';
+}
 
-const fullHtml = `
-<div class="report-block">
-<h4>① 日主特質分析</h4>
-<p>${traitHtml}</p>
+function getCaiStar(riWx){
+return {木:'土',火:'金',土:'水',金:'木',水:'火'}[riWx]||'';
+}
+
+function getGuanStar(riWx){
+return {木:'金',火:'水',土:'木',金:'火',水:'土'}[riWx]||'';
+}
+
+function getPeiouStar(riWx, gender){
+return gender==='男' ? getCaiStar(riWx) : getGuanStar(riWx);
+}
+
+function getWeakWx(riWx, isStrong){
+if(!isStrong) return {木:'金',火:'水',土:'木',金:'火',水:'土'}[riWx]||'';
+return {木:'土',火:'金',土:'水',金:'木',水:'火'}[riWx]||'';
+}
+
+function getRelation(riWx, targetWx){
+if(!riWx||!targetWx) return '關係待分析';
+if(riWx===targetWx) return '同五行（比劫），有助日主';
+const sheng={木:'火',火:'土',土:'金',金:'水',水:'木'};
+const ke={木:'土',火:'金',土:'水',金:'木',水:'火'};
+if(sheng[riWx]===targetWx) return '日主生之（食傷），洩耗能量';
+if(sheng[targetWx]===riWx) return '生助日主（印），有利';
+if(ke[riWx]===targetWx) return '日主剋之（財），財星出現';
+if(ke[targetWx]===riWx) return '剋制日主（官殺），需注意壓力';
+return '關係複雜，需綜合判斷';
+}
+
+function getDayunLiunianNote(dyWx, lyWx){
+if(dyWx===lyWx) return '大運流年同五行，能量集中，影響加倍';
+const sheng={木:'火',火:'土',土:'金',金:'水',水:'木'};
+if(sheng[dyWx]===lyWx||sheng[lyWx]===dyWx) return '大運流年相生，能量流動順暢';
+return '大運流年五行不同，需分別評估各自影響';
+}
+
+function getDayunCareerNote(shen){
+const notes={
+'正官':'走正官運，事業穩定有升遷機會，適合在大企業或政府機關發展',
+'七殺':'走七殺運，壓力大但爆發力強，適合創業或挑戰性工作',
+'正財':'走正財運，財運穩健，適合穩定收入的工作',
+'偏財':'走偏財運，投資機會多，適合業務或自由業',
+'食神':'走食神運，才華發揮，適合創意、技術類工作',
+'傷官':'走傷官運，創意旺盛但易與上司衝突，適合自由業',
+'比肩':'走比肩運，競爭增加，需防合夥糾紛',
+'劫財':'走劫財運，財務需謹慎，防破財',
+'正印':'走正印運，學習進修好時機，貴人運旺',
+'偏印':'走偏印運，適合研究、宗教、藝術類'
+};
+return notes[shen]||'十神'+shen+'，需結合全盤分析';
+}
+
+function getLiunianCareerNote(shen){
+const notes={
+'正官':'流年逢正官，有升遷或轉職機會',
+'七殺':'流年逢七殺，工作壓力大，需防小人',
+'正財':'流年逢正財，薪資收入有望提升',
+'偏財':'流年逢偏財，投資或副業有機會',
+'食神':'流年逢食神，工作順心，才能受賞識',
+'傷官':'流年逢傷官，易與上司衝突，慎言',
+'比肩':'流年逢比肩，競爭加劇，需鞏固地位',
+'劫財':'流年逢劫財，防財務損失或合夥問題',
+'正印':'流年逢正印，貴人相助，適合進修',
+'偏印':'流年逢偏印，思維活躍，適合獨立研究'
+};
+return notes[shen]||'流年'+shen+'，需結合命盤分析';
+}
+
+function getLiunianLoveNote(shen){
+const notes={
+'正財':'男命流年逢正財，有姻緣機會',
+'偏財':'男命流年逢偏財，桃花旺但需辨別真心',
+'正官':'女命流年逢正官，有正緣出現機會',
+'七殺':'女命流年逢七殺，感情波動大，需謹慎',
+'食神':'感情表達順暢，易受異性喜愛',
+'傷官':'感情易生波折，需避免過於強勢',
+'比肩':'感情競爭增加，需防第三者',
+'劫財':'感情財務糾紛，需謹慎',
+'正印':'感情較保守，緣分需主動把握',
+'偏印':'感情孤獨感較重，需主動社交'
+};
+return notes[shen]||'流年'+shen+'，感情需結合命盤分析';
+}
+
+function getRizhiMarriageNote(riDz){
+const notes={
+子:'婚姻宮屬水，感情細膩敏感',丑:'婚姻宮屬土，感情穩重但較慢熱',
+寅:'婚姻宮屬木，感情積極主動',卯:'婚姻宮屬木，感情溫柔體貼',
+辰:'婚姻宮屬土，感情複雜多變',巳:'婚姻宮屬火，感情熱烈但易忽冷忽熱',
+午:'婚姻宮屬火，感情熱情奔放',未:'婚姻宮屬土，感情忠誠但固執',
+申:'婚姻宮屬金，感情理性但較冷淡',酉:'婚姻宮屬金，感情完美主義',
+戌:'婚姻宮屬土，感情忠誠，但婚後易有摩擦',亥:'婚姻宮屬水，感情浪漫多情'
+};
+return notes[riDz]||'需綜合分析';
+}
+
+function getHealthNote(lyWx, riWx){
+const ke={木:'土',火:'金',土:'水',金:'木',水:'火'};
+if(ke[lyWx]===riWx) return '流年五行剋日主，體力較易消耗，需注意休息';
+if(ke[riWx]===lyWx) return '流年五行被日主剋，對應臟腑需多保養';
+if(lyWx===riWx) return '流年同五行，身體狀態與日主五行對應臟腑相關';
+return '流年五行與日主相生，整體健康狀態尚可';
+}
+
+// ══════════════════════════════════════════════
+// 非同步渲染分析報告
+// ══════════════════════════════════════════════
+async function renderAnalysisAsync(client, bazi){
+document.getElementById('tab-full').innerHTML='<div class="kb-loading">🔮 正在為你分析命盤⋯</div>';
+document.getElementById('tab-quick').innerHTML='<div class="kb-loading">🔮 正在為你分析命盤⋯</div>';
+
+const kbNew = await fetchKB('bazi_knowledge_base_complete.json');
+
+if(!kbNew){
+  const err='<div class="kb-error">❌ 知識庫載入失敗，請重新整理頁面</div>';
+  document.getElementById('tab-full').innerHTML=err;
+  document.getElementById('tab-quick').innerHTML=err;
+  return;
+}
+
+const ri   = bazi['日柱']||{};
+const yue  = bazi['月柱']||{};
+const nian = bazi['年柱']||{};
+const shi  = bazi['时柱']||{};
+
+const riTg   = ri['天干']?.['天干']||'';
+const riDz   = ri['地支']?.['地支']||'';
+const riWx   = WX_MAP[riTg]||'';
+const wxColor= WX_COLOR[riWx]||'#4A3728';
+
+const yueDz  = yue['地支']?.['地支']||'';
+const yueDzWx= WX_MAP[yueDz]||'';
+const yueStar= toTrad(yue['天干']?.['十神']||'');
+
+const yangTg   = ['甲','丙','戊','庚','壬'];
+const isYang   = yangTg.includes(riTg);
+const yinYang  = isYang?'陽':'陰';
+
+const isStrong = (yueDzWx===riWx)||
+  (riWx==='木'&&yueDzWx==='水')||
+  (riWx==='火'&&yueDzWx==='木')||
+  (riWx==='土'&&yueDzWx==='火')||
+  (riWx==='金'&&yueDzWx==='土')||
+  (riWx==='水'&&yueDzWx==='金');
+const strongLabel = isStrong?'身強':'身弱';
+
+const dayunList = bazi['大运']?.['大运']||[];
+const curDy = dayunList.find(dy=>
+  dy['开始年份']&&
+  parseInt(dy['开始年份'])<=CURRENT_YEAR&&
+  CURRENT_YEAR<=parseInt(dy['结束']||9999)
+)||dayunList[0]||{};
+const curDyGz  = curDy['干支']||'';
+const curDyShen= toTrad(curDy['天干十神']||'');
+const curDyTg  = curDyGz[0]||'';
+const curDyDz  = curDyGz[1]||'';
+const curDyWx  = WX_MAP[curDyTg]||'';
+const curDyAge = curDy['开始年龄']||'';
+const curDyEnd = curDy['结束年龄']||'';
+
+const TG_ARR = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+const DZ_ARR = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+const lyTg   = TG_ARR[(CURRENT_YEAR-4)%10];
+const lyDz   = DZ_ARR[(CURRENT_YEAR-4)%12];
+const lyGz   = lyTg+lyDz;
+const lyWx   = WX_MAP[lyTg]||'';
+const lyStar = toTrad(getShishen(riTg, lyTg));
+const lyYear = String(CURRENT_YEAR);
+
+const caiStar   = getCaiStar(riWx);
+const guanStar  = getGuanStar(riWx);
+const peiouStar = getPeiouStar(riWx, client.gender);
+const weakWx    = getWeakWx(riWx, isStrong);
+const WX_ORGAN  = {木:'肝膽、眼睛',火:'心臟、小腸',土:'脾胃、消化系統',金:'肺部、大腸',水:'腎臟、膀胱'};
+
+function qContent(kb, sub_item, query_key, fallback){
+  if(!kb || !kb.knowledge_base) return fallback||'';
+  const entry = kb.knowledge_base.find(e => {
+    if(e.sub_item !== sub_item) return false;
+    return Object.entries(query_key).every(([k,v]) => e.query_key && e.query_key[k] === v);
+  });
+  return (entry && entry.content) ? entry.content : (fallback||'');
+}
+
+// ── 從新知識庫取資料 ──
+const new_gexing   = qContent(kbNew, '內在性格',  {stem: riTg});
+const new_image    = qContent(kbNew, '外在形象',  {stem: riTg});
+const new_youshi   = qContent(kbNew, '優勢',      {stem: riTg});
+const new_mangdian = qContent(kbNew, '盲點',      {stem: riTg});
+const new_xiangz   = qContent(kbNew, '象徵意義',  {stem: riTg});
+const new_wxTrait  = qContent(kbNew, '五行特質',  {element: riWx});
+const new_strength = qContent(kbNew, isStrong?'身強':'身弱', {strength: strongLabel});
+const new_xiyong   = qContent(kbNew, '喜用神',    {strength: strongLabel});
+const new_jishen   = qContent(kbNew, '忌神',      {strength: strongLabel});
+const new_buyun    = qContent(kbNew, '五行補強',  {element: riWx});
+const new_wuxing   = qContent(kbNew, '五行補強',  {element: riWx});
+const new_kaiyun   = qContent(kbNew, '開運物',    {element: riWx});
+
+// ── 個人化卡片 ──
+function personalCard({icon,title,id,personalSummary,details,tags}){
+  const tagsHtml=(tags||[]).map(t=>`<span class="kb-tag">${t}</span>`).join('');
+  const detailsHtml=(details||[]).filter(Boolean).map(d=>`<li>${d}</li>`).join('');
+  return `
+    <div class="kb-card">
+      <div class="kb-card-title">
+        ${icon||''} ${title}
+        ${id?`<span class="kb-id">${id}</span>`:''}
+      </div>
+      <div class="kb-content">
+        <p style="font-size:0.95rem;line-height:1.9;color:#4A3728;font-weight:600;">${personalSummary||''}</p>
+        ${detailsHtml?`<ul style="margin-top:10px;">${detailsHtml}</ul>`:''}
+        ${tagsHtml?`<div style="margin-top:10px;">${tagsHtml}</div>`:''}
+      </div>
+    </div>
+  `;
+}
+
+// ── 折疊區塊 ──
+function section(icon, title, bodyHtml, open=false){
+  return `
+    <details class="kb-section" ${open?'open':''}>
+      <summary>${icon} ${title}</summary>
+      <div class="section-body">${bodyHtml}</div>
+    </details>
+  `;
+}
+
+// ① 日主特質
+const sec1Html = personalCard({
+  icon:'🌟', title:'日主【'+riTg+'】特質分析', id:'BAZI_001',
+  personalSummary:client.name+'，你的日主天干為【'+riTg+'】，屬'+yinYang+riWx+'。'+(new_gexing||''),
+  details:[
+    '五行屬性：'+riWx+'（'+(new_wxTrait||'')+'）',
+    '陰陽：'+yinYang+riTg+'，'+(isYang?'個性較為主動、外顯、剛直':'個性較為內斂、柔韌、細膩'),
+    '月支：'+yueDz+'（'+yueDzWx+'），命盤格局初判為【'+strongLabel+'】',
+    '主星（月干十神）：'+(yueStar||'—'),
+    new_image    ? '外在形象：'+new_image    : '',
+    new_youshi   ? '優勢：'+new_youshi       : '',
+    new_mangdian ? '盲點：'+new_mangdian     : '',
+    new_xiangz   ? '象徵：'+new_xiangz       : '',
+  ].filter(Boolean),
+  tags:['日主'+riTg, riWx, yinYang, strongLabel]
+});
+
+// ② 五行人格特質
+const sec2Html = personalCard({
+  icon:'🌊', title:'五行【'+riWx+'】人格特質', id:'BAZI_003',
+  personalSummary:client.name+'，你的日主五行屬【'+riWx+'】。'+(new_wxTrait||''),
+  details:[],
+  tags:[riWx+'行','人格特質']
+});
+
+// ③ 四柱宮位
+const GONG_NAME = {nian:'年柱（祖先宮）',yue:'月柱（父母兄弟宮）',ri:'日柱（配偶宮）',shi:'時柱（子女宮）'};
+const GONG_DATA = [
+  {key:'nian',data:bazi['年柱']||{}},
+  {key:'yue', data:bazi['月柱']||{}},
+  {key:'ri',  data:bazi['日柱']||{}},
+  {key:'shi', data:bazi['时柱']||{}}
+];
+const sec3Html = personalCard({
+  icon:'🏛', title:'四柱宮位解析', id:'BAZI_012',
+  personalSummary:client.name+'，你的四柱分別代表不同人生宮位，以下是你的個人化宮位解讀：',
+  details:GONG_DATA.map(({key,data})=>{
+    const tg  = data['天干']?.['天干']||'';
+    const dz  = data['地支']?.['地支']||'';
+    const shen= toTrad(data['天干']?.['十神']||'');
+    return GONG_NAME[key]+'：'+tg+dz+'，十神【'+(shen||'日主')+'】';
+  }),
+  tags:['年柱','月柱','日柱','時柱','宮位']
+});
+
+// ④ 身強身弱
+const YONGSHEN = {
+  身強:{木:'火、土、金（洩耗剋制）',火:'土、金、水（洩耗剋制）',土:'金、水、木（洩耗剋制）',金:'水、木、火（洩耗剋制）',水:'木、火、土（洩耗剋制）'},
+  身弱:{木:'水、木（生助）',火:'木、火（生助）',土:'火、土（生助）',金:'土、金（生助）',水:'金、水（生助）'}
+};
+const yongshen = YONGSHEN[strongLabel]?.[riWx]||'需綜合判斷';
+const sec4Html = personalCard({
+  icon:'⚖️', title:'命盤格局：你是【'+strongLabel+'】的'+riTg, id:'BAZI_017',
+  personalSummary:client.name+'，你的月支為【'+yueDz+yueDzWx+'】，'+(isStrong
+    ?'與日主'+riWx+'屬'+(yueDzWx===riWx?'同五行':'相生關係')+'，日主得令，判定為【身強】。'
+    :'與日主'+riWx+'無生助關係，日主失令，判定為【身弱】。'),
+  details:[
+    '推薦用神五行：'+yongshen,
+    new_strength ? '格局說明：'+new_strength : '',
+    new_xiyong   ? '喜用神：'+new_xiyong     : '',
+    new_jishen   ? '忌神：'+new_jishen       : '',
+  ].filter(Boolean),
+  tags:[strongLabel,'用神：'+yongshen.split('（')[0],'月支'+yueDz]
+});
+
+// ⑤ 當前大運
+const dyRelation = getRelation(riWx, curDyWx);
+const sec5Html = personalCard({
+  icon:'🌀', title:'當前大運【'+curDyGz+'】'+curDyShen+'（'+curDyAge+'～'+curDyEnd+'歲）', id:'BAZI_021',
+  personalSummary:client.name+'，你目前走【'+curDyGz+'】大運（'+curDyShen+'），五行屬'+curDyWx+'。對你的日主【'+riTg+riWx+'】而言，'+dyRelation+'。',
+  details:[
+    '大運天干：'+curDyTg+'（'+(WX_MAP[curDyTg]||'')+'）── 十神：'+curDyShen,
+    '大運地支：'+curDyDz+'（'+(WX_MAP[curDyDz]||'')+'）',
+    '與日主關係：'+dyRelation,
+    getDayunCareerNote(curDyShen),
+  ].filter(Boolean),
+  tags:['大運'+curDyGz, curDyShen, '五行'+curDyWx]
+});
+
+// ⑥ 流年
+const lyRelation = getRelation(riWx, lyWx);
+const sec6Html = personalCard({
+  icon:'📅', title:lyYear+'年流年【'+lyGz+'】對你的影響', id:'BAZI_024',
+  personalSummary:lyYear+'年（'+lyGz+'年），流年天干【'+lyTg+lyWx+'】，對你【'+riTg+riWx+'】而言是【'+lyStar+'】，'+lyRelation+'。',
+  details:[
+    '流年干支：'+lyGz+'（'+lyTg+'屬'+lyWx+'、'+lyDz+'屬'+(WX_MAP[lyDz]||'')+'）',
+    '對日主十神：'+lyStar,
+    '五行關係：'+lyRelation,
+    '大運＋流年：'+curDyGz+' × '+lyGz+' ── '+getDayunLiunianNote(curDyWx, lyWx),
+    getLiunianCareerNote(lyStar),
+  ].filter(Boolean),
+  tags:['流年'+lyGz, lyStar, lyYear+'年']
+});
+
+// ⑦ 財運
+const sec7Html = personalCard({
+  icon:'💰', title:'你的財運分析', id:'BAZI_029',
+  personalSummary:client.name+'，你的日主【'+riTg+riWx+'】，財星為【'+caiStar+'】。'+lyYear+'年流年【'+lyGz+'】，'+(lyWx===caiStar?'流年五行正是你的財星，財運有望！':'流年五行'+lyWx+'對財星'+caiStar+'的影響：'+getRelation(caiStar,lyWx)+'。'),
+  details:[
+    '你的財星五行：'+caiStar+'（'+(isStrong?'身強者以財星為用，宜積極把握':'身弱者財星重則耗身，需謹慎評估')+'）',
+    lyYear+'年財星狀態：'+(lyWx===caiStar?'✅ 流年逢財，機會較多':lyWx===riWx?'⚠️ 流年比劫，財運需防競爭':getRelation(riWx,lyWx)),
+    new_xiyong ? '喜用神提示：'+new_xiyong : '',
+    new_buyun  ? '補運方法：'+new_buyun    : '',
+  ].filter(Boolean),
+  tags:['財星'+caiStar, strongLabel, '流年'+lyGz]
+});
+
+// ⑧ 事業
+const sec8Html = personalCard({
+  icon:'💼', title:'你的事業職涯分析', id:'BAZI_032',
+  personalSummary:client.name+'，你的官殺星（代表事業壓力與機會）為【'+guanStar+'】。目前大運【'+curDyGz+curDyShen+'】，'+getDayunCareerNote(curDyShen),
+  details:[
+    '官殺星五行：'+guanStar+'（代表職場壓力、主管、責任）',
+    '當前大運十神：'+curDyShen,
+    lyYear+'年事業：流年'+lyStar+'，'+getLiunianCareerNote(lyStar),
+  ].filter(Boolean),
+  tags:['官殺'+guanStar, '大運'+curDyShen, '流年'+lyStar]
+});
+
+// ⑨ 感情
+const sec9Html = personalCard({
+  icon:'💕', title:'你的感情婚姻分析', id:'BAZI_034',
+  personalSummary:client.name+'（'+client.gender+'），你的配偶星為【'+peiouStar+'】。'+lyYear+'年流年【'+lyGz+'】，'+(lyWx===peiouStar?'✅ 流年逢配偶星，感情機緣較旺！':'流年'+lyWx+'對配偶星'+peiouStar+'：'+getRelation(peiouStar,lyWx)+'。'),
+  details:[
+    '配偶星五行：'+peiouStar+'（'+(client.gender==='男'?'男命以財星為妻星':'女命以官殺星為夫星')+'）',
+    '日支【'+riDz+'】：代表婚姻宮，'+getRizhiMarriageNote(riDz),
+    lyYear+'年感情：流年'+lyStar+'，'+getLiunianLoveNote(lyStar),
+  ].filter(Boolean),
+  tags:['配偶星'+peiouStar, '日支'+riDz, '流年'+lyStar]
+});
+
+// ⑩ 健康
+const sec10Html = personalCard({
+  icon:'🏥', title:'你的健康體質分析', id:'BAZI_042',
+  personalSummary:client.name+'，你的日主【'+riTg+riWx+'】，對應臟腑為【'+(WX_ORGAN[riWx]||'')+'】。'+(isStrong?'身強者能量充足，但需注意過旺造成的亢進問題。':'身弱者能量較不足，需特別保養對應臟腑。'),
+  details:[
+    '主要注意臟腑：'+(WX_ORGAN[riWx]||'—')+'（日主五行對應）',
+    '次要注意：'+(WX_ORGAN[weakWx]||'—')+'（命盤較弱五行對應）',
+    lyYear+'年健康：流年'+lyGz+'（'+lyWx+'），'+getHealthNote(lyWx,riWx),
+  ].filter(Boolean),
+  tags:['注意'+(WX_ORGAN[riWx]?.split('、')[0]||''), strongLabel, '流年'+lyGz]
+});
+
+// ⑪ 流日日曆
+const sec11Html = `
+<div class="alert-box">
+  <strong>📌 ${client.name} 的個人化流日提示（${lyYear}年）</strong><br>
+  以下依你的日主【${riTg}${riWx}】與${lyYear}年流年【${lyGz}】，列出各類型吉日方向。
 </div>
-<div class="report-block">
-<h4>② 四柱綜合分析</h4>
-<p>
-  <strong>年柱</strong>代表早年運與祖先緣，您的年柱為
-  ${(bazi['年柱']||{})['天干']?.['天干']||''}${(bazi['年柱']||{})['地支']?.['地支']||''}，
-  奠定了您生命的根基與家族背景。<br><br>
-  <strong>月柱</strong>代表父母緣與事業宮，您的月柱為
-  ${(bazi['月柱']||{})['天干']?.['天干']||''}${(bazi['月柱']||{})['地支']?.['地支']||''}，
-  影響您的工作態度與職場表現。<br><br>
-  <strong>日柱</strong>代表自身與配偶宮，您的日柱為
-  ${(bazi['日柱']||{})['天干']?.['天干']||''}${(bazi['日柱']||{})['地支']?.['地支']||''}，
-  是命盤的核心，代表您的本質與感情緣分。<br><br>
-  <strong>時柱</strong>代表子女緣與晚年運，您的時柱為
-  ${(bazi['时柱']||{})['天干']?.['天干']||''}${(bazi['时柱']||{})['地支']?.['地支']||''}，
-  影響您的子女關係與人生後半段的走向。
-</p>
-</div>
-<div class="report-block">
-<h4>③ 大運解讀</h4>
-<p>大運解讀內容將依據 Doris 老師的知識庫填入，目前為佔位文字。每一步大運約十年，影響人生的整體走向與運勢起伏。</p>
-</div>
-<div class="report-block">
-<h4>④ 今年流年（2026 丙午年）</h4>
-<p>2026 年為丙午年，丙火當令，午火旺盛。今年整體運勢活躍，適合積極行動、展現自我。與您的日主${riZhu}的互動關係，將在諮詢時由 Doris 老師為您詳細解析。</p>
-</div>
-<div class="doris-quote">
-<p>每一個命盤都是獨一無二的生命藍圖，<br>數字背後是你走過的每一步。<br>願這份分析成為你前行的光。<br><br>— Doris</p>
+<div class="liuri-grid">
+  <div class="liuri-card">
+    <div class="liuri-card-icon">💰</div>
+    <div class="liuri-card-title">得財日</div>
+    <div class="liuri-card-days">財星五行：${caiStar}<br>逢${caiStar}日為佳</div>
+  </div>
+  <div class="liuri-card">
+    <div class="liuri-card-icon">💼</div>
+    <div class="liuri-card-title">工作機會日</div>
+    <div class="liuri-card-days">官殺星：${guanStar}<br>逢${guanStar}日留意</div>
+  </div>
+  <div class="liuri-card">
+    <div class="liuri-card-icon">🌸</div>
+    <div class="liuri-card-title">桃花日</div>
+    <div class="liuri-card-days">配偶星：${peiouStar}<br>逢${peiouStar}日留意</div>
+  </div>
+  <div class="liuri-card">
+    <div class="liuri-card-icon">🏥</div>
+    <div class="liuri-card-title">健康注意日</div>
+    <div class="liuri-card-days">注意：${WX_ORGAN[riWx]?.split('、')[0]||''}<br>逢${weakWx}日留意</div>
+  </div>
 </div>
 `;
 
-const quickHtml = `
-<div class="report-block">
-<h4>① 你的命盤特質</h4>
-<p>${traitHtml}</p>
+// ⑫ 八字×風水整合
+const sec12Html = `
+<div class="kb-card">
+  <div class="kb-card-title">🏠 ${client.name} 的專屬風水佈局建議</div>
+  <div class="kb-content">
+    <p style="font-weight:600;color:${wxColor};">你是【${riTg}${riWx}】命主，${strongLabel}格局</p>
+    ${new_wuxing ? `<p style="margin-top:8px;">🌿 <strong>五行補強：</strong>${new_wuxing}</p>` : ''}
+    ${new_kaiyun ? `<p style="margin-top:4px;">🏮 <strong>開運物：</strong>${new_kaiyun}</p>`   : ''}
+    ${new_buyun  ? `<p style="margin-top:4px;">✨ <strong>補運方法：</strong>${new_buyun}</p>`  : ''}
+  </div>
 </div>
-<div class="report-block">
-<h4>② 今年的你（2026 丙午年）</h4>
-<p>2026 年為丙午年，丙火當令，午火旺盛。今年整體運勢活躍，適合積極行動、展現自我。與您的日主${riZhu}的互動關係，將在諮詢時由 Doris 老師為您詳細解析。</p>
-</div>
+`;
+
+// ── 組合完整版 ──
+const fullHtml=`
+${section('🌟','① 日主特質分析',sec1Html,true)}
+${section('🌊','② 五行人格特質',sec2Html,true)}
+${section('🏛','③ 四柱宮位解析',sec3Html)}
+${section('⚖️','④ 身強身弱判斷',sec4Html,true)}
+${section('🌀','⑤ 當前大運解讀',sec5Html,true)}
+${section('📅','⑥ '+lyYear+'年流年分析',sec6Html,true)}
+${section('💰','⑦ 財運分析',sec7Html)}
+${section('💼','⑧ 事業職涯分析',sec8Html)}
+${section('💕','⑨ 感情婚姻分析',sec9Html)}
+${section('🏥','⑩ 健康體質分析',sec10Html)}
+${section('📆','⑪ 每月流日日曆',sec11Html)}
+${section('🏠','⑫ 八字×風水整合佈局',sec12Html)}
 <div class="doris-quote">
-<p>每一個命盤都是獨一無二的生命藍圖，<br>數字背後是你走過的每一步。<br>願這份分析成為你前行的光。<br><br>— Doris</p>
+  <p>每一個命盤都是獨一無二的生命藍圖，<br>
+  數字背後是你走過的每一步。<br>
+  願這份分析成為你前行的光。<br><br>— Doris</p>
+</div>
+`;
+
+// ── 組合快速版 ──
+const quickHtml=`
+${section('🌟','① 你是誰：日主特質',sec1Html,true)}
+${section('⚖️','② 命盤格局：身強或身弱',sec4Html,true)}
+${section('🌀','③ 現在的你：當前大運',sec5Html,true)}
+${section('📅','④ '+lyYear+'年流年分析',sec6Html,true)}
+<div class="doris-quote">
+  <p>每一個命盤都是獨一無二的生命藍圖，<br>
+  數字背後是你走過的每一步。<br>
+  願這份分析成為你前行的光。<br><br>— Doris</p>
 </div>
 `;
 
@@ -1302,23 +1758,24 @@ document.getElementById('tab-full').innerHTML  = fullHtml;
 document.getElementById('tab-quick').innerHTML = quickHtml;
 }
 
+
 // ══════════════════════════════════════════════
 // Tab 切換
 // ══════════════════════════════════════════════
-function switchTab(tab, btn){
+function switchTab(tab,btn){
 document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
 btn.classList.add('active');
-document.getElementById('tab-full') .classList.toggle('hidden', tab!=='full');
-document.getElementById('tab-quick').classList.toggle('hidden', tab!=='quick');
+document.getElementById('tab-full') .classList.toggle('hidden',tab!=='full');
+document.getElementById('tab-quick').classList.toggle('hidden',tab!=='quick');
 }
 
 // ══════════════════════════════════════════════
-// 農曆格式化
+// 農曆格式化（原版保留）
 // ══════════════════════════════════════════════
 function formatLunar(raw){
 if(!raw) return '—';
-let s = raw.replace('农历','').replace('農曆','').trim();
-const GZ_YEAR = {
+let s=raw.replace('农历','').replace('農曆','').trim();
+const GZ_YEAR={
 甲子:1984,乙丑:1985,丙寅:1986,丁卯:1987,戊辰:1988,己巳:1989,
 庚午:1990,辛未:1991,壬申:1992,癸酉:1993,甲戌:1994,乙亥:1995,
 丙子:1996,丁丑:1997,戊寅:1998,己卯:1999,庚辰:2000,辛巳:2001,
@@ -1327,36 +1784,33 @@ const GZ_YEAR = {
 甲午:2014,乙未:2015,丙申:2016,丁酉:2017,戊戌:2018,己亥:2019,
 庚子:2020,辛丑:2021,壬寅:2022,癸卯:2023,甲辰:2024,乙巳:2025,丙午:2026
 };
-const gzMatch = s.match(/^([甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥])年/);
-let minguo = '';
+const gzMatch=s.match(/^([甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥])年/);
+let minguo='';
 if(gzMatch){
-const wy = GZ_YEAR[gzMatch[1]]||0;
-minguo = wy ? (wy-1911)+'年' : gzMatch[1]+'年';
-s = s.replace(gzMatch[0],'');
+const wy=GZ_YEAR[gzMatch[1]]||0;
+minguo=wy?(wy-1911)+'年':gzMatch[1]+'年';
+s=s.replace(gzMatch[0],'');
 }
-const CN_M = {'正':1,'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,
-          '七':7,'八':8,'九':9,'十':10,'十一':11,'十二':12};
-const mMatch = s.match(/^(閏?)(正|一|二|三|四|五|六|七|八|九|十|十一|十二)月/);
-let lunarMonth = '';
-if(mMatch){ lunarMonth=(CN_M[mMatch[2]]||mMatch[2])+'月'; s=s.replace(mMatch[0],''); }
-const CN_D = {
+const CN_M={'正':1,'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9,'十':10,'十一':11,'十二':12};
+const mMatch=s.match(/^(閏?)(正|一|二|三|四|五|六|七|八|九|十|十一|十二)月/);
+let lunarMonth='';
+if(mMatch){lunarMonth=(CN_M[mMatch[2]]||mMatch[2])+'月';s=s.replace(mMatch[0],'');}
+const CN_D={
 '初一':1,'初二':2,'初三':3,'初四':4,'初五':5,'初六':6,'初七':7,'初八':8,'初九':9,'初十':10,
 '十一':11,'十二':12,'十三':13,'十四':14,'十五':15,'十六':16,'十七':17,'十八':18,'十九':19,'二十':20,
 '廿一':21,'廿二':22,'廿三':23,'廿四':24,'廿五':25,'廿六':26,'廿七':27,'廿八':28,'廿九':29,'三十':30
 };
-let lunarDay = '';
-for(const [k,v] of Object.entries(CN_D)){
-if(s.startsWith(k)){ lunarDay=v+'日'; s=s.replace(k,''); break; }
-}
-const tMatch = s.match(/([甲乙丙丁戊己庚辛壬癸]?)([子丑寅卯辰巳午未申酉戌亥])[时時]/);
-const shi = tMatch ? tMatch[1]+tMatch[2]+'時' : '';
-return [minguo,lunarMonth,lunarDay,shi].filter(Boolean).join(' ');
+let lunarDay='';
+for(const[k,v]of Object.entries(CN_D)){if(s.startsWith(k)){lunarDay=v+'日';s=s.replace(k,'');break;}}
+const tMatch=s.match(/([甲乙丙丁戊己庚辛壬癸]?)([子丑寅卯辰巳午未申酉戌亥])[时時]/);
+const shi=tMatch?tMatch[1]+tMatch[2]+'時':'';
+return[minguo,lunarMonth,lunarDay,shi].filter(Boolean).join(' ');
 }
 
 // ══════════════════════════════════════════════
 // 初始化
 // ══════════════════════════════════════════════
-window.onload = ()=>{
+window.onload=()=>{
 initSelects();
 showScreen('screen-list');
 };
