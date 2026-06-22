@@ -1,0 +1,262 @@
+{
+  "knowledge_base": [
+
+    // ════════════════════════════════
+    // ① 日主特質（6個子項目 × 10天干 = 60筆）
+    // ════════════════════════════════
+
+    // --- 天干個性 ---
+    { "id": "01-01-01", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "天干個性", "query_key": { "stem": "甲" }, "content": "想當老大", "source": "TW_BZ", "is_template": false },
+    { "id": "01-01-02", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "天干個性", "query_key": { "stem": "乙" }, "content": "默默付出", "source": "TW_BZ", "is_template": false },
+    { "id": "01-01-03", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "天干個性", "query_key": { "stem": "丙" }, "content": "熱情爆發", "source": "TW_BZ", "is_template": false },
+    { "id": "01-01-04", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "天干個性", "query_key": { "stem": "丁" }, "content": "暖男", "source": "TW_BZ", "is_template": false },
+    { "id": "01-01-05", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "天干個性", "query_key": { "stem": "戊" }, "content": "能忍務實", "source": "TW_BZ", "is_template": false },
+    { "id": "01-01-06", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "天干個性", "query_key": { "stem": "己" }, "content": "踏實謹慎", "source": "TW_BZ", "is_template": false },
+    { "id": "01-01-07", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "天干個性", "query_key": { "stem": "庚" }, "content": "堅定直率", "source": "TW_BZ", "is_template": false },
+    { "id": "01-01-08", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "天干個性", "query_key": { "stem": "辛" }, "content": "細膩優雅", "source": "TW_BZ", "is_template": false },
+    { "id": "01-01-09", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "天干個性", "query_key": { "stem": "壬" }, "content": "靈活多變", "source": "TW_BZ", "is_template": false },
+    { "id": "01-01-10", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "天干個性", "query_key": { "stem": "癸" }, "content": "善解人意", "source": "TW_BZ", "is_template": false },
+
+    // --- 外在形象 ---
+    { "id": "01-02-01", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "外在形象", "query_key": { "stem": "甲" }, "content": "參天大樹；具向上發展、向下紮根、生長之特性", "source": "XU_BZ+TW_BZ", "is_template": false },
+    { "id": "01-02-02", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "外在形象", "query_key": { "stem": "乙" }, "content": "藤蔓；具向上發展、向下紮根、生長之特性", "source": "XU_BZ+TW_BZ", "is_template": false },
+    { "id": "01-02-03", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "外在形象", "query_key": { "stem": "丙" }, "content": "太陽火；具光明、照亮、熱情之特性", "source": "XU_BZ+TW_BZ", "is_template": false },
+    { "id": "01-02-04", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "外在形象", "query_key": { "stem": "丁" }, "content": "燭光火；具光明、照亮、熱情之特性", "source": "XU_BZ+TW_BZ", "is_template": false },
+    { "id": "01-02-05", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "外在形象", "query_key": { "stem": "戊" }, "content": "高山；具包容性、乘載之特性", "source": "XU_BZ+TW_BZ", "is_template": false },
+    { "id": "01-02-06", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "外在形象", "query_key": { "stem": "己" }, "content": "田園土；具包容性、乘載之特性", "source": "XU_BZ+TW_BZ", "is_template": false },
+    { "id": "01-02-07", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "外在形象", "query_key": { "stem": "庚" }, "content": "鋼鐵；具剛硬、收斂之特性", "source": "XU_BZ+TW_BZ", "is_template": false },
+    { "id": "01-02-08", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "外在形象", "query_key": { "stem": "辛" }, "content": "珠寶；具剛硬、收斂之特性", "source": "XU_BZ+TW_BZ", "is_template": false },
+    { "id": "01-02-09", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "外在形象", "query_key": { "stem": "壬" }, "content": "大海；具流動性、滋潤之特性", "source": "XU_BZ+TW_BZ", "is_template": false },
+    { "id": "01-02-10", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "外在形象", "query_key": { "stem": "癸" }, "content": "雨露；具流動性、滋潤之特性", "source": "XU_BZ+TW_BZ", "is_template": false },
+
+    // --- 優勢 ---
+    { "id": "01-03-01", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "優勢", "query_key": { "stem": "甲" }, "content": "領導、開創、剛正不阿", "source": "XU_BZ", "is_template": false },
+    { "id": "01-03-02", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "優勢", "query_key": { "stem": "乙" }, "content": "柔軟、靈巧、懂得變通、協調", "source": "XU_BZ", "is_template": false },
+    { "id": "01-03-03", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "優勢", "query_key": { "stem": "丙" }, "content": "熱情開朗、照亮別人、領導", "source": "XU_BZ", "is_template": false },
+    { "id": "01-03-04", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "優勢", "query_key": { "stem": "丁" }, "content": "細膩、溫暖、療癒、觀察力好", "source": "XU_BZ", "is_template": false },
+    { "id": "01-03-05", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "優勢", "query_key": { "stem": "戊" }, "content": "厚重可靠、能承擔責任、守護者", "source": "XU_BZ", "is_template": false },
+    { "id": "01-03-06", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "優勢", "query_key": { "stem": "己" }, "content": "溫厚務實、滋養、培育者", "source": "XU_BZ", "is_template": false },
+    { "id": "01-03-07", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "優勢", "query_key": { "stem": "庚" }, "content": "剛毅果決、敢衝敢拼、行動派", "source": "XU_BZ", "is_template": false },
+    { "id": "01-03-08", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "優勢", "query_key": { "stem": "辛" }, "content": "細緻、注重質感細節、溫暖", "source": "XU_BZ", "is_template": false },
+    { "id": "01-03-09", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "優勢", "query_key": { "stem": "壬" }, "content": "胸懷開闊、聰明靈活、冒險家", "source": "XU_BZ", "is_template": false },
+    { "id": "01-03-10", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "優勢", "query_key": { "stem": "癸" }, "content": "細膩感性、韌性強、支持者", "source": "XU_BZ", "is_template": false },
+
+    // --- 盲點 ---
+    { "id": "01-04-01", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "盲點", "query_key": { "stem": "甲" }, "content": "不懂變通、原則性太強", "source": "XU_BZ", "is_template": false },
+    { "id": "01-04-02", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "盲點", "query_key": { "stem": "乙" }, "content": "依附", "source": "XU_BZ", "is_template": false },
+    { "id": "01-04-03", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "盲點", "query_key": { "stem": "丙" }, "content": "急躁、情緒化", "source": "XU_BZ", "is_template": false },
+    { "id": "01-04-04", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "盲點", "query_key": { "stem": "丁" }, "content": "情緒內斂", "source": "XU_BZ", "is_template": false },
+    { "id": "01-04-05", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "盲點", "query_key": { "stem": "戊" }, "content": "固執、不願改變", "source": "XU_BZ", "is_template": false },
+    { "id": "01-04-06", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "盲點", "query_key": { "stem": "己" }, "content": "善變、缺乏安全感", "source": "XU_BZ", "is_template": false },
+    { "id": "01-04-07", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "盲點", "query_key": { "stem": "庚" }, "content": "過於強硬、得理不饒人", "source": "XU_BZ", "is_template": false },
+    { "id": "01-04-08", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "盲點", "query_key": { "stem": "辛" }, "content": "容易斷、迂迴", "source": "XU_BZ", "is_template": false },
+    { "id": "01-04-09", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "盲點", "query_key": { "stem": "壬" }, "content": "情緒起伏大、多慮", "source": "XU_BZ", "is_template": false },
+    { "id": "01-04-10", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "盲點", "query_key": { "stem": "癸" }, "content": "變動性差、心思單純易吃虧", "source": "XU_BZ", "is_template": false },
+
+    // --- 象徵 ---
+    { "id": "01-05-01", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "象徵", "query_key": { "stem": "甲" }, "content": "進取、突破、穩固、生命力", "source": "TW_BZ", "is_template": false },
+    { "id": "01-05-02", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "象徵", "query_key": { "stem": "乙" }, "content": "進取、突破、穩固、生命力", "source": "TW_BZ", "is_template": false },
+    { "id": "01-05-03", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "象徵", "query_key": { "stem": "丙" }, "content": "正直、領導力、積極、感染力", "source": "TW_BZ", "is_template": false },
+    { "id": "01-05-04", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "象徵", "query_key": { "stem": "丁" }, "content": "正直、領導力、積極、感染力", "source": "TW_BZ", "is_template": false },
+    { "id": "01-05-05", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "象徵", "query_key": { "stem": "戊" }, "content": "接納、寬厚、穩重、承擔責任", "source": "TW_BZ", "is_template": false },
+    { "id": "01-05-06", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "象徵", "query_key": { "stem": "己" }, "content": "接納、寬厚、穩重、承擔責任", "source": "TW_BZ", "is_template": false },
+    { "id": "01-05-07", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "象徵", "query_key": { "stem": "庚" }, "content": "原則性強、果斷、內斂、去蕪存菁", "source": "TW_BZ", "is_template": false },
+    { "id": "01-05-08", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "象徵", "query_key": { "stem": "辛" }, "content": "原則性強、果斷、內斂、去蕪存菁", "source": "TW_BZ", "is_template": false },
+    { "id": "01-05-09", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "象徵", "query_key": { "stem": "壬" }, "content": "靈活、變通、智慧、滋養他人", "source": "TW_BZ", "is_template": false },
+    { "id": "01-05-10", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "象徵", "query_key": { "stem": "癸" }, "content": "靈活、變通、智慧、滋養他人", "source": "TW_BZ", "is_template": false },
+
+    // --- 人生課題（延伸推算型）---
+    { "id": "01-06-01", "part": "第一部分", "section_no": "①", "section": "日主特質", "sub_item": "人生課題", "query_key": { "stem": "{{stem}}", "strength": "{{strength}}", "top_shishen": "{{top_shishen}}", "weak_element": "{{weak_element}}", "strong_element": "{{strong_element}}" }, "content": "依{{日主}}的盲點、命盤最強十神的失衡表現，以及最旺／最缺五行交叉判定人生課題；若某項能量過旺，課題是節制與轉化；若某項能量不足，課題是培養相應能力與生活習慣。", "source": "延伸推算", "is_template": true },
+
+    // ════════════════════════════════
+    // ② 十神人格剖析（4個子項目）
+    // ════════════════════════════════
+
+    // --- 命盤中最強的十神（延伸推算）---
+    { "id": "02-01-01", "part": "第一部分", "section_no": "②", "section": "十神人格剖析", "sub_item": "命盤中最強的十神", "query_key": { "stem": "{{stem}}", "strength": "{{strength}}" }, "content": "綜合四柱透干、地支主氣／藏干、月令與是否得根，找出主導命盤的{{最強十神}}；其人格特質優先用於命主的核心行為模式。", "source": "延伸推算", "is_template": true },
+
+    // --- 十神代表的人格特質 ---
+    { "id": "02-02-01", "part": "第一部分", "section_no": "②", "section": "十神人格剖析", "sub_item": "十神代表的人格特質", "query_key": { "shishen": "比肩" }, "content": "朋友、兄弟姊妹、競爭、好勝、講義氣", "source": "XU_BZ", "is_template": false },
+    { "id": "02-02-02", "part": "第一部分", "section_no": "②", "section": "十神人格剖析", "sub_item": "十神代表的人格特質", "query_key": { "shishen": "劫財" }, "content": "朋友、平輩、廣結善緣、行動力強、易衝動", "source": "XU_BZ", "is_template": false },
+    { "id": "02-02-03", "part": "第一部分", "section_no": "②", "section": "十神人格剖析", "sub_item": "十神代表的人格特質", "query_key": { "shishen": "食神" }, "content": "才華、享受、溫和、藝術感、易分心", "source": "XU_BZ", "is_template": false },
+    { "id": "02-02-04", "part": "第一部分", "section_no": "②", "section": "十神人格剖析", "sub_item": "十神代表的人格特質", "query_key": { "shishen": "傷官" }, "content": "創意、聰明、叛逆、衝撞權威、反應快", "source": "XU_BZ", "is_template": false },
+    { "id": "02-02-05", "part": "第一部分", "section_no": "②", "section": "十神人格剖析", "sub_item": "十神代表的人格特質", "query_key": { "shishen": "偏財" }, "content": "意外之財、投資、慷慨、交際手腕好", "source": "XU_BZ", "is_template": false },
+    { "id": "02-02-06", "part": "第一部分", "section_no": "②", "section": "十神人格剖析", "sub_item": "十神代表的人格特質", "query_key": { "shishen": "正財" }, "content": "穩定收入、務實、保守、勤儉、責任感", "source": "XU_BZ", "is_template": false },
+    { "id": "02-02-07", "part": "第一部分", "section_no": "②", "section": "十神人格剖析", "sub_item": "十神代表的人格特質", "query_key": { "shishen": "七殺" }, "content": "壓力、挑戰、威嚴、果斷、執行力強", "source": "XU_BZ", "is_template": false },
+    { "id": "02-02-08", "part": "第一部分", "section_no": "②", "section": "十神人格剖析", "sub_item": "十神代表的人格特質", "query_key": { "shishen": "正官" }, "content": "規矩、秩序、正派、管理能力好、易墨守成規", "source": "XU_BZ", "is_template": false },
+    { "id": "02-02-09", "part": "第一部分", "section_no": "②", "section": "十神人格剖析", "sub_item": "十神代表的人格特質", "query_key": { "shishen": "偏印" }, "content": "靈感、第六感、孤僻、觀察力敏銳", "source": "XU_BZ", "is_template": false },
+    { "id": "02-02-10", "part": "第一部分", "section_no": "②", "section": "十神人格剖析", "sub_item": "十神代表的人格特質", "query_key": { "shishen": "正印" }, "content": "長輩照顧、文化、寬容、被動、安全感", "source": "XU_BZ", "is_template": false },
+
+    // --- 十神與六親關係 ---
+    { "id": "02-03-01", "part": "第一部分", "section_no": "②", "section": "十神人格剖析", "sub_item": "十神與六親關係", "query_key": { "gender": "男" }, "content": "以正財為伴侶、偏財為父", "source": "TW_BZ", "is_template": false },
+    { "id": "02-03-02", "part": "第一部分", "section_no": "②", "section": "十神人格剖析", "sub_item": "十神與六親關係", "query_key": { "gender": "女" }, "content": "以正官為伴侶、七殺為感情對象", "source": "TW_BZ", "is_template": false },
+    { "id": "02-03-03", "part": "第一部分", "section_no": "②", "section": "十神人格剖析", "sub_item": "十神與六親關係", "query_key": { "relation": "手足" }, "content": "比肩、劫財代表兄弟姊妹與平輩；命盤無比劫或比劫在年柱，代表手足緣分淡", "source": "XU_BZ", "is_template": false },
+    { "id": "02-03-04", "part": "第一部分", "section_no": "②", "section": "十神人格剖析", "sub_item": "十神與六親關係", "query_key": { "relation": "子息" }, "content": "男看官殺，女看食傷", "source": "XU_BZ", "is_template": false },
+
+    // --- 十神的優勢與挑戰（延伸推算）---
+    { "id": "02-04-01", "part": "第一部分", "section_no": "②", "section": "十神人格剖析", "sub_item": "十神的優勢與挑戰", "query_key": { "top_shishen": "{{top_shishen}}", "strength": "{{strength}}" }, "content": "依命主最強十神及受制衡後的表現，輸出優勢與挑戰；比劫強→行動/人脈/競爭力，挑戰為衝動/爭主導；食傷強→創意/表達，挑戰為分心/衝撞權威；財星強→務實/資源整合，挑戰為重利/財務壓力；官殺強→紀律/管理，挑戰為高壓/僵化；印星強→學習/觀察，挑戰為被動/想多做少。", "source": "延伸推算", "is_template": true },
+
+    // ════════════════════════════════
+    // ③ 五行人格（5個子項目）
+    // ════════════════════════════════
+
+    // --- 五行分佈（延伸推算）---
+    { "id": "03-01-01", "part": "第一部分", "section_no": "③", "section": "五行人格", "sub_item": "五行分佈", "query_key": { "stem": "{{stem}}", "pillars": "{{pillars}}" }, "content": "依命盤四柱計算木火土金水各佔分數，輸出分佈比例", "source": "延伸推算", "is_template": true },
+
+    // --- 最強五行（延伸推算）---
+    { "id": "03-02-01", "part": "第一部分", "section_no": "③", "section": "五行人格", "sub_item": "最強五行", "query_key": { "strong_element": "{{strong_element}}" }, "content": "比較五行分佈並納入月令與地支根氣，最高且得令者判為最強五行；需同時說明其正向特質與過旺時可能牽動的被剋五行。", "source": "延伸推算", "is_template": true },
+
+    // --- 缺少五行（延伸推算）---
+    { "id": "03-03-01", "part": "第一部分", "section_no": "③", "section": "五行人格", "sub_item": "缺少五行", "query_key": { "weak_element": "{{weak_element}}", "xiyong": "{{xiyong}}" }, "content": "五行分佈中未出現者列為缺少五行；缺少不等於一定要補，須先確認該五行是否為喜用神，若為忌神則不宜機械補強。", "source": "延伸推算", "is_template": true },
+
+    // --- 五行人格特質 ---
+    { "id": "03-04-01", "part": "第一部分", "section_no": "③", "section": "五行人格", "sub_item": "五行人格特質", "query_key": { "element": "木" }, "content": "主生長；向上發展、向下紮根，象徵進取、突破、穩固、生命力", "source": "TW_BZ", "is_template": false },
+    { "id": "03-04-02", "part": "第一部分", "section_no": "③", "section": "五行人格", "sub_item": "五行人格特質", "query_key": { "element": "火" }, "content": "主熱情；光明、照亮，象徵正直、領導力、積極、感染力", "source": "TW_BZ", "is_template": false },
+    { "id": "03-04-03", "part": "第一部分", "section_no": "③", "section": "五行人格", "sub_item": "五行人格特質", "query_key": { "element": "土" }, "content": "主包容；包容性、乘載，象徵接納、寬厚、穩重、承擔責任", "source": "TW_BZ", "is_template": false },
+    { "id": "03-04-04", "part": "第一部分", "section_no": "③", "section": "五行人格", "sub_item": "五行人格特質", "query_key": { "element": "金" }, "content": "主收斂；剛硬、收斂，象徵原則性強、果斷、內斂、去蕪存菁", "source": "TW_BZ", "is_template": false },
+    { "id": "03-04-05", "part": "第一部分", "section_no": "③", "section": "五行人格", "sub_item": "五行人格特質", "query_key": { "element": "水" }, "content": "主流動；流動性、滋潤，象徵靈活、變通、智慧、滋養他人", "source": "TW_BZ", "is_template": false },
+
+    // --- 五行補強建議 ---
+    { "id": "03-05-01", "part": "第一部分", "section_no": "③", "section": "五行人格", "sub_item": "五行補強建議", "query_key": { "element": "金" }, "content": "穿金銀白灰色、擺放鼠猴龍雞牛小物、佩戴金銀飾品", "source": "XU_BZ", "is_template": false },
+    { "id": "03-05-02", "part": "第一部分", "section_no": "③", "section": "五行人格", "sub_item": "五行補強建議", "query_key": { "element": "木" }, "content": "接近植物大自然、穿藍黑綠色、擺放龍鼠虎兔羊豬木雕", "source": "XU_BZ", "is_template": false },
+    { "id": "03-05-03", "part": "第一部分", "section_no": "③", "section": "五行人格", "sub_item": "五行補強建議", "query_key": { "element": "水" }, "content": "多游泳泡澡、往北旅行、穿黑藍白灰色、擺放鼠猴雞龍牛豬金屬小物、佩戴金銀飾品", "source": "XU_BZ", "is_template": false },
+    { "id": "03-05-04", "part": "第一部分", "section_no": "③", "section": "五行人格", "sub_item": "五行補強建議", "query_key": { "element": "火" }, "content": "多曬太陽、戶外運動、泡硫磺溫泉、往南/赤道旅行、穿紅橘黃綠色、擺放馬虎狗兔羊蛇木雕", "source": "XU_BZ", "is_template": false },
+    { "id": "03-05-05", "part": "第一部分", "section_no": "③", "section": "五行人格", "sub_item": "五行補強建議", "query_key": { "element": "土" }, "content": "多曬太陽、踩地、泡泥漿/硫磺溫泉、往南/赤道旅行、穿紅橘黃土咖啡色、擺放馬虎狗羊蛇陶土小物", "source": "XU_BZ", "is_template": false },
+
+    // ════════════════════════════════
+    // ④ 四柱宮位解析（5個子項目）
+    // ════════════════════════════════
+
+    { "id": "04-01-01", "part": "第一部分", "section_no": "④", "section": "四柱宮位解析", "sub_item": "年柱（祖先宮）", "query_key": { "pillar": "年柱" }, "content": "1歲～18歲，遠方/海外，外人/長輩/祖先父母，頭部；代表對象年紀大很多（10歲以上），或遠距離/外國人/圈外人；大運沖年柱地支：可能在國外生活、國內外飛來飛去或移民", "source": "TW_BZ+XU_BZ", "is_template": false },
+    { "id": "04-02-01", "part": "第一部分", "section_no": "④", "section": "四柱宮位解析", "sub_item": "月柱（父母宮/事業宮）", "query_key": { "pillar": "月柱" }, "content": "19歲～36歲，家鄉，平輩/同事/兄弟姊妹，軀幹/脊背，本命宮；代表對象年紀較大（約大2歲～10歲）；流年/大運沖月柱：父母可能搬家、常去旅遊不在家或老家重新裝潢", "source": "TW_BZ+XU_BZ", "is_template": false },
+    { "id": "04-03-01", "part": "第一部分", "section_no": "④", "section": "四柱宮位解析", "sub_item": "日柱（夫妻宮）", "query_key": { "pillar": "日柱" }, "content": "37歲～55歲，居所/工作場所，配偶/至親，內臟/心腦，夫妻宮；日支代表伴侶的家，遇刑沖破害時易有感情變化；代表對象年紀相仿（正負2歲以內）；流年沖日柱：極高機率搬家、大裝修或買賣房子", "source": "TW_BZ+XU_BZ", "is_template": false },
+    { "id": "04-04-01", "part": "第一部分", "section_no": "④", "section": "四柱宮位解析", "sub_item": "時柱（子女宮）", "query_key": { "pillar": "時柱" }, "content": "56歲之後，門戶/房子附近，學生/晚輩/下屬，下肢/生殖泌尿系統；代表對象年紀較小（約小2歲～10歲）；流年/大運沖時柱：小孩長大後易去外地讀書工作或移民", "source": "TW_BZ+XU_BZ", "is_template": false },
+    { "id": "04-05-01", "part": "第一部分", "section_no": "④", "section": "四柱宮位解析", "sub_item": "藏干解析", "query_key": { "branch": "子" }, "content": "子（水，鼠，23:00-01:00）：純水", "source": "XU_BZ", "is_template": false },
+    { "id": "04-05-02", "part": "第一部分", "section_no": "④", "section": "四柱宮位解析", "sub_item": "藏干解析", "query_key": { "branch": "丑" }, "content": "丑（土，牛，01:00-03:00）：濕土（含水金）", "source": "XU_BZ", "is_template": false },
+    { "id": "04-05-03", "part": "第一部分", "section_no": "④", "section": "四柱宮位解析", "sub_item": "藏干解析", "query_key": { "branch": "寅" }, "content": "寅（木，虎，03:00-05:00）：木火土", "source": "XU_BZ", "is_template": false },
+    { "id": "04-05-04", "part": "第一部分", "section_no": "④", "section": "四柱宮位解析", "sub_item": "藏干解析", "query_key": { "branch": "卯" }, "content": "卯（木，兔，05:00-07:00）：純木", "source": "XU_BZ", "is_template": false },
+    { "id": "04-05-05", "part": "第一部分", "section_no": "④", "section": "四柱宮位解析", "sub_item": "藏干解析", "query_key": { "branch": "辰" }, "content": "辰（土，龍，07:00-09:00）：濕土（含水木）", "source": "XU_BZ", "is_template": false },
+    { "id": "04-05-06", "part": "第一部分", "section_no": "④", "section": "四柱宮位解析", "sub_item": "藏干解析", "query_key": { "branch": "巳" }, "content": "巳（火，蛇，09:00-11:00）：火土金", "source": "XU_BZ", "is_template": false },
+    { "id": "04-05-07", "part": "第一部分", "section_no": "④", "section": "四柱宮位解析", "sub_item": "藏干解析", "query_key": { "branch": "午" }, "content": "午（火，馬，11:00-13:00）：火土", "source": "XU_BZ", "is_template": false },
+    { "id": "04-05-08", "part": "第一部分", "section_no": "④", "section": "四柱宮位解析", "sub_item": "藏干解析", "query_key": { "branch": "未" }, "content": "未（土，羊，13:00-15:00）：燥土（含火木）", "source": "XU_BZ", "is_template": false },
+    { "id": "04-05-09", "part": "第一部分", "section_no": "④", "section": "四柱宮位解析", "sub_item": "藏干解析", "query_key": { "branch": "申" }, "content": "申（金，猴，15:00-17:00）：金水土", "source": "XU_BZ", "is_template": false },
+    { "id": "04-05-10", "part": "第一部分", "section_no": "④", "section": "四柱宮位解析", "sub_item": "藏干解析", "query_key": { "branch": "酉" }, "content": "酉（金，雞，17:00-19:00）：純金", "source": "XU_BZ", "is_template": false },
+    { "id": "04-05-11", "part": "第一部分", "section_no": "④", "section": "四柱宮位解析", "sub_item": "藏干解析", "query_key": { "branch": "戌" }, "content": "戌（土，狗，19:00-21:00）：燥土（含火金）", "source": "XU_BZ", "is_template": false },
+    { "id": "04-05-12", "part": "第一部分", "section_no": "④", "section": "四柱宮位解析", "sub_item": "藏干解析", "query_key": { "branch": "亥" }, "content": "亥（水，豬，21:00-23:00）：水木", "source": "XU_BZ", "is_template": false },
+
+    // ════════════════════════════════
+    // ⑤ 格局判斷（4個子項目）
+    // ════════════════════════════════
+
+    { "id": "05-01-01", "part": "第一部分", "section_no": "⑤", "section": "格局判斷", "sub_item": "格局類型", "query_key": { "strength_score": "{{strength_score}}" }, "content": "加分項大於45%為身強，小於45%為身弱；大於80%可能為從強，小於20%可能為從弱", "source": "XU_BZ", "is_template": true },
+    { "id": "05-02-01", "part": "第一部分", "section_no": "⑤", "section": "格局判斷", "sub_item": "從格細分", "query_key": { "strength": "從強" }, "content": "從強格：加分項大於80%（能量極旺）", "source": "XU_BZ", "is_template": false },
+    { "id": "05-02-02", "part": "第一部分", "section_no": "⑤", "section": "格局判斷", "sub_item": "從格細分", "query_key": { "strength": "從弱" }, "content": "從弱格：加分項小於20%（能量極弱）", "source": "XU_BZ", "is_template": false },
+    { "id": "05-03-01", "part": "第一部分", "section_no": "⑤", "section": "格局判斷", "sub_item": "格局高低", "query_key": { "stem": "{{stem}}", "strength": "{{strength}}", "top_shishen": "{{top_shishen}}" }, "content": "格局高低以月令核心是否清純、用神是否有力、忌神是否受制、刑沖合化是否破壞結構，以及大運能否扶助用神綜合判定；不可只憑單一十神下結論。", "source": "延伸推算", "is_template": true },
+    { "id": "05-04-01", "part": "第一部分", "section_no": "⑤", "section": "格局判斷", "sub_item": "格局說明", "query_key": { "strength": "{{strength}}" }, "content": "步驟1找日主→步驟2找加分項（生我、同我）→步驟3找扣分項（剋我、我剋、我生）→步驟4權重計算（年干5%、年支20%、月干5%、月支35%、日支20%、時干5%、時支10%）→步驟5判斷結果→步驟6特殊檢查（貪生忘剋、日主之庫、地支三合三會局）", "source": "XU_BZ", "is_template": false },
+
+    // ════════════════════════════════
+    // ⑥ 身強身弱（5個子項目）
+    // ════════════════════════════════
+
+    { "id": "06-01-01", "part": "第一部分", "section_no": "⑥", "section": "身強身弱", "sub_item": "強弱判斷結果", "query_key": { "stem": "{{stem}}", "strength": "{{strength}}" }, "content": "依四柱對{{日主}}的生扶與剋洩耗結果，輸出為{{身強／身弱／從強格／從弱格}}；並用一至兩句說明主要生扶來源與主要消耗來源。", "source": "延伸推算", "is_template": true },
+    { "id": "06-02-01", "part": "第一部分", "section_no": "⑥", "section": "身強身弱", "sub_item": "判斷依據", "query_key": { "stem": "{{stem}}", "branch_month": "{{branch_month}}", "strength": "{{strength}}" }, "content": "{{日主}}在月令{{月支}}的生扶程度為{{月令作用}}，四柱中生我／同我的力量主要來自{{生扶來源}}，剋我／我剋／我生的力量主要來自{{剋洩耗來源}}。", "source": "延伸推算", "is_template": true },
+    { "id": "06-03-01", "part": "第一部分", "section_no": "⑥", "section": "身強身弱", "sub_item": "身強的影響", "query_key": { "strength": "身強" }, "content": "身強者主動性強、抗壓性高、喜歡自己決策；喜用神為剋我、我剋、我生（財、官殺、食傷）；忌神為生我、同我（印、比劫）；大運走財、官殺、食傷運為好運；大運走印、比劫運為壞運；身強盡量不合夥，若要合夥必須由自己主導獨資", "source": "TW_BZ+XU_BZ", "is_template": false },
+    { "id": "06-04-01", "part": "第一部分", "section_no": "⑥", "section": "身強身弱", "sub_item": "身弱的影響", "query_key": { "strength": "身弱" }, "content": "身弱者內斂謹慎、依賴外力、低抗壓但適應力強；喜用神為生我、同我（印、比劫）；忌神為剋我、我剋、我生（財、官殺、食傷）；大運走印、比劫運為好運；大運走財、官殺、食傷運為壞運；身弱非常適合合夥（有錢大家賺）", "source": "TW_BZ+XU_BZ", "is_template": false },
+    { "id": "06-05-01", "part": "第一部分", "section_no": "⑥", "section": "身強身弱", "sub_item": "對各面向的影響", "query_key": { "dayun_type": "好運", "liunian_type": "好流年" }, "content": "好運遇好流年：大運平衡且流年為喜用神，財運、事業、功名皆順利，需好好把握", "source": "XU_BZ", "is_template": false },
+    { "id": "06-05-02", "part": "第一部分", "section_no": "⑥", "section": "身強身弱", "sub_item": "對各面向的影響", "query_key": { "dayun_type": "好運", "liunian_type": "壞流年" }, "content": "好運遇壞流年：大運平衡但流年為忌神，會短暫不平衡，易破財或食傷受剋，因大運好影響較短暫", "source": "XU_BZ", "is_template": false },
+    { "id": "06-05-03", "part": "第一部分", "section_no": "⑥", "section": "身強身弱", "sub_item": "對各面向的影響", "query_key": { "dayun_type": "壞運", "liunian_type": "好流年" }, "content": "壞運遇好流年：大運不平衡但流年為喜用神，不無小補，可短暫獲得正向結果，適合把握這1-3年發揮", "source": "XU_BZ", "is_template": false },
+    { "id": "06-05-04", "part": "第一部分", "section_no": "⑥", "section": "身強身弱", "sub_item": "對各面向的影響", "query_key": { "dayun_type": "壞運", "liunian_type": "壞流年" }, "content": "壞運遇壞流年：大運與流年皆為忌神，極度不平衡，諸事不順，易有壓力、破財或糾紛，需保守求穩，極力補充用神能量", "source": "XU_BZ", "is_template": false },
+
+    // ════════════════════════════════
+    // ⑦ 喜用神建議（5個子項目）
+    // ════════════════════════════════
+
+    { "id": "07-01-01", "part": "第一部分", "section_no": "⑦", "section": "喜用神建議", "sub_item": "喜神是什麼", "query_key": { "strength": "身強" }, "content": "身強喜用神：財、官殺、食傷（剋我、我剋、我生）", "source": "XU_BZ", "is_template": false },
+    { "id": "07-01-02", "part": "第一部分", "section_no": "⑦", "section": "喜用神建議", "sub_item": "喜神是什麼", "query_key": { "strength": "身弱" }, "content": "身弱喜用神：印、比劫（生我、同我）", "source": "XU_BZ", "is_template": false },
+    { "id": "07-01-03", "part": "第一部分", "section_no": "⑦", "section": "喜用神建議", "sub_item": "喜神是什麼", "query_key": { "strength": "從強" }, "content": "從強格喜用神：生我、同我（順勢）", "source": "XU_BZ", "is_template": false },
+    { "id": "07-01-04", "part": "第一部分", "section_no": "⑦", "section": "喜用神建議", "sub_item": "喜神是什麼", "query_key": { "strength": "從弱" }, "content": "從弱格喜用神：剋我、我剋、我生（順勢）", "source": "XU_BZ", "is_template": false },
+    { "id": "07-02-01", "part": "第一部分", "section_no": "⑦", "section": "喜用神建議", "sub_item": "忌神是什麼", "query_key": { "strength": "身強" }, "content": "身強忌神：印、比劫（生我、同我）", "source": "XU_BZ", "is_template": false },
+    { "id": "07-02-02", "part": "第一部分", "section_no": "⑦", "section": "喜用神建議", "sub_item": "忌神是什麼", "query_key": { "strength": "身弱" }, "content": "身弱忌神：財、官殺、食傷（剋我、我剋、我生）", "source": "XU_BZ", "is_template": false },
+    { "id": "07-02-03", "part": "第一部分", "section_no": "⑦", "section": "喜用神建議", "sub_item": "忌神是什麼", "query_key": { "strength": "從強" }, "content": "從強格忌神：剋我、我剋、我生（逆勢）", "source": "XU_BZ", "is_template": false },
+    { "id": "07-02-04", "part": "第一部分", "section_no": "⑦", "section": "喜用神建議", "sub_item": "忌神是什麼", "query_key": { "strength": "從弱" }, "content": "從弱格忌神：生我、同我（逆勢）", "source": "XU_BZ", "is_template": false },
+    { "id": "07-03-01", "part": "第一部分", "section_no": "⑦", "section": "喜用神建議", "sub_item": "用神補運方法", "query_key": { "xiyong_element": "金" }, "content": "穿金銀白灰色、擺放鼠猴龍雞牛小物、佩戴金銀飾品", "source": "XU_BZ", "is_template": false },
+    { "id": "07-03-02", "part": "第一部分", "section_no": "⑦", "section": "喜用神建議", "sub_item": "用神補運方法", "query_key": { "xiyong_element": "木" }, "content": "接近植物大自然、穿藍黑綠色、擺放龍鼠虎兔羊豬木雕", "source": "XU_BZ", "is_template": false },
+    { "id": "07-03-03", "part": "第一部分", "section_no": "⑦", "section": "喜用神建議", "sub_item": "用神補運方法", "query_key": { "xiyong_element": "水" }, "content": "多游泳泡澡、往北旅行、穿黑藍白灰色、擺放鼠猴雞龍牛豬金屬小物、佩戴金銀飾品", "source": "XU_BZ", "is_template": false },
+    { "id": "07-03-04", "part": "第一部分", "section_no": "⑦", "section": "喜用神建議", "sub_item": "用神補運方法", "query_key": { "xiyong_element": "火" }, "content": "多曬太陽、戶外運動、泡硫磺溫泉、往南/赤道旅行、穿紅橘黃綠色、擺放馬虎狗兔羊蛇木雕", "source": "XU_BZ", "is_template": false },
+    { "id": "07-03-05", "part": "第一部分", "section_no": "⑦", "section": "喜用神建議", "sub_item": "用神補運方法", "query_key": { "xiyong_element": "土" }, "content": "多曬太陽、踩地、泡泥漿/硫磺溫泉、往南/赤道旅行、穿紅橘黃土咖啡色、擺放馬虎狗羊蛇陶土小物", "source": "XU_BZ", "is_template": false },
+    { "id": "07-04-01", "part": "第一部分", "section_no": "⑦", "section": "喜用神建議", "sub_item": "忌神避開方法", "query_key": { "strength": "{{strength}}", "jishen_element": "{{jishen_element}}" }, "content": "先依格局確認忌神，再降低其顏色、方位、活動與環境能量；若忌神在大運或流年增強，重大投資、轉職與關係決策宜保守，並以用神平衡，不採完全排斥單一五行的極端做法。", "source": "延伸推算", "is_template": true },
+    { "id": "07-05-01", "part": "第一部分", "section_no": "⑦", "section": "喜用神建議", "sub_item": "開運物建議", "query_key": { "xiyong_element": "金" }, "content": "擺放鼠猴龍雞牛小物、佩戴金銀飾品", "source": "XU_BZ", "is_template": false },
+    { "id": "07-05-02", "part": "第一部分", "section_no": "⑦", "section": "喜用神建議", "sub_item": "開運物建議", "query_key": { "xiyong_element": "木" }, "content": "擺放龍鼠虎兔羊豬木雕", "source": "XU_BZ", "is_template": false },
+    { "id": "07-05-03", "part": "第一部分", "section_no": "⑦", "section": "喜用神建議", "sub_item": "開運物建議", "query_key": { "xiyong_element": "水" }, "content": "擺放鼠猴雞龍牛豬金屬小物、佩戴金銀飾品", "source": "XU_BZ", "is_template": false },
+    { "id": "07-05-04", "part": "第一部分", "section_no": "⑦", "section": "喜用神建議", "sub_item": "開運物建議", "query_key": { "xiyong_element": "火" }, "content": "擺放馬虎狗兔羊蛇木雕", "source": "XU_BZ", "is_template": false },
+    { "id": "07-05-05", "part": "第一部分", "section_no": "⑦", "section": "喜用神建議", "sub_item": "開運物建議", "query_key": { "xiyong_element": "土" }, "content": "擺放馬虎狗羊蛇陶土小物", "source": "XU_BZ", "is_template": false },
+
+    // ════════════════════════════════
+    // 第二部分：時機預測
+    // ════════════════════════════════
+
+    // ⑧ 當前大運（6個子項目）
+    { "id": "08-01-01", "part": "第二部分", "section_no": "⑧", "section": "當前大運", "sub_item": "現在走什麼大運", "query_key": { "dayun_stem": "{{dayun_stem}}", "dayun_branch": "{{dayun_branch}}" }, "content": "當前大運天干地支為{{dayun_stem}}{{dayun_branch}}，依命主生年月日順逆排列推算", "source": "延伸推算", "is_template": true },
+    { "id": "08-02-01", "part": "第二部分", "section_no": "⑧", "section": "當前大運", "sub_item": "大運十神", "query_key": { "dayun_shishen": "{{dayun_shishen}}", "strength": "{{strength}}" }, "content": "當前大運對命主為{{dayun_shishen}}，屬{{吉/凶}}運；依身強弱判斷此十神是否為喜用神", "source": "延伸推算", "is_template": true },
+    { "id": "08-03-01", "part": "第二部分", "section_no": "⑧", "section": "當前大運", "sub_item": "大運整體評級", "query_key": { "dayun_shishen": "{{dayun_shishen}}", "strength": "{{strength}}" }, "content": "依大運十神與命主身強弱的喜忌關係，輸出★★★★★整體評分與10年走向說明", "source": "延伸推算", "is_template": true },
+    { "id": "08-04-01", "part": "第二部分", "section_no": "⑧", "section": "當前大運", "sub_item": "大運對各面向影響", "query_key": { "dayun_shishen": "{{dayun_shishen}}", "strength": "{{strength}}" }, "content": "這10年財運/事業/感情/健康各自走向，依大運十神對應六親與五行臟腑分析", "source": "延伸推算", "is_template": true },
+    { "id": "08-05-01", "part": "第二部分", "section_no": "⑧", "section": "當前大運", "sub_item": "大運起訖時間", "query_key": { "dayun_start_age": "{{dayun_start_age}}", "dayun_end_age": "{{dayun_end_age}}" }, "content": "當前大運從{{dayun_start_age}}歲至{{dayun_end_age}}歲", "source": "延伸推算", "is_template": true },
+    { "id": "08-06-01", "part": "第二部分", "section_no": "⑧", "section": "當前大運", "sub_item": "下一個大運預告", "query_key": { "next_dayun_stem": "{{next_dayun_stem}}", "next_dayun_branch": "{{next_dayun_branch}}", "next_dayun_shishen": "{{next_dayun_shishen}}" }, "content": "下一個大運為{{next_dayun_stem}}{{next_dayun_branch}}（{{next_dayun_shishen}}），從{{next_dayun_start_age}}歲開始；預告其對命主的整體影響方向", "source": "延伸推算", "is_template": true },
+
+    // ════════════════════════════════
+    // ⑨ 流年分析（7+12個子項目）
+    // ════════════════════════════════
+
+    // --- 9-1 基本流年 ---
+    { "id": "09-01-01", "part": "第二部分", "section_no": "⑨", "section": "流年分析", "sub_item": "今年天干地支", "query_key": { "liunian_stem": "{{liunian_stem}}", "liunian_branch": "{{liunian_branch}}" }, "content": "今年為{{liunian_stem}}{{liunian_branch}}年", "source": "延伸推算", "is_template": true },
+    { "id": "09-02-01", "part": "第二部分", "section_no": "⑨", "section": "流年分析", "sub_item": "流年十神", "query_key": { "liunian_shishen": "{{liunian_shishen}}", "strength": "{{strength}}" }, "content": "今年流年天干對命主為{{liunian_shishen}}，屬{{喜/忌}}神；地支與命盤形成{{合/沖/刑/害/無}}關係", "source": "延伸推算", "is_template": true },
+    { "id": "09-03-01", "part": "第二部分", "section_no": "⑨", "section": "流年分析", "sub_item": "流年整體評級", "query_key": { "liunian_shishen": "{{liunian_shishen}}", "dayun_type": "{{dayun_type}}" }, "content": "今年整體運勢評分★★★★★；大運與流年疊加後的綜合判斷", "source": "延伸推算", "is_template": true },
+    { "id": "09-04-01", "part": "第二部分", "section_no": "⑨", "section": "流年分析", "sub_item": "上半年走勢", "query_key": { "liunian_stem": "{{liunian_stem}}", "strength": "{{strength}}" }, "content": "1～6月重點提示：依流月天干地支與命盤的喜忌關係，輸出上半年整體走向與注意事項", "source": "延伸推算", "is_template": true },
+    { "id": "09-05-01", "part": "第二部分", "section_no": "⑨", "section": "流年分析", "sub_item": "下半年走勢", "query_key": { "liunian_stem": "{{liunian_stem}}", "strength": "{{strength}}" }, "content": "7～12月重點提示：依流月天干地支與命盤的喜忌關係，輸出下半年整體走向與注意事項", "source": "延伸推算", "is_template": true },
+    { "id": "09-06-01", "part": "第二部分", "section_no": "⑨", "section": "流年分析", "sub_item": "今年最佳時機月份", "query_key": { "liunian_shishen": "{{liunian_shishen}}", "xiyong_element": "{{xiyong_element}}" }, "content": "哪幾個月流月天干地支為喜用神，最適合行動、簽約、投資、求職", "source": "延伸推算", "is_template": true },
+    { "id": "09-07-01", "part": "第二部分", "section_no": "⑨", "section": "流年分析", "sub_item": "今年需要注意月份", "query_key": { "liunian_shishen": "{{liunian_shishen}}", "jishen_element": "{{jishen_element}}" }, "content": "哪幾個月流月天干地支為忌神，需保守謹慎、避免重大決策", "source": "延伸推算", "is_template": true },
+
+    // --- 9-2 流年重大事件判斷 ---
+    { "id": "09-08-01", "part": "第二部分", "section_no": "⑨", "section": "流年分析", "sub_item": "換工作／離職時機", "query_key": { "liunian_shishen": "{{liunian_shishen}}", "guansha_status": "{{guansha_status}}" }, "content": "官殺星受沖或食傷旺時，判斷是否適合換工作；官殺為忌神且受沖→適合；官殺為喜用神且受沖→需謹慎評估", "source": "延伸推算", "is_template": true },
+    { "id": "09-09-01", "part": "第二部分", "section_no": "⑨", "section": "流年分析", "sub_item": "升職加薪時機", "query_key": { "liunian_shishen": "{{liunian_shishen}}", "strength": "{{strength}}" }, "content": "官星得令且為喜用神→輸出最有機會的月份與行動建議", "source": "延伸推算", "is_template": true },
+    { "id": "09-10-01", "part": "第二部分", "section_no": "⑨", "section": "流年分析", "sub_item": "創業時機", "query_key": { "shishen_combo": "食傷生財", "strength": "{{strength}}" }, "content": "食傷生財格局出現且為喜用神→今年是否適合創業；身強食傷旺財星得令為最佳創業時機", "source": "延伸推算", "is_template": true },
+    { "id": "09-11-01", "part": "第二部分", "section_no": "⑨", "section": "流年分析", "sub_item": "副業啟動時機", "query_key": { "liunian_shishen": "偏財", "strength": "{{strength}}" }, "content": "偏財星動且為喜用神→今年是否適合開展副業、斜槓收入", "source": "延伸推算", "is_template": true },
+    { "id": "09-12-01", "part": "第二部分", "section_no": "⑨", "section": "流年分析", "sub_item": "投資進場時機", "query_key": { "caixin_status": "{{caixin_status}}", "strength": "{{strength}}" }, "content": "財星旺且為喜用神→今年是否適合投資；財星為忌神或受沖→不宜進場，保守理財", "source": "延伸推算", "is_template": true },
+    { "id": "09-13-01", "part": "第二部分", "section_no": "⑨", "section": "流年分析", "sub_item": "結婚時機", "query_key": { "fuzigong_status": "{{fuzigong_status}}", "liunian_branch": "{{liunian_branch}}" }, "content": "夫妻宮合且夫妻星得令→今年是否適合結婚；日支逢合為最佳結婚訊號", "source": "延伸推算", "is_template": true },
+    { "id": "09-14-01", "part": "第二部分", "section_no": "⑨", "section": "流年分析", "sub_item": "生育時機", "query_key": { "zinu_star_status": "{{zinu_star_status}}", "liunian_branch": "{{liunian_branch}}" }, "content": "子女星旺（男看官殺，女看食傷）且時柱不受沖→今年是否適合懷孕生子", "source": "延伸推算", "is_template": true },
+    { "id": "09-15-01", "part": "第二部分", "section_no": "⑨", "section": "流年分析", "sub_item": "搬家／置產時機", "query_key": { "tu_status": "{{tu_status}}", "rizhu_status": "{{rizhu_status}}" }, "content": "土星得令或流年沖日柱→今年是否適合買房搬家；流年沖日支為極高機率搬家訊號", "source": "延伸推算", "is_template": true },
+    { "id": "09-16-01", "part": "第二部分", "section_no": "⑨", "section": "流年分析", "sub_item": "出國／遠行時機", "query_key": { "yima_status": "{{yima_status}}", "nianzhu_status": "{{nianzhu_status}}" }, "content": "驛馬星動或流年沖年柱地支→今年是否有遠行、出差、移民機會", "source": "延伸推算", "is_template": true },
+    { "id": "09-17-01", "part": "第二部分", "section_no": "⑨", "section": "流年分析", "sub_item": "考試／進修時機", "query_key": { "yinxing_status": "{{yinxing_status}}", "strength": "{{strength}}" }, "content": "印星旺且為喜用神→今年是否適合考試、進修、學習新技能", "source": "延伸推算", "is_template": true },
+    { "id": "09-18-01", "part": "第二部分", "section_no": "⑨", "section": "流年分析", "sub_item": "官司／法律糾紛", "query_key": { "qisha_status": "{{qisha_status}}", "strength": "{{strength}}" }, "content": "七殺旺無制且為忌神→今年是否有官司、法律糾紛、合約風險；建議避免簽署重要文件", "source": "延伸推算", "is_template": true },
+    { "id": "09-19-01", "part": "第二部分", "section_no": "⑨", "section": "流年分析", "sub_item": "意外／車關風險", "query_key": { "xingchong_status": "{{xingchong_status}}", "liunian_branch": "{{liunian_branch}}" }, "content": "刑沖嚴重月份→輸出哪個月要特別小心意外、車關；建議出行謹慎、避免高風險活動", "source": "延伸推算", "is_template": true },
+
+    // ════════════════════════════════
+    // ⑩ 太歲影響與化解（6個子項目）
+    // ════════════════════════════════
+
+    { "id": "10-01-01", "part": "第二部分", "section_no": "⑩", "section": "太歲影響與化解", "sub_item": "是否犯太歲", "query_key": { "taisui_type": "值太歲" }, "content": "流年地支與命主日支相同→值太歲；變動大、需謹慎行事", "source": "延伸推算", "is_template": false },
+    { "id": "10-01-02", "part": "第二部分", "section_no": "⑩", "section": "太歲影響與化解", "sub_item": "是否犯太歲", "query_key": { "taisui_type": "沖太歲" }, "content": "流年地支與命主日支相沖→沖太歲；六沖最強，易有大變動、搬遷、關係破裂", "source": "延伸推算", "is_template": false },
+    { "id": "10-01-03", "part": "第二部分", "section_no": "⑩", "section": "太歲影響與化解", "sub_item": "是否犯太歲", "query_key": { "taisui_type": "刑太歲" }, "content": "流年地支與命主日支相刑→刑太歲；易有官司、健康、人際糾紛", "source": "延伸推算", "is_template": false },
+    { "id": "10-01-04", "part": "第二部分", "section_no": "⑩", "section": "太歲影響與化解", "sub_item": "是否犯太歲", "query_key": { "taisui_type": "破太歲" }, "content": "流年地支與命主日支相破→破太歲；易有計畫受阻、合作破局", "source": "延伸推算", "is_template": false },
+    { "id": "10-01-05", "part": "第二部分", "section_no": "⑩", "section": "太歲影響與化解", "sub_item": "是否犯太歲", "query_key": { "taisui_type": "害太歲" }, "content": "流年地支與命主日支相害→害太歲；易有暗中阻礙、小人作祟", "source": "延伸推算", "is_template": false },
+    { "id": "10-01-06", "part": "第二部分", "section_no": "⑩", "section": "太歲影響與化解", "sub_item": "是否犯太歲", "query_key": { "taisui_type": "合太歲" }, "content": "流年地支與命主日支相合→合太歲；若合化為喜用神則吉，合化為忌神則凶", "source": "延伸推算", "is_template": false },
+    { "id": "10-02-01", "part": "第二部分", "section_no": "⑩", "section": "太歲影響與化解", "sub_item": "犯太歲類型", "query_key": { "taisui_type": "{{taisui_type}}" }, "content": "值太歲/沖太歲/刑太歲/破太歲/害太歲/合太歲，依命主日支與流年地支關係判定", "source": "延伸推算", "is_template": true },
+    { "id": "10-03-01", "part": "第二部分", "section_no": "⑩", "section": "太歲影響與化解", "sub_item": "影響程度", "query_key": { "taisui_type": "沖太歲" }, "content": "嚴重：六沖直接衝擊夫妻宮，感情、居所、健康皆受影響", "source": "延伸推算", "is_template": false },
+    { "id": "10-03-02", "part": "第二部分", "section_no": "⑩", "section": "太歲影響與化解", "sub_item": "影響程度", "query_key": { "taisui_type": "刑太歲" }, "content": "中等：刑沖帶來壓力與糾紛，但有機會轉化為突破", "source": "延伸推算", "is_template": false },
+    { "id": "10-03-03", "part": "第二部分", "section_no": "⑩", "section": "太歲影響與化解", "sub_item": "影響程度", "query_key": { "taisui_type": "破太歲" }, "content": "輕微：計畫易受阻，調整節奏即可", "source": "延伸推算", "is_template": false },
+    { "id": "10-04-01", "part": "第二部分", "section_no": "⑩", "section": "太歲影響與化解", "sub_item": "犯太歲的具體影響", "query_key": { "taisui_type": "{{taisui_type}}", "fuzigong_status": "{{fuzigong_status}}" }, "content": "依犯太歲類型與夫妻宮、事業宮、健康宮的受影響程度，輸出對哪個面向影響最大", "source": "延伸推算", "is_template": true },
+    { "id": "10-05-01", "part": "第二部分", "section_no": "⑩", "section": "太歲影響與化解", "sub_item": "化解方法", "query_key": { "taisui_type": "{{taisui_type}}", "xiyong_element": "{{xiyong_element}}" }, "content": "依犯太歲類型輸出具體化解步驟：補充喜用神能量、避開忌神方位顏色、特定月份謹慎行事", "source": "延伸推算", "is_template": true },
+    { "id": "10-06-01", "part": "第二部分", "section_no": "⑩", "section": "太歲影響與化解", "sub_item": "不犯太歲說明", "query_key": { "taisui_type": "無" }, "content": "今年不犯太歲；太歲對命主無直接沖刑，可借助流年能量順勢推進重要計畫", "source": "延伸推算", "is_template": false },
+
+    // ════════════════════════════════
+    // ⑪ 每月流日日曆（5個子項目）
+    // ════════════════════════════════
+
+    { "id": "11-01-01", "part": "第二部分", "section_no": "⑪", "section": "每月流日日曆", "sub_item": "每月得財日", "query_key": { "month": "{{month}}", "xiyong_element": "{{xiyong_element}}" }, "content": "本月流日天干地支為喜用神（財星）的日期→最適合談錢、投資、收款、簽財務合約", "source": "延伸推算", "is_template": true },
+    { "id": "11-02-01", "part": "第二部分", "section_no": "⑪", "section": "每月流日日曆", "sub_item": "每月工作機會日", "query_key": { "month": "{{month}}", "guansha_element": "{{guansha_element}}" }, "content": "本月流日天干地支為官殺或食傷喜用神的日期→最適合面試、談合作、提案、升職溝通", "source": "延伸推算", "is_template": true },
+    { "id": "11-03-01", "part": "第二部分", "section_no": "⑪", "section": "每月流日日曆", "sub_item": "每月桃花日", "query_key": { "month": "{{month}}", "taohua_branch": "{{taohua_branch}}" }, "content": "本月流日地支出現桃花星（子午卯酉）的日期→最適合約會、告白、認識新對象", "source": "延伸推算", "is_template": true },
+    { "id": "11-04-01", "part": "第二部分", "section_no": "⑪", "section": "每月流日日曆", "sub_item": "每月健康注意日", "query_key": { "month": "{{month}}", "weak_element": "{{weak_element}}" }, "content": "本月流日天干地支剋洩命主弱五行的日期→特別注意身體、避免開刀手術", "source": "延伸推算", "is_template": true },
+    { "id": "11-05-01", "part": "第二部分", "section_no": "⑪", "section": "每月流日日曆", "sub_item": "每月避凶日", "query_key": { "month": "{{month}}", "jishen_element": "{{jishen_element}}", "xingchong_status": "{{xingchong_status}}" }, "content": "本月流日天干地支為忌神或形成刑沖的日期→小心小人、意外、車關、口舌是非", "source": "延伸推算", "is_template": true }
+
+  ]
+}
