@@ -460,6 +460,63 @@ margin-top:12px;
 margin:8px 0 0;
 line-height:1.9;
 }
+.report-summary{
+font-size:0.95rem;
+line-height:1.9;
+color:#4A3728;
+font-weight:600;
+}
+.report-summary p{
+margin:0;
+}
+.report-summary p + p{
+margin-top:6px;
+}
+.report-detail{
+margin-top:8px;
+padding:8px 10px;
+background:#FFFDF8;
+border-left:3px solid #ECD9BF;
+border-radius:6px;
+}
+.report-detail p{
+margin:0;
+line-height:1.85;
+}
+.report-detail p + p{
+margin-top:6px;
+}
+.key-token{
+color:#8B6914;
+font-weight:800;
+background:#FFF7E6;
+padding:0 3px;
+border-radius:4px;
+}
+.key-strength{
+color:#B45309;
+font-weight:800;
+}
+.key-wealth{
+color:#B45309;
+font-weight:800;
+}
+.key-career{
+color:#2563EB;
+font-weight:800;
+}
+.key-love{
+color:#BE185D;
+font-weight:800;
+}
+.key-health{
+color:#15803D;
+font-weight:800;
+}
+.detail-label{
+color:#7C2D12;
+font-weight:800;
+}
 .teacher-view{
 background:#FDF8EF;
 border-left:3px solid #D4B896;
@@ -494,6 +551,47 @@ padding-left:18px;
 margin:3px 0;
 line-height:1.65;
 }
+.summary-panel{
+background:#FFFDF8;
+border:1px solid #F0E2CF;
+border-radius:8px;
+padding:12px 14px;
+margin-top:10px;
+}
+.summary-panel-title{
+font-size:0.86rem;
+font-weight:700;
+color:#8B6914;
+margin-bottom:6px;
+}
+.focus-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+gap:8px;
+margin-top:10px;
+}
+.focus-item{
+background:#FDF8EF;
+border-left:3px solid #D4B896;
+border-radius:6px;
+padding:8px 10px;
+line-height:1.65;
+}
+.focus-label{
+display:block;
+font-size:0.76rem;
+font-weight:700;
+color:#8B6914;
+}
+.focus-value{
+font-weight:800;
+color:#9A3412;
+}
+.tone-wealth{color:#B45309;font-weight:800;}
+.tone-career{color:#2563EB;font-weight:800;}
+.tone-love{color:#BE185D;font-weight:800;}
+.tone-health{color:#15803D;font-weight:800;}
+.tone-warn{color:#B91C1C;font-weight:800;}
 .kb-tag{
 display:inline-block;
 font-size:0.68rem;
@@ -1585,6 +1683,13 @@ function analyzeCombinations(){
     '丁壬':'淫暱之合：感受細膩、重品味，也容易牽動桃花與情感需求。',
     '戊癸':'無情之合：情緒反應容易悶在心裡，外表可能顯得冷淡；但內在其實重情趣、重感受。'
   };
+  const stemComboNames = {
+    '甲己':'中正之合',
+    '乙庚':'仁義之合',
+    '丙辛':'威制之合',
+    '丁壬':'淫暱之合',
+    '戊癸':'無情之合'
+  };
   const branchSix = [
     ['子','丑','土'],['寅','亥','木'],['卯','戌','火'],['辰','酉','金'],['巳','申','水'],['午','未','土']
   ];
@@ -1596,9 +1701,17 @@ function analyzeCombinations(){
     const pa = stems.find(p => p.tg === a);
     const pb = stems.find(p => p.tg === b);
     if(pa && pb){
-      const support = yueDzWx === wx || riWx === wx || stems.some(p => WX_MAP[p.tg] === wx);
+      const supportReasons = [];
+      if(yueDzWx === wx) supportReasons.push(`月支【${yueDz}】屬${wx}，月令有支撐`);
+      const sameWxStems = stems.filter(p => WX_MAP[p.tg] === wx).map(p => `${p.label}【${p.tg}】`);
+      if(sameWxStems.length) supportReasons.push(`${sameWxStems.join('、')}透出${wx}氣`);
+      const sameWxBranches = branches.filter(p => WX_MAP[p.dz] === wx).map(p => `${p.label}【${p.dz}】`);
+      if(sameWxBranches.length) supportReasons.push(`${sameWxBranches.join('、')}帶${wx}氣`);
       const comboKey = a + b;
-      rows.push(`天干合：${pa.label}【${a}】與${pb.label}【${b}】有「${a}${b}合${wx}」。${stemComboNotes[comboKey] || ''}這代表${pa.role}和${pb.role}容易互相牽動；以目前盤面看，${support ? '有五行支援，可列為重要互動訊號。' : '化氣條件不足，先以「有合象、有牽動」解讀，不直接斷成化'+wx+'。'}`);
+      const supportText = supportReasons.length
+        ? `盤面有${wx}的支援：${supportReasons.join('，')}。但合化仍要看月令、透干與全盤力量，所以這裡先判作「合象明顯、${wx}氣有參與」，不直接說已完全化${wx}。`
+        : `盤面缺少明顯${wx}氣支援，所以先以「有合象、有牽動」解讀，不直接斷成化${wx}。`;
+      rows.push(`天干合：${pa.label}【${a}】與${pb.label}【${b}】形成「${a}${b}合${wx}・${stemComboNames[comboKey] || '天干五合'}」。${stemComboNotes[comboKey] || ''}這代表${pa.role}和${pb.role}容易互相牽動。${supportText}`);
     }
   }
   for(const [a,b,wx] of branchSix){
@@ -1876,6 +1989,46 @@ function actionList(text){
   return `${prefix}<ul class="action-list">${parts.map(item => `<li>${item}</li>`).join('')}</ul>`;
 }
 
+function compactList(items){
+  const cleaned = (items || [])
+    .filter(Boolean)
+    .map(item => String(item).trim())
+    .filter(Boolean);
+  if(!cleaned.length) return '';
+  return `<ul class="action-list">${cleaned.map(item => `<li>${item}</li>`).join('')}</ul>`;
+}
+
+function focusItem(label, value, toneClass = ''){
+  if(!value) return '';
+  return `<div class="focus-item"><span class="focus-label">${label}</span><span class="focus-value ${toneClass}">${value}</span></div>`;
+}
+
+function enhanceReportText(text){
+  if(!text) return '';
+  let html = String(text);
+  html = html.replace(/(財星|財位|招財|正財|偏財|得財|破財)/g, '<span class="key-wealth">$1</span>');
+  html = html.replace(/(官殺|事業|職場|主管|責任|規則|文昌|大運)/g, '<span class="key-career">$1</span>');
+  html = html.replace(/(配偶星|夫妻宮|感情|桃花|婚姻|親密關係)/g, '<span class="key-love">$1</span>');
+  html = html.replace(/(健康|脾胃|腎臟|膀胱|保養|病符|五黃)/g, '<span class="key-health">$1</span>');
+  html = html.replace(/(身強|身弱|喜用神|忌神|用神|日主|流年)/g, '<span class="key-strength">$1</span>');
+  html = html.replace(/【([^】]+)】/g, '<span class="key-token">【$1】</span>');
+  html = html.replace(/^([^：:]{2,14}[：:])/, '<span class="detail-label">$1</span>');
+  return html;
+}
+
+function renderReportText(text, className = 'report-detail'){
+  if(!text) return '';
+  const raw = String(text).trim();
+  if(!raw) return '';
+  if(raw.startsWith('<') || raw.includes('<ul') || raw.includes('<div')) return raw;
+  const sentences = raw
+    .split(/(?<=。)/)
+    .map(s => s.trim())
+    .filter(Boolean);
+  const parts = sentences.length > 1 && raw.length > 60 ? sentences : [raw];
+  return `<div class="${className}">${parts.map(part => `<p>${enhanceReportText(part)}</p>`).join('')}</div>`;
+}
+
 // ── 從新知識庫取資料 ──
 const new_gexing   = qContent(kbNew, '內在性格',  {stem: riTg});
 const new_image    = qContent(kbNew, '外在形象',  {stem: riTg});
@@ -1950,10 +2103,6 @@ const XU_FS_LAYOUT = {
   }
 };
 const xuFs = XU_FS_LAYOUT[riWx]?.[client.gender === '男' ? '男' : '女'] || {};
-const XU_FS_PDF_EXAMPLES = {
-  土:{女:{career:'東北方、正東方、東南方、正北方（PDF 練習表範例：土命女事業貴人位）'}}
-};
-const xuFsExample = XU_FS_PDF_EXAMPLES[riWx]?.[client.gender === '男' ? '男' : '女'] || {};
 const XU_WATER_TANK = {
   金:'陶瓷或玻璃製，顏色以綠色、藍綠色較合適；水缸裡可以放水草。',
   木:'陶瓷製，顏色可用紅色、橙色、黃色或土黃色；水缸裡可以放玉石石頭。',
@@ -1961,26 +2110,28 @@ const XU_WATER_TANK = {
   火:'陶瓷、玻璃或金屬製，顏色以白色、灰色較合適；水缸裡可以放銅幣或錢幣。',
   土:'陶瓷或玻璃製，顏色以藍色、黑色、白色或灰色較合適；水缸裡可以放銅幣或錢幣。'
 };
+const XU_WATER_COMMON = '長方形約60x30x30公分，或圓形直徑約40公分；不加蓋、不打燈，水量8～9分滿。水要乾淨流動，可用馬達、濾水器或定期換水；小空間可先用裝水玻璃杯，每天換水。';
+const XU_YEAR_WATER_NOTE = `${CURRENT_YEAR}年若搭配紫白飛星，一白、六白方位可評估小型動水；二黑、五黃等凶位以安靜化煞為主，未細看前不要放大型動水。`;
 const waterTankInsights = qSmartMany(kbNew, [
   {subItems:'水缸佈置說明', query_keys:{element:riWx}, limit:1},
   {subItems:'水缸佈置說明', query_keys:{scope:'general'}, limit:1},
   {subItems:'水缸佈置說明', query_keys:{year:CURRENT_YEAR}, limit:1},
 ], 3);
 const waterPlacementHtml = `
-  <div class="teacher-view">
-    <div class="teacher-view-title">徐玉蘭老師五行命主風水方位</div>
-    <p><strong>${riWx}命${client.gender}的招財水缸：</strong>優先看財位，建議方位是【${xuFs.wealth || '需查表'}】；可放在客廳或個人空間中對應此方位的位置。</p>
-    <ul class="action-list">
-      <li>財位／招財水缸：${xuFs.wealth || '需查表'}</li>
-      ${xuFsExample.career ? `<li>事業／貴人位：${xuFsExample.career}</li>` : ''}
-      <li>文昌／學習位：${xuFs.wenchang || '需查表'}</li>
-      <li>桃花／人緣位：${xuFs.peach || '需查表'}</li>
-      <li>健康／保養位：${xuFs.health || '需查表'}</li>
-    </ul>
-    <p><strong>使用邏輯：</strong>水缸以財位為主；文昌、桃花、健康與事業位是其他添運擺件的方位，不代表每一個位置都要放水缸。</p>
-    <p><strong>水缸材質與顏色：</strong>${XU_WATER_TANK[riWx] || waterTankInsights[0] || '需依五行命主選材質與添運色彩。'}</p>
-    <p><strong>共通設置：</strong>${waterTankInsights[1] || '水缸可抓長方形60x30x30或圓形直徑40公分；不要加蓋、不需要照明，水量放8~9分滿，水要保持清新與流動。'}</p>
-    <p><strong>${CURRENT_YEAR}流年提醒：</strong>${waterTankInsights[2] || '一白、六白方位可評估水缸相關擺件；二黑、五黃等凶位仍以安靜化煞為主，避免未判斷就放大型動水。'}</p>
+  <div class="summary-panel">
+    <div class="summary-panel-title">徐玉蘭老師五行命主方位</div>
+    <div class="focus-grid">
+      ${focusItem('財位／招財水缸', xuFs.wealth || '需查表', 'tone-wealth')}
+      ${focusItem('文昌／學習位', xuFs.wenchang || '需查表', 'tone-career')}
+      ${focusItem('桃花／人緣位', xuFs.peach || '需查表', 'tone-love')}
+      ${focusItem('健康／保養位', xuFs.health || '需查表', 'tone-health')}
+    </div>
+    ${compactList([
+      `招財水缸優先放在財位【${xuFs.wealth || '需查表'}】，其他方位以對應擺件補運，不是每一格都放水缸。`,
+      `水缸材質與顏色：${XU_WATER_TANK[riWx] || waterTankInsights[0] || '需依五行命主選材質與添運色彩。'}`,
+      `共通設置：${XU_WATER_COMMON}`,
+      `流年提醒：${XU_YEAR_WATER_NOTE}`
+    ])}
   </div>
 `;
 
@@ -1988,7 +2139,7 @@ const waterPlacementHtml = `
 function personalCard({icon,title,id,personalSummary,details,tags}){
   const detailsHtml=(details||[]).filter(Boolean).map(d=>{
     const html = String(d);
-    return html.trim().startsWith('<') || html.includes('<ul') ? html : `<p>${html}</p>`;
+    return renderReportText(html);
   }).join('');
   return `
     <div class="kb-card">
@@ -1996,7 +2147,7 @@ function personalCard({icon,title,id,personalSummary,details,tags}){
         ${icon||''} ${title}
       </div>
       <div class="kb-content">
-        <p style="font-size:0.95rem;line-height:1.9;color:#4A3728;font-weight:600;">${personalSummary||''}</p>
+        ${personalSummary ? renderReportText(personalSummary, 'report-summary') : ''}
         ${detailsHtml?`<div class="kb-talk-details">${detailsHtml}</div>`:''}
       </div>
     </div>
@@ -2083,7 +2234,7 @@ const GONG_DATA = [
 ];
 const sec3Html = personalCard({
   icon:'🏛', title:'四柱宮位解析', id:'BAZI_012',
-  personalSummary:client.name+'，四柱不是只看干支名稱，而是看每一個宮位被哪種十神啟動。你的盤可以先抓這幾個重點：',
+  personalSummary:client.name+'，你的四柱重點如下：年柱看原生家庭，月柱看現實環境與工作節奏，日柱看自己與親密關係，時柱看晚年、子女與成果。',
   details:GONG_DATA.map(({key,data})=>{
     const tg  = data['天干']?.['天干']||'';
     const dz  = data['地支']?.['地支']||'';
@@ -2099,7 +2250,7 @@ const combinationRows = analyzeCombinations();
 const secComboHtml = personalCard({
   icon:'🔗', title:'合化／刑沖另欄檢查', id:'BAZI_COMBO',
   personalSummary:combinationRows.length
-    ? client.name+'，你的命盤有幾組天干地支互動，需要另外看，不適合混在日主或感情段落裡一筆帶過。'
+    ? client.name+'，這裡只列命盤裡實際抓到的合化、六合或沖；重點是看哪些宮位互相牽動。'
     : client.name+'，這張盤目前沒有抓到明顯的天干五合、地支六合或六沖訊號；若要更細，仍可再看三合、三會、刑害破與藏干透出。',
   details:combinationRows.length ? combinationRows : [
     '目前先不硬塞合化文字，避免把教材規則誤當成你的個案結論。'
@@ -2240,20 +2391,30 @@ const sec11Html = `
 `;
 
 // ⑫ 八字×風水整合
+const supportMethod = new_wuxing || new_buyun || '';
+const fengshuiTeacherEvidence = teacherCombinedBlock(teacherKB, [
+  {question:'財位佈局', maxPoints:2},
+  {question:'水缸佈置說明', query_key:{element:riWx}, maxPoints:2},
+  {question:'桃花位佈局', maxPoints:2},
+  {question:'今年流年風水（2026丙午年）', query_key:{year:CURRENT_YEAR}, maxPoints:2}
+], {title:'老師觀點依據（三位老師精選）', limit:3, maxPoints:3});
 const sec12Html = `
 <div class="kb-card">
   <div class="kb-card-title">🏠 ${client.name} 的專屬風水佈局建議</div>
   <div class="kb-content">
     <p style="font-weight:600;color:${wxColor};">你是【${riTg}${riWx}】命主，${strongLabel}格局</p>
-    ${fengshuiInsights.map(text => `<p style="margin-top:8px;">${text}</p>`).join('')}
+    <div class="summary-panel">
+      <div class="summary-panel-title">統整後先做這三件事</div>
+      ${compactList([
+        `財位先保持<span class="tone-wealth">乾淨、明亮、不受壓</span>，擺件控制在3～5樣內；求財不要把所有招財物一次堆滿。`,
+        `${CURRENT_YEAR}年流年風水可先看<span class="tone-wealth">正東財位</span>與<span class="tone-career">正北偏財／貴人位</span>，但正南五黃、病符方位要先避凶，不急著催旺。`,
+        `健康與情緒空間以<span class="tone-health">安靜、通風、少雜物</span>為主；凶位不放大型動水，先化煞再補運。`
+      ])}
+    </div>
     ${waterPlacementHtml}
-    ${new_wuxing ? `<div style="margin-top:8px;">🌿 <strong>五行補強：</strong>${actionList(new_wuxing)}</div>` : ''}
-    ${new_kaiyun ? `<div style="margin-top:4px;">🏮 <strong>開運物：</strong>${actionList(new_kaiyun)}</div>`   : ''}
-    ${new_buyun  ? `<div style="margin-top:4px;">✨ <strong>補運方法：</strong>${actionList(new_buyun)}</div>`  : ''}
-    ${teacherViewBlock(teacherKB, '財位佈局', {}, 3)}
-    ${teacherViewBlock(teacherKB, '水缸佈置說明', {element:riWx}, 1)}
-    ${teacherViewBlock(teacherKB, '桃花位佈局', {}, 2)}
-    ${teacherViewBlock(teacherKB, '今年流年風水（2026丙午年）', {year:CURRENT_YEAR}, 2)}
+    ${supportMethod ? `<div class="summary-panel"><div class="summary-panel-title">五行補強</div>${actionList(supportMethod)}</div>` : ''}
+    ${new_kaiyun ? `<div class="summary-panel"><div class="summary-panel-title">開運物</div>${actionList(new_kaiyun)}</div>` : ''}
+    ${fengshuiTeacherEvidence}
   </div>
 </div>
 `;
