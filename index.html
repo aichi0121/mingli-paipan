@@ -1367,13 +1367,13 @@ return {木:'土',火:'金',土:'水',金:'木',水:'火'}[riWx]||'';
 
 function getRelation(riWx, targetWx){
 if(!riWx||!targetWx) return '關係待分析';
-if(riWx===targetWx) return '同五行（比劫），有助日主';
+if(riWx===targetWx) return '自我與競爭加強（比劫）';
 const sheng={木:'火',火:'土',土:'金',金:'水',水:'木'};
 const ke={木:'土',火:'金',土:'水',金:'木',水:'火'};
-if(sheng[riWx]===targetWx) return '日主生之（食傷），洩耗能量';
-if(sheng[targetWx]===riWx) return '生助日主（印），有利';
-if(ke[riWx]===targetWx) return '日主剋之（財），財星出現';
-if(ke[targetWx]===riWx) return '剋制日主（官殺），需注意壓力';
+if(sheng[riWx]===targetWx) return '表達輸出增加（食傷）';
+if(sheng[targetWx]===riWx) return '資源學習加強（印星）';
+if(ke[riWx]===targetWx) return '財務資源浮現（財星）';
+if(ke[targetWx]===riWx) return '責任壓力增加（官殺）';
 return '關係複雜，需綜合判斷';
 }
 
@@ -1532,8 +1532,8 @@ const pillarList = [
 ];
 
 function relationTone(relation, strength){
-  if(relation.includes('生助') || relation.includes('同五行')){
-    return strength === '身強' ? '讓原本已不弱的日主更旺，做事有底氣，但也容易固執、想太多或壓力悶住。' : '能補足日主能量，適合先穩住身心、建立資源，再談擴張。';
+  if(relation.includes('資源') || relation.includes('印') || relation.includes('自我') || relation.includes('比劫')){
+    return strength === '身強' ? '這會讓你更有底氣，也更容易把想法放大；好處是行動力強，提醒是不要太固執或把壓力悶住。' : '這是在補你的能量，適合先穩住身心、建立資源，再談擴張。';
   }
   if(relation.includes('食傷')) return '會把能量往外帶，適合表達、作品、教學、輸出與建立個人風格。';
   if(relation.includes('財')) return strength === '身強' ? '財星被帶出來，適合談資源、收入、客戶與可落地的成果。' : '財星會帶來機會，也會帶來消耗，財務和承諾要量力而為。';
@@ -1541,13 +1541,24 @@ function relationTone(relation, strength){
   return '需要合併大運、本命強弱與宮位一起看，不宜只用單一五行下結論。';
 }
 
+function relationPlain(relation){
+  if(relation.includes('資源') || relation.includes('印')) return '資源、學習、貴人、休息與內在整理被加強';
+  if(relation.includes('自我') || relation.includes('比劫')) return '自我意識、同輩競爭、主見與行動力被加強';
+  if(relation.includes('食傷')) return '表達、作品、輸出、教學與創意被加強';
+  if(relation.includes('財')) return '金錢、客戶、資源交換與現實成果被加強';
+  if(relation.includes('官殺')) return '責任、規則、壓力、主管與外界要求被加強';
+  return relation;
+}
+
 function dayunAppliedSummary(){
   const tgRelation = getRelation(riWx, WX_MAP[curDyTg]);
   const dzRelation = getRelation(riWx, WX_MAP[curDyDz]);
+  const firstHalf = curDyAge && curDyEnd ? `${curDyAge}～${Math.min(Number(curDyAge) + 4, Number(curDyEnd))}歲` : '前五年';
+  const secondHalf = curDyAge && curDyEnd ? `${Math.min(Number(curDyAge) + 5, Number(curDyEnd))}～${curDyEnd}歲` : '後五年';
   return [
-    `大運天干【${curDyTg}】主外在事件，對你是【${curDyShen || getShishen(riTg, curDyTg)}】，代表這十年表面上容易遇到「${getDayunCareerNote(curDyShen)}」這類主題。`,
-    `大運地支【${curDyDz}】主內在環境與累積，五行屬【${WX_MAP[curDyDz] || '—'}】，和日主【${riWx}】的關係是「${dzRelation}」。`,
-    `套到你的盤：${tgRelation}；${relationTone(tgRelation, strongLabel)}`
+    `這一步大運不是要你自己判斷：我已經替你定位在【${curDyGz}】。天干【${curDyTg}】看${firstHalf}較明顯的外在事件，地支【${curDyDz}】看${secondHalf}逐漸形成的環境與累積。`,
+    `【${curDyTg}】對你的日主【${riTg}】是【${curDyShen || getShishen(riTg, curDyTg)}】，所以這十年的主題偏向：${getDayunCareerNote(curDyShen)}。`,
+    `地支【${curDyDz}】五行屬【${WX_MAP[curDyDz] || '—'}】，會讓「${relationPlain(dzRelation)}」。因為你本來就是【${strongLabel}】，所以好處是底氣變足，盲點是容易想太多、拖延或變得更固執。`
   ];
 }
 
@@ -1555,9 +1566,9 @@ function liunianAppliedSummary(){
   const tgRelation = getRelation(riWx, WX_MAP[lyTg]);
   const dzRelation = getRelation(riWx, WX_MAP[lyDz]);
   return [
-    `${lyYear}年的天干【${lyTg}】是你命盤裡的【${lyStar}】，偏向外在事件與今年浮上檯面的主題。`,
-    `${lyYear}年的地支【${lyDz}】五行屬【${WX_MAP[lyDz] || '—'}】，偏向環境、人際與身體感受；它和日主【${riWx}】的關係是「${dzRelation}」。`,
-    `所以今年不是直接套課程的2026文字，而是用【${lyGz}】對【${riTg}${riWx}】重新換算：${tgRelation}；${relationTone(tgRelation, strongLabel)}`
+    `${lyYear}年的流年是【${lyGz}】。天干【${lyTg}】對你的日主【${riTg}】是【${lyStar}】，代表今年浮上檯面的主題是「${getLiunianCareerNote(lyStar)}」。`,
+    `地支【${lyDz}】五行屬【${WX_MAP[lyDz] || '—'}】，偏向今年的環境、人際與身體感受；它會讓「${relationPlain(dzRelation)}」。`,
+    `套回你的盤來看：${tgRelation}。${relationTone(tgRelation, strongLabel)}`
   ];
 }
 
@@ -1577,7 +1588,10 @@ function analyzeCombinations(){
   for(const [a,b,wx] of stemCombos){
     const pa = stems.find(p => p.tg === a);
     const pb = stems.find(p => p.tg === b);
-    if(pa && pb) rows.push(`天干合：${pa.label}【${a}】與${pb.label}【${b}】有「${a}${b}合${wx}」訊號，代表這兩個宮位之間容易互相牽動；是否真正化${wx}，還要看月令、透干與全盤五行是否支持。`);
+    if(pa && pb){
+      const support = yueDzWx === wx || riWx === wx || stems.some(p => WX_MAP[p.tg] === wx);
+      rows.push(`天干合：${pa.label}【${a}】與${pb.label}【${b}】有「${a}${b}合${wx}」。這代表${pa.role}和${pb.role}容易互相牽動；以目前盤面看，${support ? '有五行支援，可列為重要互動訊號。' : '化氣條件不足，先以「有合象、有牽動」解讀，不直接斷成化'+wx+'。'}`);
+    }
   }
   for(const [a,b,wx] of branchSix){
     const pa = branches.find(p => p.dz === a);
@@ -1617,7 +1631,7 @@ function personalizeContent(text){
     .replaceAll('{{起運年齡}}', curDyAge || '')
     .replaceAll('{{喜用神}}', yongshenText)
     .replaceAll('{{喜用神五行}}', yongshenText)
-    .replaceAll('{{喜神／忌神}}', isStrong ? '忌神偏旺，需要用金、水、木來洩耗剋制' : '喜神可補，需要用生助日主的五行來扶持')
+    .replaceAll('{{喜神／忌神}}', isStrong ? '能量偏旺，需要用金、水、木來疏通和平衡' : '能量需要被補足，適合靠近能支持日主的五行')
     .replaceAll('{{忌神}}', strongLabel === '身強' ? '印、比劫' : '財、官殺、食傷')
     .replace(/平級聤/g, '平級聊')
     .replace(/多聤/g, '多聊')
@@ -1801,6 +1815,34 @@ function teacherViewBlock(kb, question, query_key = {}, limit = 2, options = {})
   return `<div class="teacher-view"><div class="teacher-view-title">${options.title || '老師觀點依據（精選）'}</div>${rows.join('')}</div>`;
 }
 
+function teacherCombinedBlock(kb, items, options = {}){
+  if(!kb || !Array.isArray(kb.questions)) return '';
+  const seenText = new Set();
+  const groups = new Map();
+  for(const item of items){
+    const q = kb.questions.find(qItem => qItem.question === item.question);
+    if(!q || !q.teacher_interpretations) continue;
+    for(const view of Object.values(q.teacher_interpretations)){
+      if(!view.interpretation || view.interpretation.includes('未找到可直接或合理延伸')) continue;
+      if(!options.includeOtherCourses && view.source_code === 'B_FS') continue;
+      const points = teacherRelevantPoints(view, item.query_key || {}, item.maxPoints || 2);
+      for(const point of points){
+        const key = (view.source_code || view.teacher) + point.replace(/\s+/g, '');
+        if(seenText.has(key)) continue;
+        seenText.add(key);
+        const label = `${teacherName(view)}${view.domain ? '（'+view.domain+'）' : ''}`;
+        if(!groups.has(label)) groups.set(label, []);
+        groups.get(label).push(point);
+      }
+    }
+  }
+  const rows = [...groups.entries()].slice(0, options.limit || 2).map(([label, points]) =>
+    `<div class="teacher-source"><strong>${label}</strong><ul class="action-list">${points.slice(0, options.maxPoints || 3).map(point => `<li>${escapeHtml(point)}</li>`).join('')}</ul></div>`
+  );
+  if(!rows.length) return '';
+  return `<div class="teacher-view"><div class="teacher-view-title">${options.title || '老師觀點依據（精選）'}</div>${rows.join('')}</div>`;
+}
+
 function actionList(text){
   if(!text) return '';
   const cleaned = personalizeContent(text);
@@ -1847,14 +1889,9 @@ const curDyFamily = tenGodFamily(curDyShen);
 const lyFamily = tenGodFamily(lyStar);
 const caiFamilyKey = client.gender === '男' ? '財星' : '官殺';
 const dayunInsights = qSmartMany(kbNew, [
-  {subItems:'大運對各面向影響', query_keys:[{ten_god:curDyBalanceKey, strength:strongLabel},{scope:'general'}], limit:2},
   {subItems:'大運十神', query_keys:[{ten_god:curDyShen},{ten_god:curDyFamily}], limit:1},
-], 2);
-const liunianInsights = qSmartMany(kbNew, [
-  {subItems:['9-1 基本流年｜今年天干地支','今年天干地支'], query_keys:{stem:lyTg, year:CURRENT_YEAR}, limit:1},
-  {subItems:['9-1 基本流年｜流年十神','流年十神'], query_keys:{stem:lyTg, year:CURRENT_YEAR}, limit:1},
-  {subItems:['對各面向的影響','流年剋洩影響'], query_keys:[{ten_god:lyBalanceKey, strength:strongLabel},{ten_god:lyFamily}], limit:1},
-], 3);
+], 1);
+const liunianInsights = [];
 const wealthInsights = qSmartMany(kbNew, [
   {subItems:['12-1 基本財運｜天生財運模式','天生財運模式'], query_keys:[{ten_god:'財星', strength:strongLabel},{ten_god:'財星'}], limit:1},
   {subItems:['12-1 基本財運｜今年財運走勢','今年財運走勢'], query_keys:[{ten_god:lyBalanceKey, strength:strongLabel},{ten_god:'財星', strength:strongLabel},{scope:'general'}], limit:1},
@@ -1936,8 +1973,10 @@ const sec1Html = personalCard({
     new_youshi || teacher_youshi ? '你值得好好使用的優勢：'+(new_youshi||teacher_youshi) : '',
     new_mangdian || teacher_mangdian ? '要稍微留意的地方：'+(new_mangdian||teacher_mangdian) : '',
     new_xiangz ? '更深一層來說，'+new_xiangz : '',
-    teacherViewBlock(teacherKB, '內在性格', {stem: riTg}, 1),
-    teacherViewBlock(teacherKB, '五行人格特質', {variant: riWx}, 1),
+    teacherCombinedBlock(teacherKB, [
+      {question:'內在性格', query_key:{stem:riTg}, maxPoints:2},
+      {question:'五行人格特質', query_key:{variant:riWx}, maxPoints:1}
+    ], {title:'老師觀點依據（精選）', limit:2, maxPoints:3}),
   ].filter(Boolean),
   tags:['日主'+riTg, riWx, yinYang, strongLabel]
 });
@@ -1958,6 +1997,28 @@ const GONG_FOCUS = {
   ri:'這是你自己與伴侶的位置，重點在自我狀態、親密關係與婚姻互動。',
   shi:'看晚年、子女、作品成果，也能觀察你把能力留給世界的方式。'
 };
+function gongJudgement(key, shen, wx){
+  const relation = getRelation(riWx, wx);
+  const shenText = {
+    正印:'偏向照顧、學習、資源與保護，也容易重視安全感。',
+    偏印:'偏向研究、直覺、非典型學習與獨處思考。',
+    正財:'偏向務實、金錢秩序、責任感與對現實資源的掌握。',
+    偏財:'偏向機會、人脈、彈性收入與對外開拓。',
+    正官:'偏向規矩、責任、名聲、制度與被要求。',
+    七殺:'偏向壓力、挑戰、競爭、行動力與危機處理。',
+    食神:'偏向表達、作品、享受、教學與穩定輸出。',
+    傷官:'偏向創意、反應、突破、表達慾與不喜被管。',
+    比肩:'偏向自我、主見、同輩競爭與獨立性。',
+    劫財:'偏向朋友、分資源、合作競爭與財務流動。'
+  }[shen] || '這一柱以日主自身狀態為主。';
+  const roleText = {
+    nian:'放在年柱，表示早年與家族背景容易帶著這種氣質。',
+    yue:'放在月柱，表示現實環境、工作節奏與父母手足對你影響很深。',
+    ri:'放在日柱，表示這是你自己與親密關係最核心的互動方式。',
+    shi:'放在時柱，表示晚年、子女、作品成果或長期累積會帶出這種能量。'
+  }[key] || '';
+  return `${roleText}${shenText}這個位置會讓「${relationPlain(relation)}」，所以不是只列五行，而是直接看它怎麼影響這個人生宮位。`;
+}
 const GONG_DATA = [
   {key:'nian',data:bazi['年柱']||{}},
   {key:'yue', data:bazi['月柱']||{}},
@@ -1972,7 +2033,7 @@ const sec3Html = personalCard({
     const dz  = data['地支']?.['地支']||'';
     const shen= toTrad(data['天干']?.['十神']||'');
     const wx = WX_MAP[tg] || WX_MAP[dz] || '';
-    return GONG_NAME[key]+'是【'+tg+dz+'】，十神為【'+(shen||'日主')+'】。重點：'+GONG_FOCUS[key]+'這一柱帶有【'+(shen||'日主')+'】氣質，解讀時要特別看它在'+(wx ? '五行【'+wx+'】' : '五行')+'上的作用。';
+    return GONG_NAME[key]+'是【'+tg+dz+'】，十神為【'+(shen||'日主')+'】。'+gongJudgement(key, shen || '日主', wx);
   }),
   tags:['年柱','月柱','日柱','時柱','宮位']
 });
@@ -2014,12 +2075,10 @@ const sec4Html = personalCard({
 const dyRelation = getRelation(riWx, curDyWx);
 const sec5Html = personalCard({
   icon:'🌀', title:'當前大運【'+curDyGz+'】'+curDyShen+'（'+curDyAge+'～'+curDyEnd+'歲）', id:'BAZI_021',
-  personalSummary:client.name+'，你目前走到【'+curDyGz+'】大運，主題是【'+curDyShen+'】。這一步運的五行屬【'+curDyWx+'】，對你的日主【'+riTg+riWx+'】來說，整體是「'+dyRelation+'」。',
+  personalSummary:client.name+'，你目前走到【'+curDyGz+'】大運，主題是【'+curDyShen+'】。白話說，這十年不是單純好或壞，而是會把「'+relationPlain(dyRelation)+'」這件事推到你面前。',
   details:[
     '這段時間大約落在 '+curDyAge+' 到 '+curDyEnd+' 歲，會比較明顯地把【'+curDyShen+'】的課題帶到你生活裡。',
     ...dayunAppliedSummary(),
-    ...dayunInsights,
-    teacherViewBlock(teacherKB, '大運對各面向影響', {ten_god:curDyBalanceKey, strength:strongLabel}, 1, {title:'老師判斷依據（大運）', maxPoints:2}),
   ].filter(Boolean),
   tags:['大運'+curDyGz, curDyShen, '五行'+curDyWx]
 });
@@ -2032,8 +2091,6 @@ const sec6Html = personalCard({
   details:[
     ...liunianAppliedSummary(),
     '大運【'+curDyGz+'】遇上流年【'+lyGz+'】：'+getDayunLiunianNote(curDyWx, lyWx)+'。',
-    ...liunianInsights,
-    teacherViewBlock(teacherKB, '流年十神', {stem:lyTg, year:CURRENT_YEAR}, 1, {title:'老師判斷依據（流年）', maxPoints:2}),
   ].filter(Boolean),
   tags:['流年'+lyGz, lyStar, lyYear+'年']
 });
