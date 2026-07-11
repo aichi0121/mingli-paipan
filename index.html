@@ -1497,7 +1497,89 @@ function qContent(kb, sub_item, query_key, fallback){
     if(e.sub_item !== sub_item) return false;
     return Object.entries(query_key).every(([k,v]) => e.query_key && e.query_key[k] === v);
   });
-  return (entry && entry.content) ? entry.content : (fallback||'');
+  return (entry && entry.content) ? personalizeContent(entry.content) : (fallback||'');
+}
+
+function personalizeContent(text){
+  if(!text) return '';
+  const yongshenMap = {
+    身強:{木:'火、土、金',火:'土、金、水',土:'金、水、木',金:'水、木、火',水:'木、火、土'},
+    身弱:{木:'水、木',火:'木、火',土:'火、土',金:'土、金',水:'金、水'}
+  };
+  const yongshenText = yongshenMap[strongLabel]?.[riWx] || '喜用神';
+  return text
+    .replaceAll('{{日主}}', riTg+riWx)
+    .replaceAll('{{身強／身弱／從強格／從弱格}}', strongLabel)
+    .replaceAll('{{身強弱結果}}', strongLabel)
+    .replaceAll('{{大運天干}}{{大運地支}}', curDyGz)
+    .replaceAll('{{起運年齡}}', curDyAge || '')
+    .replaceAll('{{喜用神}}', yongshenText)
+    .replaceAll('{{忌神}}', strongLabel === '身強' ? '印、比劫' : '財、官殺、食傷')
+    .replace(/如果你的命盤呈現「命主輸出規則」，?/g, '')
+    .replace(/如果你的命盤呈現「延伸推算」，?/g, '')
+    .replace(/如果你的命盤呈現「延伸定義」，?/g, '')
+    .replace(/如果你的命盤呈現「延伸特質」，?/g, '')
+    .replace(/如果你的命盤呈現「適用條件」，?/g, '')
+    .replace(/如果你的命盤呈現「可能盲點」，?/g, '')
+    .replace(/如果你的命盤呈現「步驟5 判斷結果」，?/g, '')
+    .replace(/如果你的命盤呈現「綜合結論」，?/g, '')
+    .replace(/如果你的命盤呈現「([^」]+)」，?/g, '以「$1」來看，')
+    .replace(/命主輸出規則/g, '你的命盤')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function normalizeQueryKey(query_key){
+  const variants = [query_key || {}];
+  if(query_key?.element) variants.push({...query_key, variant: query_key.element});
+  if(query_key?.variant) variants.push({...query_key, element: query_key.variant});
+  return variants.map(key => Object.fromEntries(Object.entries(key).filter(([,v]) => v !== undefined && v !== '')));
+}
+
+function queryKnowledge(kb, subItems, query_keys = [{}], limit = 1){
+  if(!kb || !kb.knowledge_base) return [];
+  const names = Array.isArray(subItems) ? subItems : [subItems];
+  const keys = (Array.isArray(query_keys) ? query_keys : [query_keys]).flatMap(normalizeQueryKey);
+  const matches = [];
+  for(const entry of kb.knowledge_base){
+    if(!names.includes(entry.sub_item)) continue;
+    const ok = keys.some(key => Object.entries(key).every(([k,v]) => entry.query_key && entry.query_key[k] === v));
+    if(ok && entry.content && !matches.some(item => item.content === entry.content)) matches.push(entry);
+    if(matches.length >= limit) break;
+  }
+  return matches;
+}
+
+function qSmart(kb, subItems, query_keys, fallback = ''){
+  return personalizeContent(queryKnowledge(kb, subItems, query_keys, 1)[0]?.content || fallback);
+}
+
+function qSmartMany(kb, specs, limit = 6){
+  const rows = [];
+  for(const spec of specs){
+    const entries = queryKnowledge(kb, spec.subItems, spec.query_keys || [{}], spec.limit || 1);
+    for(const entry of entries){
+      const content = personalizeContent(entry.content);
+      if(content && !rows.includes(content)) rows.push(content);
+      if(rows.length >= limit) return rows;
+    }
+  }
+  return rows;
+}
+
+function tenGodFamily(shen){
+  if(['正財','偏財'].includes(shen)) return '財星';
+  if(['正官','七殺'].includes(shen)) return '官殺';
+  if(['食神','傷官'].includes(shen)) return '食傷';
+  if(['正印','偏印'].includes(shen)) return '印';
+  if(['比肩','劫財'].includes(shen)) return '比劫';
+  return shen || '';
+}
+
+function balanceTenGodKey(strength, shen){
+  const family = tenGodFamily(shen);
+  if(strength === '身強') return ['財星','官殺','食傷'].includes(family) ? '食傷' : '比劫';
+  return ['印','比劫'].includes(family) ? '比劫' : '食傷';
 }
 
 function cleanTeacherPoint(text){
@@ -1531,18 +1613,62 @@ const new_gexing   = qContent(kbNew, '內在性格',  {stem: riTg});
 const new_image    = qContent(kbNew, '外在形象',  {stem: riTg});
 const new_youshi   = qContent(kbNew, '優勢',      {stem: riTg});
 const new_mangdian = qContent(kbNew, '盲點',      {stem: riTg});
-const new_xiangz   = qContent(kbNew, '象徵意義',  {stem: riTg});
-const new_wxTrait  = qContent(kbNew, '五行特質',  {element: riWx});
-const new_strength = qContent(kbNew, isStrong?'身強':'身弱', {strength: strongLabel});
-const new_xiyong   = qContent(kbNew, '喜用神',    {strength: strongLabel});
-const new_jishen   = qContent(kbNew, '忌神',      {strength: strongLabel});
-const new_buyun    = qContent(kbNew, '五行補強',  {element: riWx});
-const new_wuxing   = qContent(kbNew, '五行補強',  {element: riWx});
-const new_kaiyun   = qContent(kbNew, '開運物',    {element: riWx});
+const new_xiangz   = qSmart(kbNew, ['象徵','象徵意義'], {stem: riTg});
+const new_wxTrait  = qSmart(kbNew, ['五行人格特質','五行特質','個人命主五行'], [{variant: riWx},{element: riWx}]);
+const new_strength = qSmart(kbNew, ['身強的影響','身弱的影響','強弱判斷結果'], [{strength: strongLabel},{ten_god: balanceTenGodKey(strongLabel, curDyShen), strength: strongLabel}]);
+const new_xiyong   = qSmart(kbNew, ['喜神是什麼','喜用神'], [{strength: strongLabel},{ten_god: balanceTenGodKey(strongLabel, '食神'), strength: strongLabel}]);
+const new_jishen   = qSmart(kbNew, ['忌神是什麼','忌神'], [{strength: strongLabel},{ten_god: balanceTenGodKey(strongLabel, '比肩'), strength: strongLabel}]);
+const new_buyun    = qSmart(kbNew, ['用神補運方法','五行補強建議','五行補強'], [{variant: riWx},{element: riWx}]);
+const new_wuxing   = qSmart(kbNew, ['五行補強建議','五行補強'], [{variant: riWx},{element: riWx}]);
+const new_kaiyun   = qSmart(kbNew, ['開運物建議','開運物'], [{variant: riWx},{element: riWx}]);
 const teacher_inner = teacherPoint(teacherKB, '內在性格', {stem: riTg}, riTg+riWx);
 const teacher_image = teacherPoint(teacherKB, '外在形象', {stem: riTg}, riTg+riWx);
 const teacher_youshi = teacherPoint(teacherKB, '優勢', {stem: riTg}, riTg+riWx);
 const teacher_mangdian = teacherPoint(teacherKB, '盲點', {stem: riTg}, riTg+riWx);
+const curDyBalanceKey = balanceTenGodKey(strongLabel, curDyShen);
+const lyBalanceKey = balanceTenGodKey(strongLabel, lyStar);
+const curDyFamily = tenGodFamily(curDyShen);
+const lyFamily = tenGodFamily(lyStar);
+const caiFamilyKey = client.gender === '男' ? '財星' : '官殺';
+const dayunInsights = qSmartMany(kbNew, [
+  {subItems:'大運對各面向影響', query_keys:[{ten_god:curDyBalanceKey, strength:strongLabel},{scope:'general'}], limit:2},
+  {subItems:'大運十神', query_keys:[{ten_god:curDyShen},{ten_god:curDyFamily}], limit:1},
+  {subItems:'現在走什麼大運', query_keys:[{variant:'命主輸出規則（延伸推算）'},{scope:'general'}], limit:1},
+], 4);
+const liunianInsights = qSmartMany(kbNew, [
+  {subItems:['9-1 基本流年｜今年天干地支','今年天干地支'], query_keys:{stem:lyTg, year:CURRENT_YEAR}, limit:1},
+  {subItems:['9-1 基本流年｜流年十神','流年十神'], query_keys:{stem:lyTg, year:CURRENT_YEAR}, limit:1},
+  {subItems:['對各面向的影響','流年剋洩影響'], query_keys:[{ten_god:lyBalanceKey, strength:strongLabel},{ten_god:lyFamily},{scope:'general'}], limit:2},
+], 4);
+const wealthInsights = qSmartMany(kbNew, [
+  {subItems:['12-1 基本財運｜天生財運模式','天生財運模式'], query_keys:[{ten_god:'財星', strength:strongLabel},{ten_god:'財星'}], limit:1},
+  {subItems:['12-1 基本財運｜今年財運走勢','今年財運走勢'], query_keys:[{ten_god:lyBalanceKey, strength:strongLabel},{ten_god:'財星', strength:strongLabel},{scope:'general'}], limit:1},
+  {subItems:['12-1 基本財運｜得財方式','得財方式'], query_keys:[{ten_god:'財星'},{element:caiStar},{scope:'general'}], limit:1},
+  {subItems:['12-1 基本財運｜漏財原因分析','漏財原因分析'], query_keys:[{ten_god:'比劫', strength:strongLabel},{strength:strongLabel},{scope:'general'}], limit:1},
+  {subItems:['12-1 基本財運｜破財防範建議','破財防範建議'], query_keys:[{ten_god:'比劫', strength:strongLabel},{scope:'general'}], limit:1},
+], 5);
+const careerInsights = qSmartMany(kbNew, [
+  {subItems:['13-1 基本事業｜事業天賦','事業天賦'], query_keys:[{ten_god:curDyShen},{ten_god:curDyFamily},{scope:'general'}], limit:1},
+  {subItems:['13-1 基本事業｜今年事業走勢','今年事業走勢'], query_keys:[{ten_god:lyStar},{ten_god:lyFamily},{ten_god:lyBalanceKey, strength:strongLabel}], limit:1},
+  {subItems:['13-1 基本事業｜職場人際策略','職場人際策略'], query_keys:[{ten_god:curDyShen},{ten_god:curDyFamily},{scope:'general'}], limit:1},
+  {subItems:['13-2 行業方向細分｜身心靈／宗教行業','13-2 行業方向細分｜線上事業','13-2 行業方向細分｜副業／斜槓'], query_keys:[{stem:riTg, element:riWx, ten_god:curDyShen},{ten_god:curDyShen},{ten_god:curDyFamily}], limit:2},
+], 5);
+const loveInsights = qSmartMany(kbNew, [
+  {subItems:['14-1 感情基礎｜夫妻宮判斷（日支）','夫妻宮判斷（日支)','夫妻宮判斷（日支）','日柱（夫妻宮）'], query_keys:[{branch:riDz},{variant:'夫妻宮位置'},{variant:'日柱（花）'}], limit:1},
+  {subItems:['14-1 感情基礎｜夫妻星強弱','夫妻星強弱'], query_keys:[{ten_god:caiFamilyKey, strength:strongLabel}], limit:1},
+  {subItems:['14-1 感情基礎｜感情模式','感情模式'], query_keys:[{ten_god:lyStar},{ten_god:lyFamily},{scope:'general'}], limit:1},
+  {subItems:['14-2 交往階段｜感情相處策略','感情相處策略'], query_keys:[{ten_god:lyStar},{ten_god:lyFamily},{scope:'general'}], limit:1},
+  {subItems:['14-2 交往階段｜桃花運強弱','桃花運強弱'], query_keys:[{ten_god:caiFamilyKey},{scope:'general'}], limit:1},
+], 5);
+const healthInsights = qSmartMany(kbNew, [
+  {subItems:['五行體質', riWx+' → '+(WX_ORGAN[riWx]||'').replace('、','/'),'先天弱項臟腑'], query_keys:[{variant:riWx},{element:riWx},{scope:'general'}], limit:2},
+  {subItems:['健康預防建議','健康補運方法'], query_keys:[{variant:riWx},{element:riWx},{scope:'general'}], limit:2},
+  {subItems:['健康高風險時期','家人健康與家庭風險'], query_keys:[{ten_god:lyFamily},{element:riWx},{scope:'general'}], limit:1},
+], 5);
+const fengshuiInsights = qSmartMany(kbNew, [
+  {subItems:['今年流年風水（2026丙午年）','住宅風水（各空間）'], query_keys:[{year:CURRENT_YEAR, stem:lyTg},{variant:riWx},{scope:'general'}], limit:2},
+  {subItems:['喜用方位','喜用顏色','財位佈局','健康位佈局','事業位佈局'], query_keys:[{variant:riWx},{element:riWx},{strength:strongLabel},{scope:'general'}], limit:4},
+], 6);
 
 // ── 個人化卡片 ──
 function personalCard({icon,title,id,personalSummary,details,tags}){
@@ -1644,6 +1770,7 @@ const sec5Html = personalCard({
     '這段時間大約落在 '+curDyAge+' 到 '+curDyEnd+' 歲，會比較明顯地把【'+curDyShen+'】的課題帶到你生活裡。',
     '天干是【'+curDyTg+'】，地支是【'+curDyDz+'】；一個看外在事件，一個看內在累積，兩邊要一起看。',
     getDayunCareerNote(curDyShen)+'。你可以把它當成這幾年做選擇時的提醒。',
+    ...dayunInsights,
   ].filter(Boolean),
   tags:['大運'+curDyGz, curDyShen, '五行'+curDyWx]
 });
@@ -1657,6 +1784,7 @@ const sec6Html = personalCard({
     '今年的五行主調是【'+lyWx+'】，和你的日主【'+riWx+'】之間呈現「'+lyRelation+'」。',
     '大運【'+curDyGz+'】遇上流年【'+lyGz+'】：'+getDayunLiunianNote(curDyWx, lyWx)+'。',
     getLiunianCareerNote(lyStar)+'，所以今年很適合用這個方向來安排重點。',
+    ...liunianInsights,
   ].filter(Boolean),
   tags:['流年'+lyGz, lyStar, lyYear+'年']
 });
@@ -1668,6 +1796,7 @@ const sec7Html = personalCard({
   details:[
     isStrong?'你屬於身強格局，遇到財星時比較能主動把握資源與機會。':'你屬於身弱格局，財星出現時要記得量力而為，先穩住節奏再擴張。',
     lyYear+'年的財星狀態可以這樣看：'+(lyWx===caiStar?'流年逢財，機會較多。':lyWx===riWx?'流年比劫，財務上要注意競爭、分帳或衝動花費。':getRelation(riWx,lyWx)+'。'),
+    ...wealthInsights,
     new_xiyong ? '想讓財運更順，可以多靠近這類喜用神能量：'+new_xiyong : '',
     new_buyun  ? '日常補運可以從這裡開始：'+new_buyun : '',
   ].filter(Boolean),
@@ -1681,6 +1810,7 @@ const sec8Html = personalCard({
   details:[
     getDayunCareerNote(curDyShen)+'，所以這段時間的職涯選擇，可以多觀察自己是不是正在累積更長線的能力。',
     lyYear+'年流年是【'+lyStar+'】：'+getLiunianCareerNote(lyStar)+'。',
+    ...careerInsights,
     '遇到壓力時，不一定要急著硬碰硬；先分清楚哪些是責任，哪些只是別人的期待，會更穩。',
   ].filter(Boolean),
   tags:['官殺'+guanStar, '大運'+curDyShen, '流年'+lyStar]
@@ -1693,6 +1823,7 @@ const sec9Html = personalCard({
   details:[
     '你的日支是【'+riDz+'】，也就是婚姻宮；它透露的是你在親密關係裡容易期待什麼、在意什麼。'+getRizhiMarriageNote(riDz)+'。',
     lyYear+'年的感情氛圍落在【'+lyStar+'】：'+getLiunianLoveNote(lyStar)+'。',
+    ...loveInsights,
     '這段時間感情上最重要的不是猜對方，而是把自己的界線和需要說清楚。',
   ].filter(Boolean),
   tags:['配偶星'+peiouStar, '日支'+riDz, '流年'+lyStar]
@@ -1706,6 +1837,7 @@ const sec10Html = personalCard({
     '主要保養方向可以先放在【'+(WX_ORGAN[riWx]||'—')+'】。',
     '命盤裡相對需要補足的地方，也可以留意【'+(WX_ORGAN[weakWx]||'—')+'】。',
     lyYear+'年流年【'+lyGz+'】五行屬【'+lyWx+'】，'+getHealthNote(lyWx,riWx)+'。',
+    ...healthInsights,
   ].filter(Boolean),
   tags:['注意'+(WX_ORGAN[riWx]?.split('、')[0]||''), strongLabel, '流年'+lyGz]
 });
@@ -1746,6 +1878,7 @@ const sec12Html = `
   <div class="kb-card-title">🏠 ${client.name} 的專屬風水佈局建議</div>
   <div class="kb-content">
     <p style="font-weight:600;color:${wxColor};">你是【${riTg}${riWx}】命主，${strongLabel}格局</p>
+    ${fengshuiInsights.map(text => `<p style="margin-top:8px;">${text}</p>`).join('')}
     ${new_wuxing ? `<p style="margin-top:8px;">🌿 <strong>五行補強：</strong>${new_wuxing}</p>` : ''}
     ${new_kaiyun ? `<p style="margin-top:4px;">🏮 <strong>開運物：</strong>${new_kaiyun}</p>`   : ''}
     ${new_buyun  ? `<p style="margin-top:4px;">✨ <strong>補運方法：</strong>${new_buyun}</p>`  : ''}
