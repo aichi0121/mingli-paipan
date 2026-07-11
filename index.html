@@ -1757,6 +1757,7 @@ function teacherRelevantPoints(view, query_key = {}, maxPoints = 3){
   if(values.length){
     const matched = points.filter(point => values.some(v => point.includes(v)));
     if(matched.length) points = matched;
+    else return [];
   }
   const seen = new Set();
   return points.filter(point => {
@@ -1975,8 +1976,11 @@ const sec1Html = personalCard({
     new_xiangz ? '更深一層來說，'+new_xiangz : '',
     teacherCombinedBlock(teacherKB, [
       {question:'內在性格', query_key:{stem:riTg}, maxPoints:2},
+      {question:'外在形象', query_key:{stem:riTg}, maxPoints:1},
+      {question:'優勢', query_key:{stem:riTg}, maxPoints:1},
+      {question:'盲點', query_key:{stem:riTg}, maxPoints:1},
       {question:'五行人格特質', query_key:{variant:riWx}, maxPoints:1}
-    ], {title:'老師觀點依據（精選）', limit:2, maxPoints:3}),
+    ], {title:'老師觀點依據（日主精選）', limit:3, maxPoints:4}),
   ].filter(Boolean),
   tags:['日主'+riTg, riWx, yinYang, strongLabel]
 });
