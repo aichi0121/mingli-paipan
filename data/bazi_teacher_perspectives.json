@@ -10,6 +10,10 @@
       "name": "徐玉蘭老師",
       "domain": "八字"
     },
+    "XU_FS": {
+      "name": "徐玉蘭老師",
+      "domain": "風水"
+    },
     "TW_FS": {
       "name": "湯鎮瑋老師",
       "domain": "風水"
@@ -23,7 +27,7 @@
       "domain": "風水"
     }
   },
-  "question_count": 174,
+  "question_count": 175,
   "questions": [
     {
       "id": "Q-01-001",
@@ -22650,6 +22654,163 @@
         "inferred_sources": [],
         "missing_sources": [
           "TW_BZ",
+          "TW_FS",
+          "B_FS",
+          "YS_FS"
+        ]
+      }
+    },
+    {
+      "id": "Q-07-012",
+      "part": "第七部分",
+      "section_no": "⑯",
+      "section": "風水建議（個人化）",
+      "group": "",
+      "question": "水缸佈置說明",
+      "query_keys": [
+        {
+          "id": "07-12-000",
+          "query_key": {
+            "scope": "general"
+          }
+        },
+        {
+          "id": "07-12-001",
+          "query_key": {
+            "element": "金"
+          }
+        },
+        {
+          "id": "07-12-002",
+          "query_key": {
+            "element": "木"
+          }
+        },
+        {
+          "id": "07-12-003",
+          "query_key": {
+            "element": "水"
+          }
+        },
+        {
+          "id": "07-12-004",
+          "query_key": {
+            "element": "火"
+          }
+        },
+        {
+          "id": "07-12-005",
+          "query_key": {
+            "element": "土"
+          }
+        }
+      ],
+      "is_template": false,
+      "teacher_interpretations": {
+        "XU_FS": {
+          "teacher": "徐玉蘭老師",
+          "domain": "風水",
+          "source_code": "XU_FS",
+          "interpretation_type": "direct_source_synthesis",
+          "interpretation": "徐玉蘭老師的五行命人軟裝添運對照表中，財位可依命主細節設置招財水缸。水缸尺寸以長方形60x30x30或圓形直徑40公分為例；設置細節是不加蓋、不需要照明，水量放置8~9分滿。水需要保持清新與流動，可加裝馬達、濾水器，或時常換水；使用馬達的水缸一週換一次水即可，空間較小可用裝水玻璃杯代替，但需每天換水。材質與顏色須依宮位選擇對應添運色彩：金命適合陶瓷或玻璃製、綠色或藍綠色，可放水草；木命適合陶瓷製、紅色、橙色、黃色或土黃色，可放玉石石頭；水命適合陶瓷或玻璃製、綠色，可放水草；火命適合陶瓷、玻璃或金屬製、白色或灰色，可放銅幣或錢幣；土命適合陶瓷或玻璃製、藍色、黑色、白色或灰色，可放銅幣或錢幣。紫白飛星學習筆記中，一白貪狼與六白武曲方位可見水缸相關擺件；七赤破軍則屬化洩情境，可用靜音活水水缸或風水輪，不宜把水缸當成所有方位通用的招財物。",
+          "key_points": [
+            "財位可依命主細節設置招財水缸，需先辨識家中朝向並標示方位於空白處，再對應家中區域。",
+            "尺寸例：長方形60x30x30，圓形直徑40公分。",
+            "設置細節：不加蓋、不需要照明，水量放置8~9分滿。",
+            "水流動性：加裝馬達、濾水器，或時常換水，保持水清新和流動。",
+            "使用馬達的水缸一週換一次水即可；空間較小可用裝水玻璃杯代替，但需每天換水。",
+            "金命：陶瓷或玻璃製，綠色、藍綠色最佳，可放水草。",
+            "木命：陶瓷製，紅色、橙色、黃色、土黃色最佳，可放玉石石頭。",
+            "水命：陶瓷或玻璃製，綠色最佳，可放水草。",
+            "火命：陶瓷、玻璃、金屬製，白色、灰色最佳，可放銅幣或錢幣。",
+            "土命：陶瓷、玻璃製，藍色、黑色、白色、灰色最佳，可放銅幣或錢幣。",
+            "紫白飛星中，一白貪狼與六白武曲可見水缸擺件；七赤破軍為化洩用活水，不等同一般財位催旺。"
+          ],
+          "direct_evidence": [
+            "水缸佈置說明：財位水缸佈置細節。",
+            "尺寸大小：長方形60x30x30、圓形直徑40公分。",
+            "設置細節：不要加蓋、不需要照明，水量放置8~9分滿。",
+            "水流動性：需要加裝馬達、濾水器，或時常換水，保持水的清新和流動，才能帶動運勢。",
+            "注意事項：上述材質和顏色以財位為例，需依照宮位選擇對應添運色彩、設置細節。",
+            "使用馬達的水缸一週換一次水即可，若空間較小可用裝水玻璃杯代替，但要記得每天換水。"
+          ],
+          "inference_note": ""
+        },
+        "TW_BZ": {
+          "teacher": "湯鎮瑋老師",
+          "domain": "八字",
+          "source_code": "TW_BZ",
+          "interpretation_type": "no_relevant_data",
+          "interpretation": "此老師資料中未找到可直接或合理延伸至本問題的內容。",
+          "key_points": [],
+          "direct_evidence": [],
+          "inference_note": ""
+        },
+        "XU_BZ": {
+          "teacher": "徐玉蘭老師",
+          "domain": "八字",
+          "source_code": "XU_BZ",
+          "interpretation_type": "no_relevant_data",
+          "interpretation": "此老師資料中未找到可直接或合理延伸至本問題的內容。",
+          "key_points": [],
+          "direct_evidence": [],
+          "inference_note": ""
+        },
+        "TW_FS": {
+          "teacher": "湯鎮瑋老師",
+          "domain": "風水",
+          "source_code": "TW_FS",
+          "interpretation_type": "no_relevant_data",
+          "interpretation": "此老師資料中未找到可直接或合理延伸至本問題的內容。",
+          "key_points": [],
+          "direct_evidence": [],
+          "inference_note": ""
+        },
+        "B_FS": {
+          "teacher": "課程B",
+          "domain": "風水",
+          "source_code": "B_FS",
+          "interpretation_type": "no_relevant_data",
+          "interpretation": "此老師資料中未找到可直接或合理延伸至本問題的內容。",
+          "key_points": [],
+          "direct_evidence": [],
+          "inference_note": ""
+        },
+        "YS_FS": {
+          "teacher": "尹森老師",
+          "domain": "風水",
+          "source_code": "YS_FS",
+          "interpretation_type": "no_relevant_data",
+          "interpretation": "此老師資料中未找到可直接或合理延伸至本問題的內容。",
+          "key_points": [],
+          "direct_evidence": [],
+          "inference_note": ""
+        }
+      },
+      "consensus_conclusion": {
+        "status": "single_source",
+        "shared_theories": [],
+        "conclusion": "徐玉蘭老師提供了水缸佈置的直接風水資料，因此可作為水缸擺放依據；其他老師資料未在本題形成對照共識。",
+        "supporting_sources": [
+          "XU_FS"
+        ],
+        "formation_note": "僅一個相關來源。"
+      },
+      "supplemental_analysis": {
+        "status": "none",
+        "attribution": "",
+        "items": [],
+        "basis_sources": [],
+        "disclaimer": ""
+      },
+      "source_coverage": {
+        "direct_sources": [
+          "XU_FS"
+        ],
+        "inferred_sources": [],
+        "missing_sources": [
+          "TW_BZ",
+          "XU_BZ",
           "TW_FS",
           "B_FS",
           "YS_FS"
