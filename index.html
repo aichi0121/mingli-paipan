@@ -1927,6 +1927,40 @@ const fengshuiInsights = qSmartMany(kbNew, [
   {subItems:['今年流年風水（2026丙午年）','住宅風水（各空間）'], query_keys:[{year:CURRENT_YEAR, stem:lyTg},{variant:riWx},{scope:'general'}], limit:2},
   {subItems:['喜用方位','喜用顏色','財位佈局','健康位佈局','事業位佈局'], query_keys:[{variant:riWx},{element:riWx},{strength:strongLabel},{scope:'general'}], limit:4},
 ], 6);
+const XU_FS_LAYOUT = {
+  金:{
+    男:{wealth:'西南方', wenchang:'西北方', peach:'正北方', health:'東北方'},
+    女:{wealth:'正西方', wenchang:'西北方', peach:'東南方', health:'正南方'}
+  },
+  木:{
+    男:{wealth:'正南方', wenchang:'正東方', peach:'西南方', health:'正北方'},
+    女:{wealth:'東南方', wenchang:'正東方', peach:'西北方', health:'西南方'}
+  },
+  水:{
+    男:{wealth:'正北方', wenchang:'東北方', peach:'正東方', health:'正西方'},
+    女:{wealth:'西北方', wenchang:'東北方', peach:'正南方', health:'東南方'}
+  },
+  火:{
+    男:{wealth:'正東方', wenchang:'正南方', peach:'正西方', health:'正東方'},
+    女:{wealth:'東北方', wenchang:'正南方', peach:'東北方', health:'西北方'}
+  },
+  土:{
+    男:{wealth:'東北方', wenchang:'西南方', peach:'東北方', health:'東南方'},
+    女:{wealth:'西南方', wenchang:'西南方', peach:'西南方', health:'正北方'}
+  }
+};
+const xuFs = XU_FS_LAYOUT[riWx]?.[client.gender === '男' ? '男' : '女'] || {};
+const XU_FS_PDF_EXAMPLES = {
+  土:{女:{career:'東北方、正東方、東南方、正北方（PDF 練習表範例：土命女事業貴人位）'}}
+};
+const xuFsExample = XU_FS_PDF_EXAMPLES[riWx]?.[client.gender === '男' ? '男' : '女'] || {};
+const XU_WATER_TANK = {
+  金:'陶瓷或玻璃製，顏色以綠色、藍綠色較合適；水缸裡可以放水草。',
+  木:'陶瓷製，顏色可用紅色、橙色、黃色或土黃色；水缸裡可以放玉石石頭。',
+  水:'陶瓷或玻璃製，顏色以綠色較合適；水缸裡可以放水草。',
+  火:'陶瓷、玻璃或金屬製，顏色以白色、灰色較合適；水缸裡可以放銅幣或錢幣。',
+  土:'陶瓷或玻璃製，顏色以藍色、黑色、白色或灰色較合適；水缸裡可以放銅幣或錢幣。'
+};
 const waterTankInsights = qSmartMany(kbNew, [
   {subItems:'水缸佈置說明', query_keys:{element:riWx}, limit:1},
   {subItems:'水缸佈置說明', query_keys:{scope:'general'}, limit:1},
@@ -1934,8 +1968,17 @@ const waterTankInsights = qSmartMany(kbNew, [
 ], 3);
 const waterPlacementHtml = `
   <div class="teacher-view">
-    <div class="teacher-view-title">水缸／流水盆擺放提醒（徐玉蘭老師風水課整理）</div>
-    <p><strong>${riWx}命主水缸：</strong>${waterTankInsights[0] || '可依命主五行、財位與宮位細節判斷是否設置招財水缸。'}</p>
+    <div class="teacher-view-title">徐玉蘭老師五行命主風水方位</div>
+    <p><strong>${riWx}命${client.gender}的招財水缸：</strong>優先看財位，建議方位是【${xuFs.wealth || '需查表'}】；可放在客廳或個人空間中對應此方位的位置。</p>
+    <ul class="action-list">
+      <li>財位／招財水缸：${xuFs.wealth || '需查表'}</li>
+      ${xuFsExample.career ? `<li>事業／貴人位：${xuFsExample.career}</li>` : ''}
+      <li>文昌／學習位：${xuFs.wenchang || '需查表'}</li>
+      <li>桃花／人緣位：${xuFs.peach || '需查表'}</li>
+      <li>健康／保養位：${xuFs.health || '需查表'}</li>
+    </ul>
+    <p><strong>使用邏輯：</strong>水缸以財位為主；文昌、桃花、健康與事業位是其他添運擺件的方位，不代表每一個位置都要放水缸。</p>
+    <p><strong>水缸材質與顏色：</strong>${XU_WATER_TANK[riWx] || waterTankInsights[0] || '需依五行命主選材質與添運色彩。'}</p>
     <p><strong>共通設置：</strong>${waterTankInsights[1] || '水缸可抓長方形60x30x30或圓形直徑40公分；不要加蓋、不需要照明，水量放8~9分滿，水要保持清新與流動。'}</p>
     <p><strong>${CURRENT_YEAR}流年提醒：</strong>${waterTankInsights[2] || '一白、六白方位可評估水缸相關擺件；二黑、五黃等凶位仍以安靜化煞為主，避免未判斷就放大型動水。'}</p>
   </div>
