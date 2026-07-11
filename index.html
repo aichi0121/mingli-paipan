@@ -1578,6 +1578,13 @@ function analyzeCombinations(){
   const stemCombos = [
     ['甲','己','土'],['乙','庚','金'],['丙','辛','水'],['丁','壬','木'],['戊','癸','火']
   ];
+  const stemComboNotes = {
+    '甲己':'中正之合：講信用、重承諾，但也容易固執或想當好好先生。',
+    '乙庚':'仁義之合：重義氣、有原則，說話和行動比較直接。',
+    '丙辛':'威制之合：個性強、重氣勢，也容易有好勝心。',
+    '丁壬':'淫暱之合：感受細膩、重品味，也容易牽動桃花與情感需求。',
+    '戊癸':'無情之合：情緒反應容易悶在心裡，外表可能顯得冷淡；但內在其實重情趣、重感受。'
+  };
   const branchSix = [
     ['子','丑','土'],['寅','亥','木'],['卯','戌','火'],['辰','酉','金'],['巳','申','水'],['午','未','土']
   ];
@@ -1590,7 +1597,8 @@ function analyzeCombinations(){
     const pb = stems.find(p => p.tg === b);
     if(pa && pb){
       const support = yueDzWx === wx || riWx === wx || stems.some(p => WX_MAP[p.tg] === wx);
-      rows.push(`天干合：${pa.label}【${a}】與${pb.label}【${b}】有「${a}${b}合${wx}」。這代表${pa.role}和${pb.role}容易互相牽動；以目前盤面看，${support ? '有五行支援，可列為重要互動訊號。' : '化氣條件不足，先以「有合象、有牽動」解讀，不直接斷成化'+wx+'。'}`);
+      const comboKey = a + b;
+      rows.push(`天干合：${pa.label}【${a}】與${pb.label}【${b}】有「${a}${b}合${wx}」。${stemComboNotes[comboKey] || ''}這代表${pa.role}和${pb.role}容易互相牽動；以目前盤面看，${support ? '有五行支援，可列為重要互動訊號。' : '化氣條件不足，先以「有合象、有牽動」解讀，不直接斷成化'+wx+'。'}`);
     }
   }
   for(const [a,b,wx] of branchSix){
@@ -1753,7 +1761,8 @@ function teacherRelevantPoints(view, query_key = {}, maxPoints = 3){
   let points = rawPoints
     .map(point => compactTeacherText(point, 120))
     .filter(Boolean)
-    .filter(point => !point.includes('{{'));
+    .filter(point => !point.includes('{{'))
+    .filter(point => !point.includes('天干五合'));
   if(values.length){
     const matched = points.filter(point => values.some(v => point.includes(v)));
     if(matched.length) points = matched;
