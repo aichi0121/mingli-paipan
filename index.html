@@ -453,6 +453,13 @@ margin-top:6px;
 .kb-content ul li{
 margin-bottom:4px;
 }
+.kb-talk-details{
+margin-top:12px;
+}
+.kb-talk-details p{
+margin:8px 0 0;
+line-height:1.9;
+}
 .kb-tag{
 display:inline-block;
 font-size:0.68rem;
@@ -1418,7 +1425,9 @@ async function renderAnalysisAsync(client, bazi){
 document.getElementById('tab-full').innerHTML='<div class="kb-loading">🔮 正在為你分析命盤⋯</div>';
 document.getElementById('tab-quick').innerHTML='<div class="kb-loading">🔮 正在為你分析命盤⋯</div>';
 
-const kbNew = await fetchKB('bazi_knowledge_base_complete.json');
+const kbNew = await fetchKB('bazi_knowledge_colloquial.json')
+  || await fetchKB('bazi_knowledge_base_complete.json');
+const teacherKB = await fetchKB('bazi_teacher_perspectives.json');
 
 if(!kbNew){
   const err='<div class="kb-error">❌ 知識庫載入失敗，請重新整理頁面</div>';
@@ -1491,6 +1500,32 @@ function qContent(kb, sub_item, query_key, fallback){
   return (entry && entry.content) ? entry.content : (fallback||'');
 }
 
+function cleanTeacherPoint(text){
+  if(!text) return '';
+  return text
+    .replace(/^[^：:]+[：:]/,'')
+    .replace(/^你的?/, '')
+    .trim();
+}
+
+function teacherPoint(kb, question, query_key, needle){
+  if(!kb || !Array.isArray(kb.questions)) return '';
+  const q = kb.questions.find(item =>
+    item.question === question &&
+    Array.isArray(item.query_keys) &&
+    item.query_keys.some(key =>
+      Object.entries(query_key).every(([k,v]) => key.query_key && key.query_key[k] === v)
+    )
+  );
+  if(!q || !q.teacher_interpretations) return '';
+  for(const view of Object.values(q.teacher_interpretations)){
+    const points = view.key_points || [];
+    const matched = points.find(point => !needle || point.includes(needle));
+    if(matched) return cleanTeacherPoint(matched);
+  }
+  return '';
+}
+
 // ── 從新知識庫取資料 ──
 const new_gexing   = qContent(kbNew, '內在性格',  {stem: riTg});
 const new_image    = qContent(kbNew, '外在形象',  {stem: riTg});
@@ -1504,21 +1539,22 @@ const new_jishen   = qContent(kbNew, '忌神',      {strength: strongLabel});
 const new_buyun    = qContent(kbNew, '五行補強',  {element: riWx});
 const new_wuxing   = qContent(kbNew, '五行補強',  {element: riWx});
 const new_kaiyun   = qContent(kbNew, '開運物',    {element: riWx});
+const teacher_inner = teacherPoint(teacherKB, '內在性格', {stem: riTg}, riTg+riWx);
+const teacher_image = teacherPoint(teacherKB, '外在形象', {stem: riTg}, riTg+riWx);
+const teacher_youshi = teacherPoint(teacherKB, '優勢', {stem: riTg}, riTg+riWx);
+const teacher_mangdian = teacherPoint(teacherKB, '盲點', {stem: riTg}, riTg+riWx);
 
 // ── 個人化卡片 ──
 function personalCard({icon,title,id,personalSummary,details,tags}){
-  const tagsHtml=(tags||[]).map(t=>`<span class="kb-tag">${t}</span>`).join('');
-  const detailsHtml=(details||[]).filter(Boolean).map(d=>`<li>${d}</li>`).join('');
+  const detailsHtml=(details||[]).filter(Boolean).map(d=>`<p>${d}</p>`).join('');
   return `
     <div class="kb-card">
       <div class="kb-card-title">
         ${icon||''} ${title}
-        ${id?`<span class="kb-id">${id}</span>`:''}
       </div>
       <div class="kb-content">
         <p style="font-size:0.95rem;line-height:1.9;color:#4A3728;font-weight:600;">${personalSummary||''}</p>
-        ${detailsHtml?`<ul style="margin-top:10px;">${detailsHtml}</ul>`:''}
-        ${tagsHtml?`<div style="margin-top:10px;">${tagsHtml}</div>`:''}
+        ${detailsHtml?`<div class="kb-talk-details">${detailsHtml}</div>`:''}
       </div>
     </div>
   `;
@@ -1537,16 +1573,16 @@ function section(icon, title, bodyHtml, open=false){
 // ① 日主特質
 const sec1Html = personalCard({
   icon:'🌟', title:'日主【'+riTg+'】特質分析', id:'BAZI_001',
-  personalSummary:client.name+'，你的日主天干為【'+riTg+'】，屬'+yinYang+riWx+'。'+(new_gexing||''),
+  personalSummary:client.name+'，你的日主天干是【'+riTg+'】，屬於'+yinYang+riWx+'。'+(new_gexing||teacher_inner||''),
   details:[
-    '五行屬性：'+riWx+'（'+(new_wxTrait||'')+'）',
-    '陰陽：'+yinYang+riTg+'，'+(isYang?'個性較為主動、外顯、剛直':'個性較為內斂、柔韌、細膩'),
-    '月支：'+yueDz+'（'+yueDzWx+'），命盤格局初判為【'+strongLabel+'】',
-    '主星（月干十神）：'+(yueStar||'—'),
-    new_image    ? '外在形象：'+new_image    : '',
-    new_youshi   ? '優勢：'+new_youshi       : '',
-    new_mangdian ? '盲點：'+new_mangdian     : '',
-    new_xiangz   ? '象徵：'+new_xiangz       : '',
+    new_wxTrait ? '從五行來看，你帶著【'+riWx+'】的底色：'+new_wxTrait : '',
+    '你的陰陽屬性是【'+yinYang+riTg+'】，所以表達方式通常'+(isYang?'比較主動、直接，也比較容易把想法放到檯面上。':'比較內斂、細膩，很多感受會先在心裡消化。'),
+    '月支落在【'+yueDz+'】，五行屬【'+yueDzWx+'】，所以這張命盤先看作【'+strongLabel+'】來解讀。',
+    yueStar ? '月干十神是【'+yueStar+'】，這會影響你面對家人、資源與現實壓力時的反應方式。' : '',
+    new_image || teacher_image ? '別人第一眼感受到的你：'+(new_image||teacher_image) : '',
+    new_youshi || teacher_youshi ? '你值得好好使用的優勢：'+(new_youshi||teacher_youshi) : '',
+    new_mangdian || teacher_mangdian ? '要稍微留意的地方：'+(new_mangdian||teacher_mangdian) : '',
+    new_xiangz ? '更深一層來說，'+new_xiangz : '',
   ].filter(Boolean),
   tags:['日主'+riTg, riWx, yinYang, strongLabel]
 });
@@ -1554,7 +1590,7 @@ const sec1Html = personalCard({
 // ② 五行人格特質
 const sec2Html = personalCard({
   icon:'🌊', title:'五行【'+riWx+'】人格特質', id:'BAZI_003',
-  personalSummary:client.name+'，你的日主五行屬【'+riWx+'】。'+(new_wxTrait||''),
+  personalSummary:client.name+'，你的日主五行屬【'+riWx+'】。'+(new_wxTrait||'這代表你看世界的方式，會帶著這個五行的節奏。'),
   details:[],
   tags:[riWx+'行','人格特質']
 });
@@ -1569,12 +1605,12 @@ const GONG_DATA = [
 ];
 const sec3Html = personalCard({
   icon:'🏛', title:'四柱宮位解析', id:'BAZI_012',
-  personalSummary:client.name+'，你的四柱分別代表不同人生宮位，以下是你的個人化宮位解讀：',
+  personalSummary:client.name+'，四柱可以想成四個人生位置：原生家庭、成長環境、自己與伴侶，以及晚年或子女緣。你的盤可以先這樣看：',
   details:GONG_DATA.map(({key,data})=>{
     const tg  = data['天干']?.['天干']||'';
     const dz  = data['地支']?.['地支']||'';
     const shen= toTrad(data['天干']?.['十神']||'');
-    return GONG_NAME[key]+'：'+tg+dz+'，十神【'+(shen||'日主')+'】';
+    return GONG_NAME[key]+'是【'+tg+dz+'】，十神為【'+(shen||'日主')+'】。';
   }),
   tags:['年柱','月柱','日柱','時柱','宮位']
 });
@@ -1587,14 +1623,14 @@ const YONGSHEN = {
 const yongshen = YONGSHEN[strongLabel]?.[riWx]||'需綜合判斷';
 const sec4Html = personalCard({
   icon:'⚖️', title:'命盤格局：你是【'+strongLabel+'】的'+riTg, id:'BAZI_017',
-  personalSummary:client.name+'，你的月支為【'+yueDz+yueDzWx+'】，'+(isStrong
-    ?'與日主'+riWx+'屬'+(yueDzWx===riWx?'同五行':'相生關係')+'，日主得令，判定為【身強】。'
-    :'與日主'+riWx+'無生助關係，日主失令，判定為【身弱】。'),
+  personalSummary:client.name+'，你的月支是【'+yueDz+'】，五行屬【'+yueDzWx+'】。'+(isStrong
+    ?'它對你的日主【'+riWx+'】有支撐，所以這張盤先判定為【身強】。'
+    :'它對你的日主【'+riWx+'】支撐較少，所以這張盤先判定為【身弱】。'),
   details:[
-    '推薦用神五行：'+yongshen,
-    new_strength ? '格局說明：'+new_strength : '',
-    new_xiyong   ? '喜用神：'+new_xiyong     : '',
-    new_jishen   ? '忌神：'+new_jishen       : '',
+    '用神方向可以先抓【'+yongshen+'】，也就是讓命盤能量更平衡的方向。',
+    new_strength ? new_strength : '',
+    new_xiyong   ? '適合多靠近的能量：'+new_xiyong : '',
+    new_jishen   ? '比較需要節制的能量：'+new_jishen : '',
   ].filter(Boolean),
   tags:[strongLabel,'用神：'+yongshen.split('（')[0],'月支'+yueDz]
 });
@@ -1603,12 +1639,11 @@ const sec4Html = personalCard({
 const dyRelation = getRelation(riWx, curDyWx);
 const sec5Html = personalCard({
   icon:'🌀', title:'當前大運【'+curDyGz+'】'+curDyShen+'（'+curDyAge+'～'+curDyEnd+'歲）', id:'BAZI_021',
-  personalSummary:client.name+'，你目前走【'+curDyGz+'】大運（'+curDyShen+'），五行屬'+curDyWx+'。對你的日主【'+riTg+riWx+'】而言，'+dyRelation+'。',
+  personalSummary:client.name+'，你目前走到【'+curDyGz+'】大運，主題是【'+curDyShen+'】。這一步運的五行屬【'+curDyWx+'】，對你的日主【'+riTg+riWx+'】來說，整體是「'+dyRelation+'」。',
   details:[
-    '大運天干：'+curDyTg+'（'+(WX_MAP[curDyTg]||'')+'）── 十神：'+curDyShen,
-    '大運地支：'+curDyDz+'（'+(WX_MAP[curDyDz]||'')+'）',
-    '與日主關係：'+dyRelation,
-    getDayunCareerNote(curDyShen),
+    '這段時間大約落在 '+curDyAge+' 到 '+curDyEnd+' 歲，會比較明顯地把【'+curDyShen+'】的課題帶到你生活裡。',
+    '天干是【'+curDyTg+'】，地支是【'+curDyDz+'】；一個看外在事件，一個看內在累積，兩邊要一起看。',
+    getDayunCareerNote(curDyShen)+'。你可以把它當成這幾年做選擇時的提醒。',
   ].filter(Boolean),
   tags:['大運'+curDyGz, curDyShen, '五行'+curDyWx]
 });
@@ -1617,13 +1652,11 @@ const sec5Html = personalCard({
 const lyRelation = getRelation(riWx, lyWx);
 const sec6Html = personalCard({
   icon:'📅', title:lyYear+'年流年【'+lyGz+'】對你的影響', id:'BAZI_024',
-  personalSummary:lyYear+'年（'+lyGz+'年），流年天干【'+lyTg+lyWx+'】，對你【'+riTg+riWx+'】而言是【'+lyStar+'】，'+lyRelation+'。',
+  personalSummary:lyYear+'年是【'+lyGz+'】年，流年天干【'+lyTg+'】對你來說是【'+lyStar+'】。這一年不是只看好壞，而是看它把哪一種能量推到你面前。',
   details:[
-    '流年干支：'+lyGz+'（'+lyTg+'屬'+lyWx+'、'+lyDz+'屬'+(WX_MAP[lyDz]||'')+'）',
-    '對日主十神：'+lyStar,
-    '五行關係：'+lyRelation,
-    '大運＋流年：'+curDyGz+' × '+lyGz+' ── '+getDayunLiunianNote(curDyWx, lyWx),
-    getLiunianCareerNote(lyStar),
+    '今年的五行主調是【'+lyWx+'】，和你的日主【'+riWx+'】之間呈現「'+lyRelation+'」。',
+    '大運【'+curDyGz+'】遇上流年【'+lyGz+'】：'+getDayunLiunianNote(curDyWx, lyWx)+'。',
+    getLiunianCareerNote(lyStar)+'，所以今年很適合用這個方向來安排重點。',
   ].filter(Boolean),
   tags:['流年'+lyGz, lyStar, lyYear+'年']
 });
@@ -1631,12 +1664,12 @@ const sec6Html = personalCard({
 // ⑦ 財運
 const sec7Html = personalCard({
   icon:'💰', title:'你的財運分析', id:'BAZI_029',
-  personalSummary:client.name+'，你的日主【'+riTg+riWx+'】，財星為【'+caiStar+'】。'+lyYear+'年流年【'+lyGz+'】，'+(lyWx===caiStar?'流年五行正是你的財星，財運有望！':'流年五行'+lyWx+'對財星'+caiStar+'的影響：'+getRelation(caiStar,lyWx)+'。'),
+  personalSummary:client.name+'，以你的日主【'+riTg+riWx+'】來看，財星是【'+caiStar+'】。'+lyYear+'年流年【'+lyGz+'】，'+(lyWx===caiStar?'剛好碰到你的財星，賺錢機會會比較容易被看見。':'財運不只看有沒有錢進來，也要看你能不能穩穩接住。'),
   details:[
-    '你的財星五行：'+caiStar+'（'+(isStrong?'身強者以財星為用，宜積極把握':'身弱者財星重則耗身，需謹慎評估')+'）',
-    lyYear+'年財星狀態：'+(lyWx===caiStar?'✅ 流年逢財，機會較多':lyWx===riWx?'⚠️ 流年比劫，財運需防競爭':getRelation(riWx,lyWx)),
-    new_xiyong ? '喜用神提示：'+new_xiyong : '',
-    new_buyun  ? '補運方法：'+new_buyun    : '',
+    isStrong?'你屬於身強格局，遇到財星時比較能主動把握資源與機會。':'你屬於身弱格局，財星出現時要記得量力而為，先穩住節奏再擴張。',
+    lyYear+'年的財星狀態可以這樣看：'+(lyWx===caiStar?'流年逢財，機會較多。':lyWx===riWx?'流年比劫，財務上要注意競爭、分帳或衝動花費。':getRelation(riWx,lyWx)+'。'),
+    new_xiyong ? '想讓財運更順，可以多靠近這類喜用神能量：'+new_xiyong : '',
+    new_buyun  ? '日常補運可以從這裡開始：'+new_buyun : '',
   ].filter(Boolean),
   tags:['財星'+caiStar, strongLabel, '流年'+lyGz]
 });
@@ -1644,11 +1677,11 @@ const sec7Html = personalCard({
 // ⑧ 事業
 const sec8Html = personalCard({
   icon:'💼', title:'你的事業職涯分析', id:'BAZI_032',
-  personalSummary:client.name+'，你的官殺星（代表事業壓力與機會）為【'+guanStar+'】。目前大運【'+curDyGz+curDyShen+'】，'+getDayunCareerNote(curDyShen),
+  personalSummary:client.name+'，你的官殺星是【'+guanStar+'】，它代表職場裡的責任、規則、主管，也代表你可以被看見的位置。目前大運【'+curDyGz+'】帶著【'+curDyShen+'】的主題。',
   details:[
-    '官殺星五行：'+guanStar+'（代表職場壓力、主管、責任）',
-    '當前大運十神：'+curDyShen,
-    lyYear+'年事業：流年'+lyStar+'，'+getLiunianCareerNote(lyStar),
+    getDayunCareerNote(curDyShen)+'，所以這段時間的職涯選擇，可以多觀察自己是不是正在累積更長線的能力。',
+    lyYear+'年流年是【'+lyStar+'】：'+getLiunianCareerNote(lyStar)+'。',
+    '遇到壓力時，不一定要急著硬碰硬；先分清楚哪些是責任，哪些只是別人的期待，會更穩。',
   ].filter(Boolean),
   tags:['官殺'+guanStar, '大運'+curDyShen, '流年'+lyStar]
 });
@@ -1656,11 +1689,11 @@ const sec8Html = personalCard({
 // ⑨ 感情
 const sec9Html = personalCard({
   icon:'💕', title:'你的感情婚姻分析', id:'BAZI_034',
-  personalSummary:client.name+'（'+client.gender+'），你的配偶星為【'+peiouStar+'】。'+lyYear+'年流年【'+lyGz+'】，'+(lyWx===peiouStar?'✅ 流年逢配偶星，感情機緣較旺！':'流年'+lyWx+'對配偶星'+peiouStar+'：'+getRelation(peiouStar,lyWx)+'。'),
+  personalSummary:client.name+'，以傳統八字來看，你的配偶星是【'+peiouStar+'】。'+lyYear+'年流年【'+lyGz+'】，'+(lyWx===peiouStar?'剛好碰到配偶星，感情機緣會比較容易浮上檯面。':'感情的重點不一定是突然出現大事件，而是你怎麼回應關係裡的靠近與距離。'),
   details:[
-    '配偶星五行：'+peiouStar+'（'+(client.gender==='男'?'男命以財星為妻星':'女命以官殺星為夫星')+'）',
-    '日支【'+riDz+'】：代表婚姻宮，'+getRizhiMarriageNote(riDz),
-    lyYear+'年感情：流年'+lyStar+'，'+getLiunianLoveNote(lyStar),
+    '你的日支是【'+riDz+'】，也就是婚姻宮；它透露的是你在親密關係裡容易期待什麼、在意什麼。'+getRizhiMarriageNote(riDz)+'。',
+    lyYear+'年的感情氛圍落在【'+lyStar+'】：'+getLiunianLoveNote(lyStar)+'。',
+    '這段時間感情上最重要的不是猜對方，而是把自己的界線和需要說清楚。',
   ].filter(Boolean),
   tags:['配偶星'+peiouStar, '日支'+riDz, '流年'+lyStar]
 });
@@ -1668,11 +1701,11 @@ const sec9Html = personalCard({
 // ⑩ 健康
 const sec10Html = personalCard({
   icon:'🏥', title:'你的健康體質分析', id:'BAZI_042',
-  personalSummary:client.name+'，你的日主【'+riTg+riWx+'】，對應臟腑為【'+(WX_ORGAN[riWx]||'')+'】。'+(isStrong?'身強者能量充足，但需注意過旺造成的亢進問題。':'身弱者能量較不足，需特別保養對應臟腑。'),
+  personalSummary:client.name+'，你的日主【'+riTg+riWx+'】對應到身體上，主要會看【'+(WX_ORGAN[riWx]||'')+'】。'+(isStrong?'你的底氣不算弱，但能量太滿時也容易累積成壓力。':'你的能量比較需要被照顧，越忙越要把休息排進生活裡。'),
   details:[
-    '主要注意臟腑：'+(WX_ORGAN[riWx]||'—')+'（日主五行對應）',
-    '次要注意：'+(WX_ORGAN[weakWx]||'—')+'（命盤較弱五行對應）',
-    lyYear+'年健康：流年'+lyGz+'（'+lyWx+'），'+getHealthNote(lyWx,riWx),
+    '主要保養方向可以先放在【'+(WX_ORGAN[riWx]||'—')+'】。',
+    '命盤裡相對需要補足的地方，也可以留意【'+(WX_ORGAN[weakWx]||'—')+'】。',
+    lyYear+'年流年【'+lyGz+'】五行屬【'+lyWx+'】，'+getHealthNote(lyWx,riWx)+'。',
   ].filter(Boolean),
   tags:['注意'+(WX_ORGAN[riWx]?.split('、')[0]||''), strongLabel, '流年'+lyGz]
 });
