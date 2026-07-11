@@ -460,6 +460,32 @@ margin-top:12px;
 margin:8px 0 0;
 line-height:1.9;
 }
+.teacher-view{
+background:#FDF8EF;
+border-left:3px solid #D4B896;
+padding:10px 12px;
+margin-top:10px;
+border-radius:6px;
+}
+.teacher-view-title{
+font-size:0.78rem;
+font-weight:700;
+color:#8B6914;
+margin-bottom:6px;
+}
+.teacher-view p{
+margin:5px 0 0;
+font-size:0.82rem;
+line-height:1.75;
+}
+.action-list{
+margin:8px 0 0;
+padding-left:18px;
+}
+.action-list li{
+margin:3px 0;
+line-height:1.65;
+}
 .kb-tag{
 display:inline-block;
 font-size:0.68rem;
@@ -1509,12 +1535,22 @@ function personalizeContent(text){
   const yongshenText = yongshenMap[strongLabel]?.[riWx] || '喜用神';
   return text
     .replaceAll('{{日主}}', riTg+riWx)
+    .replaceAll('{{日主五行}}', riWx)
     .replaceAll('{{身強／身弱／從強格／從弱格}}', strongLabel)
     .replaceAll('{{身強弱結果}}', strongLabel)
     .replaceAll('{{大運天干}}{{大運地支}}', curDyGz)
     .replaceAll('{{起運年齡}}', curDyAge || '')
     .replaceAll('{{喜用神}}', yongshenText)
+    .replaceAll('{{喜用神五行}}', yongshenText)
+    .replaceAll('{{喜神／忌神}}', isStrong ? '忌神偏旺，需要用金、水、木來洩耗剋制' : '喜神可補，需要用生助日主的五行來扶持')
     .replaceAll('{{忌神}}', strongLabel === '身強' ? '印、比劫' : '財、官殺、食傷')
+    .replace(/平級聤/g, '平級聊')
+    .replace(/多聤/g, '多聊')
+    .replace(/咊啊/g, '咖啡')
+    .replace(/咊咊/g, '咖啡')
+    .replace(/靚聘/g, '績效')
+    .replace(/嫨嫗/g, '抱怨')
+    .replace(/滚水球/g, '滾水球')
     .replace(/如果你的命盤呈現「命主輸出規則」，?/g, '')
     .replace(/如果你的命盤呈現「延伸推算」，?/g, '')
     .replace(/如果你的命盤呈現「延伸定義」，?/g, '')
@@ -1525,6 +1561,10 @@ function personalizeContent(text){
     .replace(/如果你的命盤呈現「綜合結論」，?/g, '')
     .replace(/如果你的命盤呈現「([^」]+)」，?/g, '以「$1」來看，')
     .replace(/命主輸出規則/g, '你的命盤')
+    .replace(/今年固定輸出為/g, '今年是')
+    .replace(/再說明/g, '重點在於')
+    .replace(/以2026丙午年的丙火及午火藏干相對/g, '以2026丙午年的丙火與午火藏干，對照')
+    .replace(/換算流年十神，分開呈現天干主事件與地支主環境的作用，並判斷屬/g, '來看流年十神；天干偏事件，地支偏環境，整體屬於')
     .replace(/\s+/g, ' ')
     .trim();
 }
@@ -1608,6 +1648,35 @@ function teacherPoint(kb, question, query_key, needle){
   return '';
 }
 
+function teacherViewBlock(kb, question, query_key = {}, limit = 2){
+  if(!kb || !Array.isArray(kb.questions)) return '';
+  const q = kb.questions.find(item => {
+    if(item.question !== question) return false;
+    if(!Object.keys(query_key).length) return true;
+    return Array.isArray(item.query_keys) && item.query_keys.some(key =>
+      Object.entries(query_key).every(([k,v]) => key.query_key && key.query_key[k] === v)
+    );
+  });
+  if(!q || !q.teacher_interpretations) return '';
+  const rows = Object.values(q.teacher_interpretations)
+    .filter(view => view.interpretation && !view.interpretation.includes('未找到可直接或合理延伸'))
+    .slice(0, limit)
+    .map(view => `<p><strong>${view.teacher}${view.domain ? '（'+view.domain+'）' : ''}：</strong>${personalizeContent(view.interpretation)}</p>`);
+  if(!rows.length) return '';
+  return `<div class="teacher-view"><div class="teacher-view-title">老師觀點依據</div>${rows.join('')}</div>`;
+}
+
+function actionList(text){
+  if(!text) return '';
+  const cleaned = personalizeContent(text);
+  const colonIndex = Math.max(cleaned.indexOf('：'), cleaned.indexOf(':'));
+  const prefix = colonIndex > -1 ? cleaned.slice(0, colonIndex + 1) : '';
+  const body = colonIndex > -1 ? cleaned.slice(colonIndex + 1) : cleaned;
+  const parts = body.split(/[、，；;]/).map(s => s.trim()).filter(Boolean);
+  if(parts.length < 3) return cleaned;
+  return `${prefix}<ul class="action-list">${parts.map(item => `<li>${item}</li>`).join('')}</ul>`;
+}
+
 // ── 從新知識庫取資料 ──
 const new_gexing   = qContent(kbNew, '內在性格',  {stem: riTg});
 const new_image    = qContent(kbNew, '外在形象',  {stem: riTg});
@@ -1669,10 +1738,26 @@ const fengshuiInsights = qSmartMany(kbNew, [
   {subItems:['今年流年風水（2026丙午年）','住宅風水（各空間）'], query_keys:[{year:CURRENT_YEAR, stem:lyTg},{variant:riWx},{scope:'general'}], limit:2},
   {subItems:['喜用方位','喜用顏色','財位佈局','健康位佈局','事業位佈局'], query_keys:[{variant:riWx},{element:riWx},{strength:strongLabel},{scope:'general'}], limit:4},
 ], 6);
+const waterTankInsights = qSmartMany(kbNew, [
+  {subItems:'水缸佈置說明', query_keys:{element:riWx}, limit:1},
+  {subItems:'水缸佈置說明', query_keys:{scope:'general'}, limit:1},
+  {subItems:'水缸佈置說明', query_keys:{year:CURRENT_YEAR}, limit:1},
+], 3);
+const waterPlacementHtml = `
+  <div class="teacher-view">
+    <div class="teacher-view-title">水缸／流水盆擺放提醒（徐玉蘭老師風水課整理）</div>
+    <p><strong>${riWx}命主水缸：</strong>${waterTankInsights[0] || '可依命主五行、財位與宮位細節判斷是否設置招財水缸。'}</p>
+    <p><strong>共通設置：</strong>${waterTankInsights[1] || '水缸可抓長方形60x30x30或圓形直徑40公分；不要加蓋、不需要照明，水量放8~9分滿，水要保持清新與流動。'}</p>
+    <p><strong>${CURRENT_YEAR}流年提醒：</strong>${waterTankInsights[2] || '一白、六白方位可評估水缸相關擺件；二黑、五黃等凶位仍以安靜化煞為主，避免未判斷就放大型動水。'}</p>
+  </div>
+`;
 
 // ── 個人化卡片 ──
 function personalCard({icon,title,id,personalSummary,details,tags}){
-  const detailsHtml=(details||[]).filter(Boolean).map(d=>`<p>${d}</p>`).join('');
+  const detailsHtml=(details||[]).filter(Boolean).map(d=>{
+    const html = String(d);
+    return html.trim().startsWith('<') || html.includes('<ul') ? html : `<p>${html}</p>`;
+  }).join('');
   return `
     <div class="kb-card">
       <div class="kb-card-title">
@@ -1698,7 +1783,7 @@ function section(icon, title, bodyHtml, open=false){
 
 // ① 日主特質
 const sec1Html = personalCard({
-  icon:'🌟', title:'日主【'+riTg+'】特質分析', id:'BAZI_001',
+  icon:'🌟', title:'日主【'+riTg+'】與五行【'+riWx+'】特質分析', id:'BAZI_001',
   personalSummary:client.name+'，你的日主天干是【'+riTg+'】，屬於'+yinYang+riWx+'。'+(new_gexing||teacher_inner||''),
   details:[
     new_wxTrait ? '從五行來看，你帶著【'+riWx+'】的底色：'+new_wxTrait : '',
@@ -1709,6 +1794,8 @@ const sec1Html = personalCard({
     new_youshi || teacher_youshi ? '你值得好好使用的優勢：'+(new_youshi||teacher_youshi) : '',
     new_mangdian || teacher_mangdian ? '要稍微留意的地方：'+(new_mangdian||teacher_mangdian) : '',
     new_xiangz ? '更深一層來說，'+new_xiangz : '',
+    teacherViewBlock(teacherKB, '內在性格', {stem: riTg}, 1),
+    teacherViewBlock(teacherKB, '五行人格特質', {variant: riWx}, 1),
   ].filter(Boolean),
   tags:['日主'+riTg, riWx, yinYang, strongLabel]
 });
@@ -1722,7 +1809,13 @@ const sec2Html = personalCard({
 });
 
 // ③ 四柱宮位
-const GONG_NAME = {nian:'年柱（祖先宮）',yue:'月柱（父母兄弟宮）',ri:'日柱（配偶宮）',shi:'時柱（子女宮）'};
+const GONG_NAME = {nian:'年柱（祖先宮）',yue:'月柱（父母／事業宮）',ri:'日柱（夫妻宮）',shi:'時柱（子女／晚年宮）'};
+const GONG_FOCUS = {
+  nian:'看原生家庭、長輩資源、早年環境，也能觀察你對家族期待的承接方式。',
+  yue:'是整張盤很重要的位置，會牽動父母、手足、工作節奏與現實壓力。',
+  ri:'這是你自己與伴侶的位置，重點在自我狀態、親密關係與婚姻互動。',
+  shi:'看晚年、子女、作品成果，也能觀察你把能力留給世界的方式。'
+};
 const GONG_DATA = [
   {key:'nian',data:bazi['年柱']||{}},
   {key:'yue', data:bazi['月柱']||{}},
@@ -1731,12 +1824,13 @@ const GONG_DATA = [
 ];
 const sec3Html = personalCard({
   icon:'🏛', title:'四柱宮位解析', id:'BAZI_012',
-  personalSummary:client.name+'，四柱可以想成四個人生位置：原生家庭、成長環境、自己與伴侶，以及晚年或子女緣。你的盤可以先這樣看：',
+  personalSummary:client.name+'，四柱不是只看干支名稱，而是看每一個宮位被哪種十神啟動。你的盤可以先抓這幾個重點：',
   details:GONG_DATA.map(({key,data})=>{
     const tg  = data['天干']?.['天干']||'';
     const dz  = data['地支']?.['地支']||'';
     const shen= toTrad(data['天干']?.['十神']||'');
-    return GONG_NAME[key]+'是【'+tg+dz+'】，十神為【'+(shen||'日主')+'】。';
+    const wx = WX_MAP[tg] || WX_MAP[dz] || '';
+    return GONG_NAME[key]+'是【'+tg+dz+'】，十神為【'+(shen||'日主')+'】。重點：'+GONG_FOCUS[key]+'這一柱帶有【'+(shen||'日主')+'】氣質，解讀時要特別看它在'+(wx ? '五行【'+wx+'】' : '五行')+'上的作用。';
   }),
   tags:['年柱','月柱','日柱','時柱','宮位']
 });
@@ -1771,6 +1865,7 @@ const sec5Html = personalCard({
     '天干是【'+curDyTg+'】，地支是【'+curDyDz+'】；一個看外在事件，一個看內在累積，兩邊要一起看。',
     getDayunCareerNote(curDyShen)+'。你可以把它當成這幾年做選擇時的提醒。',
     ...dayunInsights,
+    teacherViewBlock(teacherKB, '大運對各面向影響', {ten_god:curDyBalanceKey, strength:strongLabel}, 2),
   ].filter(Boolean),
   tags:['大運'+curDyGz, curDyShen, '五行'+curDyWx]
 });
@@ -1785,6 +1880,7 @@ const sec6Html = personalCard({
     '大運【'+curDyGz+'】遇上流年【'+lyGz+'】：'+getDayunLiunianNote(curDyWx, lyWx)+'。',
     getLiunianCareerNote(lyStar)+'，所以今年很適合用這個方向來安排重點。',
     ...liunianInsights,
+    teacherViewBlock(teacherKB, '流年十神', {stem:lyTg, year:CURRENT_YEAR}, 2),
   ].filter(Boolean),
   tags:['流年'+lyGz, lyStar, lyYear+'年']
 });
@@ -1811,6 +1907,7 @@ const sec8Html = personalCard({
     getDayunCareerNote(curDyShen)+'，所以這段時間的職涯選擇，可以多觀察自己是不是正在累積更長線的能力。',
     lyYear+'年流年是【'+lyStar+'】：'+getLiunianCareerNote(lyStar)+'。',
     ...careerInsights,
+    teacherViewBlock(teacherKB, '職場人際策略', {ten_god:curDyShen}, 2),
     '遇到壓力時，不一定要急著硬碰硬；先分清楚哪些是責任，哪些只是別人的期待，會更穩。',
   ].filter(Boolean),
   tags:['官殺'+guanStar, '大運'+curDyShen, '流年'+lyStar]
@@ -1879,27 +1976,71 @@ const sec12Html = `
   <div class="kb-content">
     <p style="font-weight:600;color:${wxColor};">你是【${riTg}${riWx}】命主，${strongLabel}格局</p>
     ${fengshuiInsights.map(text => `<p style="margin-top:8px;">${text}</p>`).join('')}
-    ${new_wuxing ? `<p style="margin-top:8px;">🌿 <strong>五行補強：</strong>${new_wuxing}</p>` : ''}
-    ${new_kaiyun ? `<p style="margin-top:4px;">🏮 <strong>開運物：</strong>${new_kaiyun}</p>`   : ''}
-    ${new_buyun  ? `<p style="margin-top:4px;">✨ <strong>補運方法：</strong>${new_buyun}</p>`  : ''}
+    ${waterPlacementHtml}
+    ${new_wuxing ? `<div style="margin-top:8px;">🌿 <strong>五行補強：</strong>${actionList(new_wuxing)}</div>` : ''}
+    ${new_kaiyun ? `<div style="margin-top:4px;">🏮 <strong>開運物：</strong>${actionList(new_kaiyun)}</div>`   : ''}
+    ${new_buyun  ? `<div style="margin-top:4px;">✨ <strong>補運方法：</strong>${actionList(new_buyun)}</div>`  : ''}
+    ${teacherViewBlock(teacherKB, '財位佈局', {}, 3)}
+    ${teacherViewBlock(teacherKB, '水缸佈置說明', {element:riWx}, 1)}
+    ${teacherViewBlock(teacherKB, '桃花位佈局', {}, 2)}
+    ${teacherViewBlock(teacherKB, '今年流年風水（2026丙午年）', {year:CURRENT_YEAR}, 2)}
   </div>
 </div>
 `;
 
+// ── 給客戶看的快速版：簡短、口語、少術語 ──
+const quickSec1Html = personalCard({
+  icon:'🌟',
+  title:'你給人的核心感覺',
+  personalSummary:`${client.name}，你是【${riTg}${riWx}】日主。簡單說，你的底色是${riWx}，做事比較重視穩定、承擔和安全感。`,
+  details:[
+    new_gexing || '',
+    new_youshi ? '你的優勢是：'+new_youshi : '',
+    new_mangdian ? '要留意的是：'+new_mangdian : '',
+  ]
+});
+
+const quickSec4Html = personalCard({
+  icon:'⚖️',
+  title:'你的命盤能量',
+  personalSummary:`這張盤先看作【${strongLabel}】。${isStrong ? '你的能量不弱，遇到事情比較能扛，也比較適合主動做選擇。' : '你的能量需要被支持，越重要的事越要先穩住節奏。'}`,
+  details:[
+    `讓自己更平衡的方向：${yongshen}。`,
+  ]
+});
+
+const quickSec5Html = personalCard({
+  icon:'🌀',
+  title:'現在這十年的重點',
+  personalSummary:`你目前在【${curDyGz}】大運，主題是【${curDyShen}】。這段時間比較適合把注意力放在學習、整理內在、累積專業與建立自己的節奏。`,
+  details:[
+    getDayunCareerNote(curDyShen),
+  ]
+});
+
+const quickSec6Html = personalCard({
+  icon:'📅',
+  title:`${lyYear}年的提醒`,
+  personalSummary:`${lyYear}年是【${lyGz}】年，對你來說是【${lyStar}】的能量被推上來。`,
+  details:[
+    `今年適合做的事：${getLiunianCareerNote(lyStar)}。`,
+    '不用急著把所有事一次做到位，先抓一兩個最重要的方向穩穩推進。',
+  ]
+});
+
 // ── 組合完整版 ──
 const fullHtml=`
-${section('🌟','① 日主特質分析',sec1Html,true)}
-${section('🌊','② 五行人格特質',sec2Html,true)}
-${section('🏛','③ 四柱宮位解析',sec3Html)}
-${section('⚖️','④ 身強身弱判斷',sec4Html,true)}
-${section('🌀','⑤ 當前大運解讀',sec5Html,true)}
-${section('📅','⑥ '+lyYear+'年流年分析',sec6Html,true)}
-${section('💰','⑦ 財運分析',sec7Html)}
-${section('💼','⑧ 事業職涯分析',sec8Html)}
-${section('💕','⑨ 感情婚姻分析',sec9Html)}
-${section('🏥','⑩ 健康體質分析',sec10Html)}
-${section('📆','⑪ 每月流日日曆',sec11Html)}
-${section('🏠','⑫ 八字×風水整合佈局',sec12Html)}
+${section('🌟','① 日主與五行特質分析',sec1Html,true)}
+${section('🏛','② 四柱宮位解析',sec3Html,true)}
+${section('⚖️','③ 身強身弱判斷',sec4Html,true)}
+${section('🌀','④ 當前大運解讀',sec5Html,true)}
+${section('📅','⑤ '+lyYear+'年流年分析',sec6Html,true)}
+${section('💰','⑥ 財運分析',sec7Html)}
+${section('💼','⑦ 事業職涯分析',sec8Html)}
+${section('💕','⑧ 感情婚姻分析',sec9Html)}
+${section('🏥','⑨ 健康體質分析',sec10Html)}
+${section('📆','⑩ 每月流日日曆',sec11Html)}
+${section('🏠','⑪ 八字×風水整合佈局',sec12Html)}
 <div class="doris-quote">
   <p>每一個命盤都是獨一無二的生命藍圖，<br>
   數字背後是你走過的每一步。<br>
@@ -1909,10 +2050,10 @@ ${section('🏠','⑫ 八字×風水整合佈局',sec12Html)}
 
 // ── 組合快速版 ──
 const quickHtml=`
-${section('🌟','① 你是誰：日主特質',sec1Html,true)}
-${section('⚖️','② 命盤格局：身強或身弱',sec4Html,true)}
-${section('🌀','③ 現在的你：當前大運',sec5Html,true)}
-${section('📅','④ '+lyYear+'年流年分析',sec6Html,true)}
+${section('🌟','① 你是誰：日主與五行',quickSec1Html,true)}
+${section('⚖️','② 命盤能量：身強或身弱',quickSec4Html,true)}
+${section('🌀','③ 現在的你：當前大運',quickSec5Html,true)}
+${section('📅','④ '+lyYear+'年提醒',quickSec6Html,true)}
 <div class="doris-quote">
   <p>每一個命盤都是獨一無二的生命藍圖，<br>
   數字背後是你走過的每一步。<br>
