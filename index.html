@@ -478,6 +478,14 @@ margin:5px 0 0;
 font-size:0.82rem;
 line-height:1.75;
 }
+.teacher-source{
+margin-top:8px;
+}
+.teacher-source strong{
+display:block;
+font-size:0.82rem;
+margin-bottom:4px;
+}
 .action-list{
 margin:8px 0 0;
 padding-left:18px;
@@ -887,7 +895,7 @@ details.kb-section summary::after{display:none;}
 // ══════════════════════════════════════════════
 // 常數
 // ══════════════════════════════════════════════
-const CURRENT_YEAR = 2026;
+const CURRENT_YEAR = new Date().getFullYear();
 const LS_KEY = 'doris_clients';
 const GITHUB_RAW = 'https://raw.githubusercontent.com/aichi0121/mingli-paipan/main/data/';
 
@@ -1516,6 +1524,73 @@ const guanStar  = getGuanStar(riWx);
 const peiouStar = getPeiouStar(riWx, client.gender);
 const weakWx    = getWeakWx(riWx, isStrong);
 const WX_ORGAN  = {木:'肝膽、眼睛',火:'心臟、小腸',土:'脾胃、消化系統',金:'肺部、大腸',水:'腎臟、膀胱'};
+const pillarList = [
+  {label:'年柱', role:'祖先宮／早年', tg:nian['天干']?.['天干']||'', dz:nian['地支']?.['地支']||''},
+  {label:'月柱', role:'父母事業宮／現實環境', tg:yue['天干']?.['天干']||'', dz:yue['地支']?.['地支']||''},
+  {label:'日柱', role:'自己與夫妻宮', tg:riTg, dz:riDz},
+  {label:'時柱', role:'子女晚年宮／成果', tg:shi['天干']?.['天干']||'', dz:shi['地支']?.['地支']||''}
+];
+
+function relationTone(relation, strength){
+  if(relation.includes('生助') || relation.includes('同五行')){
+    return strength === '身強' ? '讓原本已不弱的日主更旺，做事有底氣，但也容易固執、想太多或壓力悶住。' : '能補足日主能量，適合先穩住身心、建立資源，再談擴張。';
+  }
+  if(relation.includes('食傷')) return '會把能量往外帶，適合表達、作品、教學、輸出與建立個人風格。';
+  if(relation.includes('財')) return strength === '身強' ? '財星被帶出來，適合談資源、收入、客戶與可落地的成果。' : '財星會帶來機會，也會帶來消耗，財務和承諾要量力而為。';
+  if(relation.includes('官殺')) return '責任、規則、主管與外界要求變明顯，適合建立紀律，但不要硬扛所有壓力。';
+  return '需要合併大運、本命強弱與宮位一起看，不宜只用單一五行下結論。';
+}
+
+function dayunAppliedSummary(){
+  const tgRelation = getRelation(riWx, WX_MAP[curDyTg]);
+  const dzRelation = getRelation(riWx, WX_MAP[curDyDz]);
+  return [
+    `大運天干【${curDyTg}】主外在事件，對你是【${curDyShen || getShishen(riTg, curDyTg)}】，代表這十年表面上容易遇到「${getDayunCareerNote(curDyShen)}」這類主題。`,
+    `大運地支【${curDyDz}】主內在環境與累積，五行屬【${WX_MAP[curDyDz] || '—'}】，和日主【${riWx}】的關係是「${dzRelation}」。`,
+    `套到你的盤：${tgRelation}；${relationTone(tgRelation, strongLabel)}`
+  ];
+}
+
+function liunianAppliedSummary(){
+  const tgRelation = getRelation(riWx, WX_MAP[lyTg]);
+  const dzRelation = getRelation(riWx, WX_MAP[lyDz]);
+  return [
+    `${lyYear}年的天干【${lyTg}】是你命盤裡的【${lyStar}】，偏向外在事件與今年浮上檯面的主題。`,
+    `${lyYear}年的地支【${lyDz}】五行屬【${WX_MAP[lyDz] || '—'}】，偏向環境、人際與身體感受；它和日主【${riWx}】的關係是「${dzRelation}」。`,
+    `所以今年不是直接套課程的2026文字，而是用【${lyGz}】對【${riTg}${riWx}】重新換算：${tgRelation}；${relationTone(tgRelation, strongLabel)}`
+  ];
+}
+
+function analyzeCombinations(){
+  const stems = pillarList.filter(p => p.tg);
+  const branches = pillarList.filter(p => p.dz);
+  const stemCombos = [
+    ['甲','己','土'],['乙','庚','金'],['丙','辛','水'],['丁','壬','木'],['戊','癸','火']
+  ];
+  const branchSix = [
+    ['子','丑','土'],['寅','亥','木'],['卯','戌','火'],['辰','酉','金'],['巳','申','水'],['午','未','土']
+  ];
+  const clashes = [
+    ['子','午'],['丑','未'],['寅','申'],['卯','酉'],['辰','戌'],['巳','亥']
+  ];
+  const rows = [];
+  for(const [a,b,wx] of stemCombos){
+    const pa = stems.find(p => p.tg === a);
+    const pb = stems.find(p => p.tg === b);
+    if(pa && pb) rows.push(`天干合：${pa.label}【${a}】與${pb.label}【${b}】有「${a}${b}合${wx}」訊號，代表這兩個宮位之間容易互相牽動；是否真正化${wx}，還要看月令、透干與全盤五行是否支持。`);
+  }
+  for(const [a,b,wx] of branchSix){
+    const pa = branches.find(p => p.dz === a);
+    const pb = branches.find(p => p.dz === b);
+    if(pa && pb) rows.push(`地支六合：${pa.label}【${a}】與${pb.label}【${b}】形成「${a}${b}合${wx}」，表示相關宮位有黏著、合作或牽制關係。`);
+  }
+  for(const [a,b] of clashes){
+    const pa = branches.find(p => p.dz === a);
+    const pb = branches.find(p => p.dz === b);
+    if(pa && pb) rows.push(`地支沖：${pa.label}【${a}】與${pb.label}【${b}】形成「${a}${b}沖」，相關宮位較容易出現變動、拉扯或需要調整的事件。`);
+  }
+  return rows;
+}
 
 function qContent(kb, sub_item, query_key, fallback){
   if(!kb || !kb.knowledge_base) return fallback||'';
@@ -1563,6 +1638,9 @@ function personalizeContent(text){
     .replace(/命主輸出規則/g, '你的命盤')
     .replace(/今年固定輸出為/g, '今年是')
     .replace(/再說明/g, '重點在於')
+    .replace(/這會是比較合適的調整方向，不用一次全部做到，先從生活中最容易落實的一件事開始就好。?/g, '')
+    .replace(/順勢的時候可以積極把握，需要留意的時候則放慢腳步，讓自己保有調整空間。?/g, '')
+    .replace(/會是你比較明顯的互動傾向。理解這一點後，你會更知道怎麼表達需要，也更容易和伴侶找到舒服的相處節奏。?/g, '')
     .replace(/以2026丙午年的丙火及午火藏干相對/g, '以2026丙午年的丙火與午火藏干，對照')
     .replace(/換算流年十神，分開呈現天干主事件與地支主環境的作用，並判斷屬/g, '來看流年十神；天干偏事件，地支偏環境，整體屬於')
     .replace(/\s+/g, ' ')
@@ -1630,6 +1708,50 @@ function cleanTeacherPoint(text){
     .trim();
 }
 
+function escapeHtml(text){
+  return String(text || '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
+function compactTeacherText(text, maxLen = 150){
+  const cleaned = personalizeContent(text || '')
+    .replace(/^依據[^：:]{1,30}[：:]/, '')
+    .replace(/延伸推算[：:]/g, '')
+    .replace(/延伸整理[：:]/g, '')
+    .replace(/；/g, '； ');
+  return cleaned.length > maxLen ? cleaned.slice(0, maxLen) + '…' : cleaned;
+}
+
+function teacherName(view){
+  if(view.source_code === 'B_FS' || view.teacher === '課程B') return '其他風水課程';
+  return view.teacher || '老師';
+}
+
+function teacherRelevantPoints(view, query_key = {}, maxPoints = 3){
+  const values = Object.values(query_key).filter(v => v !== undefined && v !== '').map(String);
+  const rawPoints = Array.isArray(view.key_points) && view.key_points.length
+    ? view.key_points
+    : [view.interpretation || ''];
+  let points = rawPoints
+    .map(point => compactTeacherText(point, 120))
+    .filter(Boolean)
+    .filter(point => !point.includes('{{'));
+  if(values.length){
+    const matched = points.filter(point => values.some(v => point.includes(v)));
+    if(matched.length) points = matched;
+  }
+  const seen = new Set();
+  return points.filter(point => {
+    if(seen.has(point)) return false;
+    seen.add(point);
+    return true;
+  }).slice(0, maxPoints);
+}
+
 function teacherPoint(kb, question, query_key, needle){
   if(!kb || !Array.isArray(kb.questions)) return '';
   const q = kb.questions.find(item =>
@@ -1648,7 +1770,7 @@ function teacherPoint(kb, question, query_key, needle){
   return '';
 }
 
-function teacherViewBlock(kb, question, query_key = {}, limit = 2){
+function teacherViewBlock(kb, question, query_key = {}, limit = 2, options = {}){
   if(!kb || !Array.isArray(kb.questions)) return '';
   const q = kb.questions.find(item => {
     if(item.question !== question) return false;
@@ -1658,12 +1780,25 @@ function teacherViewBlock(kb, question, query_key = {}, limit = 2){
     );
   });
   if(!q || !q.teacher_interpretations) return '';
+  const seenText = new Set();
   const rows = Object.values(q.teacher_interpretations)
     .filter(view => view.interpretation && !view.interpretation.includes('未找到可直接或合理延伸'))
-    .slice(0, limit)
-    .map(view => `<p><strong>${view.teacher}${view.domain ? '（'+view.domain+'）' : ''}：</strong>${personalizeContent(view.interpretation)}</p>`);
+    .filter(view => options.includeOtherCourses || view.source_code !== 'B_FS')
+    .map(view => {
+      const points = teacherRelevantPoints(view, query_key, options.maxPoints || 3)
+        .filter(point => {
+          const key = point.replace(/\s+/g, '');
+          if(seenText.has(key)) return false;
+          seenText.add(key);
+          return true;
+        });
+      if(!points.length) return '';
+      return `<div class="teacher-source"><strong>${teacherName(view)}${view.domain ? '（'+view.domain+'）' : ''}</strong><ul class="action-list">${points.map(point => `<li>${escapeHtml(point)}</li>`).join('')}</ul></div>`;
+    })
+    .filter(Boolean)
+    .slice(0, limit);
   if(!rows.length) return '';
-  return `<div class="teacher-view"><div class="teacher-view-title">老師觀點依據</div>${rows.join('')}</div>`;
+  return `<div class="teacher-view"><div class="teacher-view-title">${options.title || '老師觀點依據（精選）'}</div>${rows.join('')}</div>`;
 }
 
 function actionList(text){
@@ -1672,7 +1807,19 @@ function actionList(text){
   const colonIndex = Math.max(cleaned.indexOf('：'), cleaned.indexOf(':'));
   const prefix = colonIndex > -1 ? cleaned.slice(0, colonIndex + 1) : '';
   const body = colonIndex > -1 ? cleaned.slice(colonIndex + 1) : cleaned;
-  const parts = body.split(/[、，；;]/).map(s => s.trim()).filter(Boolean);
+  const seen = new Set();
+  const parts = body
+    .split(/[、，；;]/)
+    .map(s => s.trim().replace(/^對你來說，?/, '').replace(/^當你的命盤以「[^」]+」為主要能量時，?/, ''))
+    .filter(Boolean)
+    .filter(item => !item.includes('不用一次全部做到'))
+    .filter(item => {
+      const key = item.replace(/\s+/g, '');
+      if(seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(0, 8);
   if(parts.length < 3) return cleaned;
   return `${prefix}<ul class="action-list">${parts.map(item => `<li>${item}</li>`).join('')}</ul>`;
 }
@@ -1702,13 +1849,12 @@ const caiFamilyKey = client.gender === '男' ? '財星' : '官殺';
 const dayunInsights = qSmartMany(kbNew, [
   {subItems:'大運對各面向影響', query_keys:[{ten_god:curDyBalanceKey, strength:strongLabel},{scope:'general'}], limit:2},
   {subItems:'大運十神', query_keys:[{ten_god:curDyShen},{ten_god:curDyFamily}], limit:1},
-  {subItems:'現在走什麼大運', query_keys:[{variant:'命主輸出規則（延伸推算）'},{scope:'general'}], limit:1},
-], 4);
+], 2);
 const liunianInsights = qSmartMany(kbNew, [
   {subItems:['9-1 基本流年｜今年天干地支','今年天干地支'], query_keys:{stem:lyTg, year:CURRENT_YEAR}, limit:1},
   {subItems:['9-1 基本流年｜流年十神','流年十神'], query_keys:{stem:lyTg, year:CURRENT_YEAR}, limit:1},
-  {subItems:['對各面向的影響','流年剋洩影響'], query_keys:[{ten_god:lyBalanceKey, strength:strongLabel},{ten_god:lyFamily},{scope:'general'}], limit:2},
-], 4);
+  {subItems:['對各面向的影響','流年剋洩影響'], query_keys:[{ten_god:lyBalanceKey, strength:strongLabel},{ten_god:lyFamily}], limit:1},
+], 3);
 const wealthInsights = qSmartMany(kbNew, [
   {subItems:['12-1 基本財運｜天生財運模式','天生財運模式'], query_keys:[{ten_god:'財星', strength:strongLabel},{ten_god:'財星'}], limit:1},
   {subItems:['12-1 基本財運｜今年財運走勢','今年財運走勢'], query_keys:[{ten_god:lyBalanceKey, strength:strongLabel},{ten_god:'財星', strength:strongLabel},{scope:'general'}], limit:1},
@@ -1720,15 +1866,11 @@ const careerInsights = qSmartMany(kbNew, [
   {subItems:['13-1 基本事業｜事業天賦','事業天賦'], query_keys:[{ten_god:curDyShen},{ten_god:curDyFamily},{scope:'general'}], limit:1},
   {subItems:['13-1 基本事業｜今年事業走勢','今年事業走勢'], query_keys:[{ten_god:lyStar},{ten_god:lyFamily},{ten_god:lyBalanceKey, strength:strongLabel}], limit:1},
   {subItems:['13-1 基本事業｜職場人際策略','職場人際策略'], query_keys:[{ten_god:curDyShen},{ten_god:curDyFamily},{scope:'general'}], limit:1},
-  {subItems:['13-2 行業方向細分｜身心靈／宗教行業','13-2 行業方向細分｜線上事業','13-2 行業方向細分｜副業／斜槓'], query_keys:[{stem:riTg, element:riWx, ten_god:curDyShen},{ten_god:curDyShen},{ten_god:curDyFamily}], limit:2},
-], 5);
+], 3);
 const loveInsights = qSmartMany(kbNew, [
   {subItems:['14-1 感情基礎｜夫妻宮判斷（日支）','夫妻宮判斷（日支)','夫妻宮判斷（日支）','日柱（夫妻宮）'], query_keys:[{branch:riDz},{variant:'夫妻宮位置'},{variant:'日柱（花）'}], limit:1},
   {subItems:['14-1 感情基礎｜夫妻星強弱','夫妻星強弱'], query_keys:[{ten_god:caiFamilyKey, strength:strongLabel}], limit:1},
-  {subItems:['14-1 感情基礎｜感情模式','感情模式'], query_keys:[{ten_god:lyStar},{ten_god:lyFamily},{scope:'general'}], limit:1},
-  {subItems:['14-2 交往階段｜感情相處策略','感情相處策略'], query_keys:[{ten_god:lyStar},{ten_god:lyFamily},{scope:'general'}], limit:1},
-  {subItems:['14-2 交往階段｜桃花運強弱','桃花運強弱'], query_keys:[{ten_god:caiFamilyKey},{scope:'general'}], limit:1},
-], 5);
+], 2);
 const healthInsights = qSmartMany(kbNew, [
   {subItems:['五行體質', riWx+' → '+(WX_ORGAN[riWx]||'').replace('、','/'),'先天弱項臟腑'], query_keys:[{variant:riWx},{element:riWx},{scope:'general'}], limit:2},
   {subItems:['健康預防建議','健康補運方法'], query_keys:[{variant:riWx},{element:riWx},{scope:'general'}], limit:2},
@@ -1835,6 +1977,19 @@ const sec3Html = personalCard({
   tags:['年柱','月柱','日柱','時柱','宮位']
 });
 
+// ③-1 合化／刑沖提示
+const combinationRows = analyzeCombinations();
+const secComboHtml = personalCard({
+  icon:'🔗', title:'合化／刑沖另欄檢查', id:'BAZI_COMBO',
+  personalSummary:combinationRows.length
+    ? client.name+'，你的命盤有幾組天干地支互動，需要另外看，不適合混在日主或感情段落裡一筆帶過。'
+    : client.name+'，這張盤目前沒有抓到明顯的天干五合、地支六合或六沖訊號；若要更細，仍可再看三合、三會、刑害破與藏干透出。',
+  details:combinationRows.length ? combinationRows : [
+    '目前先不硬塞合化文字，避免把教材規則誤當成你的個案結論。'
+  ],
+  tags:['合化','刑沖','另欄判斷']
+});
+
 // ④ 身強身弱
 const YONGSHEN = {
   身強:{木:'火、土、金（洩耗剋制）',火:'土、金、水（洩耗剋制）',土:'金、水、木（洩耗剋制）',金:'水、木、火（洩耗剋制）',水:'木、火、土（洩耗剋制）'},
@@ -1862,10 +2017,9 @@ const sec5Html = personalCard({
   personalSummary:client.name+'，你目前走到【'+curDyGz+'】大運，主題是【'+curDyShen+'】。這一步運的五行屬【'+curDyWx+'】，對你的日主【'+riTg+riWx+'】來說，整體是「'+dyRelation+'」。',
   details:[
     '這段時間大約落在 '+curDyAge+' 到 '+curDyEnd+' 歲，會比較明顯地把【'+curDyShen+'】的課題帶到你生活裡。',
-    '天干是【'+curDyTg+'】，地支是【'+curDyDz+'】；一個看外在事件，一個看內在累積，兩邊要一起看。',
-    getDayunCareerNote(curDyShen)+'。你可以把它當成這幾年做選擇時的提醒。',
+    ...dayunAppliedSummary(),
     ...dayunInsights,
-    teacherViewBlock(teacherKB, '大運對各面向影響', {ten_god:curDyBalanceKey, strength:strongLabel}, 2),
+    teacherViewBlock(teacherKB, '大運對各面向影響', {ten_god:curDyBalanceKey, strength:strongLabel}, 1, {title:'老師判斷依據（大運）', maxPoints:2}),
   ].filter(Boolean),
   tags:['大運'+curDyGz, curDyShen, '五行'+curDyWx]
 });
@@ -1876,11 +2030,10 @@ const sec6Html = personalCard({
   icon:'📅', title:lyYear+'年流年【'+lyGz+'】對你的影響', id:'BAZI_024',
   personalSummary:lyYear+'年是【'+lyGz+'】年，流年天干【'+lyTg+'】對你來說是【'+lyStar+'】。這一年不是只看好壞，而是看它把哪一種能量推到你面前。',
   details:[
-    '今年的五行主調是【'+lyWx+'】，和你的日主【'+riWx+'】之間呈現「'+lyRelation+'」。',
+    ...liunianAppliedSummary(),
     '大運【'+curDyGz+'】遇上流年【'+lyGz+'】：'+getDayunLiunianNote(curDyWx, lyWx)+'。',
-    getLiunianCareerNote(lyStar)+'，所以今年很適合用這個方向來安排重點。',
     ...liunianInsights,
-    teacherViewBlock(teacherKB, '流年十神', {stem:lyTg, year:CURRENT_YEAR}, 2),
+    teacherViewBlock(teacherKB, '流年十神', {stem:lyTg, year:CURRENT_YEAR}, 1, {title:'老師判斷依據（流年）', maxPoints:2}),
   ].filter(Boolean),
   tags:['流年'+lyGz, lyStar, lyYear+'年']
 });
@@ -1906,8 +2059,9 @@ const sec8Html = personalCard({
   details:[
     getDayunCareerNote(curDyShen)+'，所以這段時間的職涯選擇，可以多觀察自己是不是正在累積更長線的能力。',
     lyYear+'年流年是【'+lyStar+'】：'+getLiunianCareerNote(lyStar)+'。',
+    '用這張盤來看，事業不是只看官殺星【'+guanStar+'】，還要看目前大運【'+curDyShen+'】怎麼讓你做事：它比較偏向先累積專業、建立方法，再用作品或成果被看見。',
     ...careerInsights,
-    teacherViewBlock(teacherKB, '職場人際策略', {ten_god:curDyShen}, 2),
+    teacherViewBlock(teacherKB, '職場人際策略', {ten_god:curDyShen}, 1, {title:'老師判斷依據（職場）', maxPoints:3}),
     '遇到壓力時，不一定要急著硬碰硬；先分清楚哪些是責任，哪些只是別人的期待，會更穩。',
   ].filter(Boolean),
   tags:['官殺'+guanStar, '大運'+curDyShen, '流年'+lyStar]
@@ -1919,7 +2073,10 @@ const sec9Html = personalCard({
   personalSummary:client.name+'，以傳統八字來看，你的配偶星是【'+peiouStar+'】。'+lyYear+'年流年【'+lyGz+'】，'+(lyWx===peiouStar?'剛好碰到配偶星，感情機緣會比較容易浮上檯面。':'感情的重點不一定是突然出現大事件，而是你怎麼回應關係裡的靠近與距離。'),
   details:[
     '你的日支是【'+riDz+'】，也就是婚姻宮；它透露的是你在親密關係裡容易期待什麼、在意什麼。'+getRizhiMarriageNote(riDz)+'。',
-    lyYear+'年的感情氛圍落在【'+lyStar+'】：'+getLiunianLoveNote(lyStar)+'。',
+    lyYear+'年的流年十神是【'+lyStar+'】：'+getLiunianLoveNote(lyStar)+'。這裡講的是今年關係裡比較容易出現的心理狀態，不是直接斷定一定結婚或分手。',
+    lyWx===peiouStar
+      ? '今年流年五行剛好碰到你的配偶星【'+peiouStar+'】，比較容易有人際、曖昧或關係議題被看見；但是否能成為穩定關係，還要看夫妻宮是否受沖合與大運是否支持。'
+      : '今年流年五行不是直接碰到你的配偶星【'+peiouStar+'】，所以感情比較像是調整互動方式，而不是單純等一個桃花事件。',
     ...loveInsights,
     '這段時間感情上最重要的不是猜對方，而是把自己的界線和需要說清楚。',
   ].filter(Boolean),
@@ -2032,15 +2189,16 @@ const quickSec6Html = personalCard({
 const fullHtml=`
 ${section('🌟','① 日主與五行特質分析',sec1Html,true)}
 ${section('🏛','② 四柱宮位解析',sec3Html,true)}
-${section('⚖️','③ 身強身弱判斷',sec4Html,true)}
-${section('🌀','④ 當前大運解讀',sec5Html,true)}
-${section('📅','⑤ '+lyYear+'年流年分析',sec6Html,true)}
-${section('💰','⑥ 財運分析',sec7Html)}
-${section('💼','⑦ 事業職涯分析',sec8Html)}
-${section('💕','⑧ 感情婚姻分析',sec9Html)}
-${section('🏥','⑨ 健康體質分析',sec10Html)}
-${section('📆','⑩ 每月流日日曆',sec11Html)}
-${section('🏠','⑪ 八字×風水整合佈局',sec12Html)}
+${section('🔗','③ 合化／刑沖另欄檢查',secComboHtml,true)}
+${section('⚖️','④ 身強身弱判斷',sec4Html,true)}
+${section('🌀','⑤ 當前大運解讀',sec5Html,true)}
+${section('📅','⑥ '+lyYear+'年流年分析',sec6Html,true)}
+${section('💰','⑦ 財運分析',sec7Html)}
+${section('💼','⑧ 事業職涯分析',sec8Html)}
+${section('💕','⑨ 感情婚姻分析',sec9Html)}
+${section('🏥','⑩ 健康體質分析',sec10Html)}
+${section('📆','⑪ 每月流日日曆',sec11Html)}
+${section('🏠','⑫ 八字×風水整合佈局',sec12Html)}
 <div class="doris-quote">
   <p>每一個命盤都是獨一無二的生命藍圖，<br>
   數字背後是你走過的每一步。<br>
