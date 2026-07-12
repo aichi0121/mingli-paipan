@@ -513,6 +513,10 @@ font-weight:800;
 color:#15803D;
 font-weight:800;
 }
+.key-resource{
+color:#7C3AED;
+font-weight:800;
+}
 .detail-label{
 color:#7C2D12;
 font-weight:800;
@@ -1773,9 +1777,39 @@ function careerDirectionSummary(){
   return uniqueJoined(directions).replace(/、內容輸出/g, '；內容輸出');
 }
 
+function wealthBigSummary(){
+  const total = caiEntries.length;
+  const zheng = zhengCaiEntries.length;
+  const pian = pianCaiEntries.length;
+  const jie = jieCaiEntries.length;
+  if(!total) return '財運總結：原局財星不明顯，賺錢要靠大運流年、專業輸出與後天經營，不適合只等機會。';
+  const level = total >= 5 ? '財星很明顯' : total >= 3 ? '財星有根、有感' : '財星有出現';
+  const style = zheng > pian
+    ? '偏向穩定收入、固定客戶、價格制度與現實安全感'
+    : pian > zheng
+      ? '偏向機會財、人脈財、專案收入與彈性收入'
+      : '穩定收入與機會財都要看';
+  const caution = jie ? `但同時有${jie}個劫財訊號，合夥、借貸、分帳、朋友家人牽涉金錢時要先講規則。` : '劫財訊號不重，財務上更適合靠制度穩定累積。';
+  return `財運總結：原局共有${total}個財星訊號（正財${zheng}、偏財${pian}），屬於「${level}」。你的財運模式${style}。${caution}`;
+}
+
+function careerBigSummary(){
+  const hasOutput = shiShangEntries.length > 0;
+  const hasOfficial = guanEntries.length > 0;
+  const main = curDyShen === '偏印'
+    ? '這十年的事業主軸是先累積專業、建立方法論，再用作品、課程或顧問服務被看見'
+    : `這十年的事業主軸受【${curDyShen}】影響，需要搭配原局官星與食傷一起看`;
+  const evidence = [
+    hasOfficial ? `官星${guanEntries.length}個，代表責任、制度、名聲與職場位置不是空的` : '',
+    hasOutput ? `食傷${shiShangEntries.length}個，代表可靠表達、教學、作品、內容輸出累積能見度` : '',
+    caiEntries.length ? `財星${caiEntries.length}個，代表成果最好能轉成明確價格、服務方案與收款規則` : ''
+  ].filter(Boolean).join('；');
+  return `事業總結：${main}。${evidence || '目前要以大運與流年補充判斷'}。`;
+}
+
 function spouseProfileSummary(){
   const parts = [];
-  parts.push(`配偶星五行是【${peiouStar}】，外型氣質多偏「${peiouStar === '木' ? '清爽、修長、有生長感或書卷感' : peiouStar === '火' ? '明亮、有精神、表情感強' : peiouStar === '土' ? '穩重、樸實、有安全感' : peiouStar === '金' ? '乾淨俐落、有輪廓或質感' : '柔和、聰明、流動感強'}」。`);
+  parts.push(`配偶星五行是【${peiouStar}】，外型氣質多偏「${peiouStar === '木' ? '憨厚老實、不高不矮、身形偏結實或偏壯，給人樸實可靠感' : peiouStar === '火' ? '明亮、有精神、表情感強' : peiouStar === '土' ? '穩重、樸實、有安全感' : peiouStar === '金' ? '乾淨俐落、有輪廓或質感' : '柔和、聰明、流動感強'}」。`);
   if(guanEntries.length){
     parts.push(`原局有官星訊號：${formatTenGodEntries(guanEntries)}，所以你容易被有責任感、守規矩、願意承擔的人吸引。`);
   }
@@ -2127,10 +2161,11 @@ function focusItem(label, value, toneClass = ''){
 function enhanceReportText(text){
   if(!text) return '';
   let html = String(text);
-  html = html.replace(/(財星|財位|招財|正財|偏財|劫財|得財|破財|收入|客戶)/g, '<span class="key-wealth">$1</span>');
+  html = html.replace(/(財星|財位|招財|正財|偏財|劫財|得財|破財|收入)/g, '<span class="key-wealth">$1</span>');
   html = html.replace(/(官殺|正官|七殺|食神|傷官|適合職業|職涯方向|文昌|升遷|貴人)/g, '<span class="key-career">$1</span>');
   html = html.replace(/(配偶星|夫妻宮|感情|桃花|婚姻宮|婚姻|親密關係|伴侶|正緣)/g, '<span class="key-love">$1</span>');
   html = html.replace(/(健康|脾胃|腎臟|膀胱|保養|病符|五黃)/g, '<span class="key-health">$1</span>');
+  html = html.replace(/(偏印|正印|印星|資源|學習|休息|內在整理|研究|宗教|藝術|獨立研究)/g, '<span class="key-resource">$1</span>');
   html = html.replace(/(身強|身弱|喜用神|忌神|用神)/g, '<span class="key-strength">$1</span>');
   html = html.replace(/【([^】]+)】/g, '<span class="key-token">【$1】</span>');
   html = html.replace(/^([^：:]{2,14}[：:])/, '<span class="detail-label">$1</span>');
@@ -2352,6 +2387,22 @@ function xuCombinedRemedyHtml(){
     </div>
   `;
 }
+function fengshuiIntegratedHtml(){
+  const overlap = xuOverlapSummary();
+  const topDirections = overlap.sharedDirections.slice(0, 4).join('；') || '依四格明細選方位';
+  return `
+    <div class="summary-panel">
+      <div class="summary-panel-title">三位老師統整版：先照這個做</div>
+      ${compactList([
+        `先定主題：求財或招財水缸，優先看徐玉蘭老師的土命財位【${xuFs.wealth || '需查表'}】；若要疊加${CURRENT_YEAR}流年，正東偏財置業、正北偏財貴人可以一起評估。`,
+        `重複方位優先整理：${topDirections}。同一方位同時出現在多個主題時，先整理那裡，不用四個主題全部擺滿。`,
+        `擺放規則用湯鎮瑋老師：財位要乾淨、明亮、不受壓，擺件控制在3～5樣內；不把招財物一次堆滿。`,
+        `主題分類用尹森老師：正財看穩定收入與事業資源，次財看貴人、投資與偏財機會，桃花位看人緣魅力與互動。`,
+        `水缸只優先放財位或可動水的流年吉位；正南五黃、西北二黑、正西三碧、西南七赤今年先安靜，不放大型動水。`
+      ])}
+    </div>
+  `;
+}
 function zibai2026Html(){
   const order = ['東南','正南','西南','正東','中宮','正西','東北','正北','西北'];
   const map = Object.fromEntries(ZIBAI_2026.map(item => [item.direction, item]));
@@ -2417,8 +2468,9 @@ function xuRemedyDetail(label, direction, remedy, toneClass = ''){
   `;
 }
 const waterPlacementHtml = `
+  ${fengshuiIntegratedHtml()}
   <div class="summary-panel">
-    <div class="summary-panel-title">徐玉蘭老師五行命主方位</div>
+    <div class="summary-panel-title">徐玉蘭老師五行命主方位（明細保留）</div>
     <div class="focus-grid">
       ${xuRemedyDetail('財位／招財水缸', xuFs.wealth || '需查表', xuRemedies.wealth, 'tone-wealth')}
       ${xuRemedyDetail('事業／貴人位', xuFs.career || '需查表', xuRemedies.career, 'tone-career')}
@@ -2428,8 +2480,7 @@ const waterPlacementHtml = `
     ${compactList([
       `招財水缸優先放在財位【${xuFs.wealth || '需查表'}】；若有多個財位，先選家中最乾淨、明亮、不受壓且方便維護水質的位置。`,
       `水缸材質與顏色：${XU_WATER_TANK[riWx] || waterTankInsights[0] || '需依五行命主選材質與添運色彩。'}`,
-      `共通設置：${XU_WATER_COMMON}`,
-      `流年提醒：${XU_YEAR_WATER_NOTE}`
+      `共通設置：${XU_WATER_COMMON}`
     ])}
   </div>
   ${xuCombinedRemedyHtml()}
@@ -2585,7 +2636,8 @@ const sec5Html = personalCard({
   icon:'🌀', title:'當前大運【'+curDyGz+'】'+curDyShen+'（'+curDyAge+'～'+curDyEnd+'歲）', id:'BAZI_021',
   personalSummary:client.name+'，你目前走到【'+curDyGz+'】大運，主題是【'+curDyShen+'】。白話說，這十年不是單純好或壞，而是會把「'+relationPlain(dyRelation)+'」這件事推到你面前。',
   details:[
-    '這段時間大約落在 '+curDyAge+' 到 '+curDyEnd+' 歲，會比較明顯地把【'+curDyShen+'】的課題帶到你生活裡。',
+    '所謂【'+curDyShen+'】課題，白話就是：'+relationPlain(dyRelation)+'。對你來說會表現在進修、研究、信念整理、貴人資源、休息節奏，以及把專業沉澱成方法。',
+    '這段時間大約落在 '+curDyAge+' 到 '+curDyEnd+' 歲，會比較明顯地把這些課題帶到你生活裡。',
     ...dayunAppliedSummary(),
   ].filter(Boolean),
   tags:['大運'+curDyGz, curDyShen, '五行'+curDyWx]
@@ -2606,8 +2658,9 @@ const sec6Html = personalCard({
 // ⑦ 財運
 const sec7Html = personalCard({
   icon:'💰', title:'你的財運分析', id:'BAZI_029',
-  personalSummary:client.name+'，以你的日主【'+riTg+riWx+'】來看，財星是【'+caiStar+'】。'+lyYear+'年流年【'+lyGz+'】，'+(lyWx===caiStar?'剛好碰到你的財星，賺錢機會會比較容易被看見。':'財運不只看有沒有錢進來，也要看你能不能穩穩接住。'),
+  personalSummary:wealthBigSummary(),
   details:[
+    client.name+'，以你的日主【'+riTg+riWx+'】來看，財星是【'+caiStar+'】。'+lyYear+'年流年【'+lyGz+'】，'+(lyWx===caiStar?'剛好碰到你的財星，賺錢機會會比較容易被看見。':'財運不只看有沒有錢進來，也要看你能不能穩穩接住。'),
     caiEntries.length
       ? '原局不是沒有財星。你盤裡的財星位置是：'+formatTenGodEntries(caiEntries)+'。正財偏向穩定收入、現實資源與金錢秩序；偏財偏向機會、人脈與彈性收入。'
       : '原局天干與藏干沒有明顯財星，所以財運要更重視大運、流年與食傷生財的時機。',
@@ -2624,8 +2677,9 @@ const sec7Html = personalCard({
 // ⑧ 事業
 const sec8Html = personalCard({
   icon:'💼', title:'你的事業職涯分析', id:'BAZI_032',
-  personalSummary:client.name+'，你的官殺星是【'+guanStar+'】，它代表職場裡的責任、規則、主管，也代表你可以被看見的位置。目前大運【'+curDyGz+'】帶著【'+curDyShen+'】的主題。',
+  personalSummary:careerBigSummary(),
   details:[
+    client.name+'，你的官殺星是【'+guanStar+'】，它代表職場裡的責任、規則、主管，也代表你可以被看見的位置。目前大運【'+curDyGz+'】帶著【'+curDyShen+'】的主題。',
     getDayunCareerNote(curDyShen)+'，所以這段時間的職涯選擇，可以多觀察自己是不是正在累積更長線的能力。',
     lyYear+'年流年是【'+lyStar+'】：'+getLiunianCareerNote(lyStar)+'。',
     '用這張盤來看，事業不是只看官殺星【'+guanStar+'】，還要看目前大運【'+curDyShen+'】怎麼讓你做事：它比較偏向先累積專業、建立方法，再用作品或成果被看見。',
@@ -2708,11 +2762,11 @@ const sec12Html = `
   <div class="kb-content">
     <p style="font-weight:600;color:${wxColor};">你是【${riTg}${riWx}】命主，${strongLabel}格局</p>
     <div class="summary-panel">
-      <div class="summary-panel-title">統整後先做這三件事</div>
+      <div class="summary-panel-title">這一欄怎麼看</div>
       ${compactList([
-        `${riWx}命本命軟裝先看徐玉蘭老師表：財位【${xuFs.wealth || '需查表'}】、事業／貴人位【${xuFs.career || '需查表'}】、文昌位【${xuFs.wenchang || '需查表'}】、桃花位【${xuFs.peach || '需查表'}】。`,
-        `${CURRENT_YEAR}年流年風水先抓四個可用位置：正東偏財與置業、正北偏財與貴人、東北讀書考試、東南人緣喜慶。想求哪件事，就先整理對應方位，不需要全部同時催旺。`,
-        `正南、西北、正西、西南今年比較需要安靜，尤其不要先放大型水缸或強動能擺件；先乾淨、少雜物、少敲打，就是第一步。`
+        `先看「三位老師統整版」決定實際操作方向。`,
+        `再看「徐玉蘭老師五行命主方位（明細保留）」核對財位、事業位、文昌位、桃花位。`,
+        `最後看紫白九宮格，確認${CURRENT_YEAR}年哪些方位可催旺、哪些方位先安靜。`
       ])}
     </div>
     ${waterPlacementHtml}
