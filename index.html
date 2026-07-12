@@ -2144,7 +2144,86 @@ const XU_FS_REMEDIES = {
 };
 const xuRemedies = XU_FS_REMEDIES[riWx] || {};
 const XU_WATER_COMMON = '長方形約60x30x30公分，或圓形直徑約40公分；不加蓋、不打燈，水量8～9分滿。水要乾淨流動，可用馬達、濾水器或定期換水；小空間可先用裝水玻璃杯，每天換水。';
-const XU_YEAR_WATER_NOTE = `${CURRENT_YEAR}年若搭配紫白飛星，一白、六白方位可評估小型動水；二黑、五黃等凶位以安靜化煞為主，未細看前不要放大型動水。`;
+const XU_YEAR_WATER_NOTE = `${CURRENT_YEAR}年若搭配紫白飛星：一白在中宮、六白在正北，可評估小型動水；七赤在西南屬化洩情境，若使用活水要小而安靜；二黑在西北、五黃在正南，以安靜化煞為主，不放大型動水。`;
+const ZIBAI_2026 = [
+  {direction:'正東', star:'八白左輔星', theme:'旺財、權力、置業', action:'可保持明亮整潔，放存摺、地契、保險櫃、黃土色系物件或鹽燈。', tone:'tone-wealth'},
+  {direction:'正北', star:'六白武曲星', theme:'偏財、貴人、權威', action:'適合用在工作、升遷、貴人與偏財布局，可放金屬、白灰色系或小型動水。', tone:'tone-career'},
+  {direction:'東北', star:'四綠文曲星', theme:'文昌、學習、考試', action:'適合書房、讀書、企劃與進修，可放綠色植物、文具、書籍。', tone:'tone-career'},
+  {direction:'東南', star:'九紫右弼星', theme:'喜慶、桃花、人氣', action:'適合人緣、曝光、喜事與合作，可用紅紫色系或花卉點亮。', tone:'tone-love'},
+  {direction:'正南', star:'五黃廉貞星', theme:'災煞、大凶', action:'宜靜不宜動，不鑽牆、不敲打、不放大型動水；以化煞、安靜、減少刺激為主。', tone:'tone-warn'},
+  {direction:'西北', star:'二黑巨門星', theme:'病符、健康壓力', action:'宜靜不宜動，避免紅黃綠刺激，可用金屬、白灰金色系化洩。', tone:'tone-health'},
+  {direction:'正西', star:'三碧祿存星', theme:'是非、口舌', action:'避免擴音、爭吵、過度動能；保持整潔安靜。', tone:'tone-warn'},
+  {direction:'西南', star:'七赤破軍星', theme:'破財、損失', action:'避免放大招財物與大型動水；若要化洩，採小型、安靜、可控的方式。', tone:'tone-warn'}
+];
+function splitZhList(text){
+  return String(text || '')
+    .split(/[、，／/]/)
+    .map(s => s.trim())
+    .filter(Boolean)
+    .map(s => s.replace(/^同色系/, '同色系'));
+}
+function uniqueJoined(list){
+  const seen = new Set();
+  return list.filter(item => {
+    const key = item.replace(/\s+/g, '');
+    if(!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).join('、');
+}
+function xuCombinedRemedyHtml(){
+  const remedies = Object.values(xuRemedies || {});
+  if(!remedies.length) return '';
+  const allItems = uniqueJoined(remedies.flatMap(r => splitZhList(r.items)).slice(0, 28));
+  const allZodiac = uniqueJoined(remedies.flatMap(r => splitZhList(r.zodiac)));
+  const allMaterials = uniqueJoined(remedies.flatMap(r => splitZhList(r.material)));
+  return `
+    <div class="summary-panel">
+      <div class="summary-panel-title">徐玉蘭老師${riWx}命軟裝綜合版</div>
+      ${compactList([
+        `可以優先準備：${allItems}`,
+        `生肖擺件可抓：${allZodiac}`,
+        `材質方向：${allMaterials}`,
+        `使用方式：先選你真正要加強的主題，再對應方位擺放，不需要把財位、事業位、文昌位、桃花位全部一次擺滿。`
+      ])}
+    </div>
+  `;
+}
+function zibai2026Html(){
+  return `
+    <div class="summary-panel">
+      <div class="summary-panel-title">${CURRENT_YEAR}紫白飛星已套用</div>
+      <div class="focus-grid">
+        ${ZIBAI_2026.map(item => focusItem(`${item.direction}｜${item.star}`, `${item.theme}：${item.action}`, item.tone)).join('')}
+      </div>
+    </div>
+  `;
+}
+function fengshuiEvidenceHtml(){
+  return `
+    <div class="teacher-view">
+      <div class="teacher-view-title">老師觀點依據（已篩選）</div>
+      <div class="teacher-source"><strong>徐玉蘭老師（${riWx}命軟裝表）</strong>
+        ${compactList([
+          `${riWx}命財位：${xuFs.wealth || '需查表'}；水缸材質：${XU_WATER_TANK[riWx] || '需查表'}`,
+          `${CURRENT_YEAR}紫白飛星：正東八白旺財、正北六白偏財貴人、東北四綠文昌、東南九紫喜慶；正南五黃、西北二黑宜靜。`
+        ])}
+      </div>
+      <div class="teacher-source"><strong>湯鎮瑋老師（通用財位規則）</strong>
+        ${compactList([
+          '明財位在大門斜對角45度，忌見空、壓樑、對廁所；財位需乾淨整潔，擺設不超過3～5樣。',
+          `${CURRENT_YEAR}年主要財位看正東八白，偏財／貴人可看正北六白。`
+        ])}
+      </div>
+      <div class="teacher-source"><strong>尹森老師（通用財位／桃花位規則，非土命專屬）</strong>
+        ${compactList([
+          '正財位掌管正財、事業、房產與開創能量；次財位掌管貴人、投資與偏財機會。',
+          '桃花位重點是人緣、魅力與互動，不等於每個人都要用同一套土命方位。'
+        ])}
+      </div>
+    </div>
+  `;
+}
 const waterTankInsights = qSmartMany(kbNew, [
   {subItems:'水缸佈置說明', query_keys:{element:riWx}, limit:1},
   {subItems:'水缸佈置說明', query_keys:{scope:'general'}, limit:1},
@@ -2180,6 +2259,8 @@ const waterPlacementHtml = `
       `流年提醒：${XU_YEAR_WATER_NOTE}`
     ])}
   </div>
+  ${xuCombinedRemedyHtml()}
+  ${zibai2026Html()}
 `;
 
 // ── 個人化卡片 ──
@@ -2439,12 +2520,7 @@ const sec11Html = `
 
 // ⑫ 八字×風水整合
 const supportMethod = new_wuxing || new_buyun || '';
-const fengshuiTeacherEvidence = teacherCombinedBlock(teacherKB, [
-  {question:'財位佈局', maxPoints:2},
-  {question:'水缸佈置說明', query_key:{element:riWx}, maxPoints:2},
-  {question:'桃花位佈局', maxPoints:2},
-  {question:'今年流年風水（2026丙午年）', query_key:{year:CURRENT_YEAR}, maxPoints:2}
-], {title:'老師觀點依據（三位老師精選）', limit:3, maxPoints:3});
+const fengshuiTeacherEvidence = fengshuiEvidenceHtml();
 const sec12Html = `
 <div class="kb-card">
   <div class="kb-card-title">🏠 ${client.name} 的專屬風水佈局建議</div>
@@ -2453,9 +2529,9 @@ const sec12Html = `
     <div class="summary-panel">
       <div class="summary-panel-title">統整後先做這三件事</div>
       ${compactList([
-        `財位先保持<span class="tone-wealth">乾淨、明亮、不受壓</span>，擺件控制在3～5樣內；求財不要把所有招財物一次堆滿。`,
-        `${CURRENT_YEAR}年流年風水可先看<span class="tone-wealth">正東財位</span>與<span class="tone-career">正北偏財／貴人位</span>，但正南五黃、病符方位要先避凶，不急著催旺。`,
-        `健康與情緒空間以<span class="tone-health">安靜、通風、少雜物</span>為主；凶位不放大型動水，先化煞再補運。`
+        `${riWx}命本命軟裝先看徐玉蘭老師表：財位【${xuFs.wealth || '需查表'}】、事業／貴人位【${xuFs.career || '需查表'}】、文昌位【${xuFs.wenchang || '需查表'}】、桃花位【${xuFs.peach || '需查表'}】。`,
+        `${CURRENT_YEAR}年紫白飛星已套用：<span class="tone-wealth">正東八白旺財</span>、<span class="tone-career">正北六白偏財／貴人</span>、<span class="tone-career">東北四綠文昌</span>、<span class="tone-love">東南九紫喜慶</span>。`,
+        `凶位先避：<span class="tone-warn">正南五黃</span>、<span class="tone-health">西北二黑</span>、<span class="tone-warn">正西三碧</span>、<span class="tone-warn">西南七赤</span>，這些位置先求安靜整潔，不急著催旺。`
       ])}
     </div>
     ${waterPlacementHtml}
