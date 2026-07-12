@@ -570,6 +570,38 @@ grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
 gap:8px;
 margin-top:10px;
 }
+.zibai-grid{
+display:grid;
+grid-template-columns:repeat(3,minmax(0,1fr));
+gap:8px;
+margin-top:10px;
+}
+.zibai-cell{
+background:#FDF8EF;
+border-left:3px solid #D4B896;
+border-radius:6px;
+padding:9px 10px;
+min-height:92px;
+line-height:1.55;
+}
+.zibai-direction{
+display:block;
+font-size:0.74rem;
+font-weight:800;
+color:#8B6914;
+}
+.zibai-star{
+display:block;
+font-size:0.84rem;
+font-weight:800;
+margin-top:2px;
+}
+.zibai-action{
+display:block;
+font-size:0.78rem;
+margin-top:4px;
+color:#5A4030;
+}
 .focus-item{
 background:#FDF8EF;
 border-left:3px solid #D4B896;
@@ -774,6 +806,7 @@ border-radius:2px;
 .wuxing-wrap{flex-direction:column;}
 .date-row{flex-wrap:wrap;}
 .compare-wrap{grid-template-columns:1fr;}
+.zibai-grid{grid-template-columns:1fr;}
 .liuri-grid{grid-template-columns:repeat(2,1fr);}
 }
 
@@ -1534,7 +1567,7 @@ function getRizhiMarriageNote(riDz){
 const notes={
 子:'婚姻宮屬水，感情細膩敏感',丑:'婚姻宮屬土，感情穩重但較慢熱',
 寅:'婚姻宮屬木，感情積極主動',卯:'婚姻宮屬木，感情溫柔體貼',
-辰:'婚姻宮屬土，感情複雜多變',巳:'婚姻宮屬火，感情熱烈但易忽冷忽熱',
+辰:'婚姻宮屬土，重安全感、生活穩定與現實承諾；辰中藏癸、乙、戊，常把金錢安全感、責任感與朋友式陪伴一起放進關係裡',巳:'婚姻宮屬火，感情熱烈但易忽冷忽熱',
 午:'婚姻宮屬火，感情熱情奔放',未:'婚姻宮屬土，感情忠誠但固執',
 申:'婚姻宮屬金，感情理性但較冷淡',酉:'婚姻宮屬金，感情完美主義',
 戌:'婚姻宮屬土，感情忠誠，但婚後易有摩擦',亥:'婚姻宮屬水，感情浪漫多情'
@@ -1628,6 +1661,59 @@ const pillarList = [
   {label:'日柱', role:'自己與夫妻宮', tg:riTg, dz:riDz},
   {label:'時柱', role:'子女晚年宮／成果', tg:shi['天干']?.['天干']||'', dz:shi['地支']?.['地支']||''}
 ];
+const pillarDataList = [
+  {label:'年柱', data:nian},
+  {label:'月柱', data:yue},
+  {label:'日柱', data:ri},
+  {label:'時柱', data:shi}
+];
+
+function collectTenGodEntries(){
+  const entries = [];
+  pillarDataList.forEach(({label, data}) => {
+    const tgObj = data['天干'] || {};
+    const tg = tgObj['天干'] || '';
+    const tgShen = toTrad(tgObj['十神'] || '');
+    if(tg && tgShen && tgShen !== '日主'){
+      entries.push({pillar:label, place:'天干', stem:tg, shen:tgShen});
+    }
+    const cgRaw = data['地支']?.['藏干'] || {};
+    ['余气','中气','主气'].forEach(key => {
+      const item = cgRaw[key] || {};
+      const stem = item['天干'] || '';
+      const shen = toTrad(item['十神'] || '');
+      if(stem && shen && shen !== '日主'){
+        entries.push({pillar:label, place:'藏干', stem, shen});
+      }
+    });
+  });
+  return entries;
+}
+
+const tenGodEntries = collectTenGodEntries();
+function tenGodMatches(names){
+  const list = Array.isArray(names) ? names : [names];
+  return tenGodEntries.filter(entry => list.includes(entry.shen));
+}
+function formatTenGodEntries(entries){
+  if(!entries.length) return '未在原局天干或藏干中明顯出現';
+  return entries.map(entry => `${entry.pillar}${entry.place}${entry.stem}${entry.shen}`).join('、');
+}
+const caiEntries = tenGodMatches(['正財','偏財']);
+const zhengCaiEntries = tenGodMatches('正財');
+const pianCaiEntries = tenGodMatches('偏財');
+const jieCaiEntries = tenGodMatches('劫財');
+const guanEntries = tenGodMatches(['正官','七殺']);
+const shiShangEntries = tenGodMatches(['食神','傷官']);
+const spousePalaceHidden = (() => {
+  const cgRaw = ri['地支']?.['藏干'] || {};
+  return ['余气','中气','主气'].map(key => {
+    const item = cgRaw[key] || {};
+    const stem = item['天干'] || '';
+    const shen = toTrad(item['十神'] || '');
+    return stem && shen ? `${stem}${shen}` : '';
+  }).filter(Boolean);
+})();
 
 function relationTone(relation, strength){
   if(relation.includes('資源') || relation.includes('印') || relation.includes('自我') || relation.includes('比劫')){
@@ -1668,6 +1754,41 @@ function liunianAppliedSummary(){
     `地支【${lyDz}】五行屬【${WX_MAP[lyDz] || '—'}】，偏向今年的環境、人際與身體感受；它會讓「${relationPlain(dzRelation)}」。`,
     `套回你的盤來看：${tgRelation}。${relationTone(tgRelation, strongLabel)}`
   ];
+}
+
+function careerDirectionSummary(){
+  const directions = [];
+  if(curDyShen === '偏印' || curDyShen === '正印'){
+    directions.push('研究分析、命理玄學、身心靈、宗教哲學、教學進修、顧問型工作');
+  }
+  if(shiShangEntries.length){
+    directions.push('內容輸出、課程設計、寫作表達、作品型工作、講師或知識型產品');
+  }
+  if(guanEntries.length || guanStar){
+    directions.push('制度流程、專案管理、專業證照、需要責任感與規範的職位');
+  }
+  if(caiEntries.length){
+    directions.push('資源整合、客戶經營、財務秩序、可被成果衡量的工作');
+  }
+  return uniqueJoined(directions).replace(/、內容輸出/g, '；內容輸出');
+}
+
+function spouseProfileSummary(){
+  const parts = [];
+  parts.push(`配偶星五行是【${peiouStar}】，外型氣質多偏「${peiouStar === '木' ? '清爽、修長、有生長感或書卷感' : peiouStar === '火' ? '明亮、有精神、表情感強' : peiouStar === '土' ? '穩重、樸實、有安全感' : peiouStar === '金' ? '乾淨俐落、有輪廓或質感' : '柔和、聰明、流動感強'}」。`);
+  if(guanEntries.length){
+    parts.push(`原局有官星訊號：${formatTenGodEntries(guanEntries)}，所以你容易被有責任感、守規矩、願意承擔的人吸引。`);
+  }
+  if(spousePalaceHidden.length){
+    parts.push(`夫妻宮【${riDz}】藏干是${spousePalaceHidden.join('、')}，代表你在關係裡同時在意現實安全感、責任承諾與同伴感。`);
+  }
+  if(spousePalaceHidden.some(item => item.includes('比肩'))){
+    parts.push('相處模式偏朋友型、戰友型：能一起討論、一起做事、互相支援，會比只靠浪漫更讓你安心。');
+  }
+  if(riDz === '辰'){
+    parts.push('辰土夫妻宮也讓你比較慢熱，會觀察對方是否穩定、可靠、能不能一起面對生活細節。');
+  }
+  return parts;
 }
 
 function analyzeCombinations(){
@@ -2006,11 +2127,11 @@ function focusItem(label, value, toneClass = ''){
 function enhanceReportText(text){
   if(!text) return '';
   let html = String(text);
-  html = html.replace(/(財星|財位|招財|正財|偏財|得財|破財)/g, '<span class="key-wealth">$1</span>');
-  html = html.replace(/(官殺|事業|職場|主管|責任|規則|文昌|大運)/g, '<span class="key-career">$1</span>');
-  html = html.replace(/(配偶星|夫妻宮|感情|桃花|婚姻|親密關係)/g, '<span class="key-love">$1</span>');
+  html = html.replace(/(財星|財位|招財|正財|偏財|劫財|得財|破財|收入|客戶)/g, '<span class="key-wealth">$1</span>');
+  html = html.replace(/(官殺|正官|七殺|食神|傷官|適合職業|職涯方向|文昌|升遷|貴人)/g, '<span class="key-career">$1</span>');
+  html = html.replace(/(配偶星|夫妻宮|感情|桃花|婚姻宮|婚姻|親密關係|伴侶|正緣)/g, '<span class="key-love">$1</span>');
   html = html.replace(/(健康|脾胃|腎臟|膀胱|保養|病符|五黃)/g, '<span class="key-health">$1</span>');
-  html = html.replace(/(身強|身弱|喜用神|忌神|用神|日主|流年)/g, '<span class="key-strength">$1</span>');
+  html = html.replace(/(身強|身弱|喜用神|忌神|用神)/g, '<span class="key-strength">$1</span>');
   html = html.replace(/【([^】]+)】/g, '<span class="key-token">【$1】</span>');
   html = html.replace(/^([^：:]{2,14}[：:])/, '<span class="detail-label">$1</span>');
   return html;
@@ -2147,6 +2268,7 @@ const XU_WATER_COMMON = '長方形約60x30x30公分，或圓形直徑約40公分
 const XU_YEAR_WATER_NOTE = `${CURRENT_YEAR}年若搭配紫白飛星：一白在中宮、六白在正北，可評估小型動水；七赤在西南屬化洩情境，若使用活水要小而安靜；二黑在西北、五黃在正南，以安靜化煞為主，不放大型動水。`;
 const ZIBAI_2026 = [
   {direction:'正東', star:'八白左輔星', theme:'旺財、權力、置業', action:'可保持明亮整潔，放存摺、地契、保險櫃、黃土色系物件或鹽燈。', tone:'tone-wealth'},
+  {direction:'中宮', star:'一白貪狼星', theme:'人緣、流動、名氣', action:'全屋中心保持通透，不堆雜物；若要用水意象，以小型、乾淨、可維護為主。', tone:'tone-love'},
   {direction:'正北', star:'六白武曲星', theme:'偏財、貴人、權威', action:'適合用在工作、升遷、貴人與偏財布局，可放金屬、白灰色系或小型動水。', tone:'tone-career'},
   {direction:'東北', star:'四綠文曲星', theme:'文昌、學習、考試', action:'適合書房、讀書、企劃與進修，可放綠色植物、文具、書籍。', tone:'tone-career'},
   {direction:'東南', star:'九紫右弼星', theme:'喜慶、桃花、人氣', action:'適合人緣、曝光、喜事與合作，可用紅紫色系或花卉點亮。', tone:'tone-love'},
@@ -2171,31 +2293,82 @@ function uniqueJoined(list){
     return true;
   }).join('、');
 }
+function splitDirections(text){
+  return splitZhList(text).map(item => item.replace(/方$/, '方'));
+}
+function frequencySummary(groups, minCount = 2){
+  const count = new Map();
+  groups.forEach(group => {
+    const unique = [...new Set(group.filter(Boolean))];
+    unique.forEach(item => count.set(item, (count.get(item) || 0) + 1));
+  });
+  return [...count.entries()]
+    .filter(([,qty]) => qty >= minCount)
+    .sort((a,b) => b[1] - a[1] || a[0].localeCompare(b[0], 'zh-Hant'))
+    .map(([item, qty]) => `${item}（${qty}項重複）`);
+}
+function extractColors(text){
+  const colors = ['藍綠','土黃色','紅','橘','黃','綠','藍','黑','白','灰','金','銀','紫'];
+  return colors.filter(color => String(text || '').includes(color));
+}
+function xuOverlapSummary(){
+  const categories = [
+    {label:'財位', direction:xuFs.wealth, remedy:xuRemedies.wealth},
+    {label:'事業／貴人位', direction:xuFs.career, remedy:xuRemedies.career},
+    {label:'文昌／學習位', direction:xuFs.wenchang, remedy:xuRemedies.wenchang},
+    {label:'桃花／人緣位', direction:xuFs.peach, remedy:xuRemedies.peach}
+  ].filter(item => item.direction && item.remedy);
+  const directionRows = categories.flatMap(cat => splitDirections(cat.direction).map(direction => ({direction, label:cat.label})));
+  const directionMap = new Map();
+  directionRows.forEach(({direction, label}) => {
+    if(!directionMap.has(direction)) directionMap.set(direction, []);
+    directionMap.get(direction).push(label);
+  });
+  const sharedDirections = [...directionMap.entries()]
+    .filter(([,labels]) => labels.length >= 2)
+    .sort((a,b) => b[1].length - a[1].length || a[0].localeCompare(b[0], 'zh-Hant'))
+    .map(([direction, labels]) => `${direction}：${labels.join('＋')}`);
+  const sharedItems = frequencySummary(categories.map(cat => splitZhList(cat.remedy.items)), 2);
+  const sharedZodiac = frequencySummary(categories.map(cat => splitZhList(cat.remedy.zodiac)), 2);
+  const sharedMaterials = frequencySummary(categories.map(cat => splitZhList(cat.remedy.material)), 2);
+  const sharedColors = frequencySummary(categories.map(cat => extractColors(cat.remedy.items)), 2);
+  return {sharedDirections, sharedItems, sharedZodiac, sharedMaterials, sharedColors};
+}
 function xuCombinedRemedyHtml(){
   const remedies = Object.values(xuRemedies || {});
   if(!remedies.length) return '';
-  const allItems = uniqueJoined(remedies.flatMap(r => splitZhList(r.items)).slice(0, 28));
-  const allZodiac = uniqueJoined(remedies.flatMap(r => splitZhList(r.zodiac)));
-  const allMaterials = uniqueJoined(remedies.flatMap(r => splitZhList(r.material)));
+  const overlap = xuOverlapSummary();
   return `
     <div class="summary-panel">
       <div class="summary-panel-title">徐玉蘭老師${riWx}命軟裝綜合版</div>
       ${compactList([
-        `可以優先準備：${allItems}`,
-        `生肖擺件可抓：${allZodiac}`,
-        `材質方向：${allMaterials}`,
-        `使用方式：先選你真正要加強的主題，再對應方位擺放，不需要把財位、事業位、文昌位、桃花位全部一次擺滿。`
+        overlap.sharedDirections.length ? `重複方位：${overlap.sharedDirections.join('；')}` : '',
+        overlap.sharedColors.length ? `重複顏色：${overlap.sharedColors.join('、')}` : '',
+        overlap.sharedItems.length ? `重複添運物品：${overlap.sharedItems.slice(0, 18).join('、')}` : '',
+        overlap.sharedZodiac.length ? `重複生肖擺件：${overlap.sharedZodiac.join('、')}` : '',
+        overlap.sharedMaterials.length ? `重複材質：${overlap.sharedMaterials.join('、')}` : '',
+        `使用方式：先選你真正要加強的主題；若同一方位同時出現在多個主題，就可以優先整理那個方位，再放少量、好維護的物品。`
       ])}
     </div>
   `;
 }
 function zibai2026Html(){
+  const order = ['東南','正南','西南','正東','中宮','正西','東北','正北','西北'];
+  const map = Object.fromEntries(ZIBAI_2026.map(item => [item.direction, item]));
   return `
     <div class="summary-panel">
-      <div class="summary-panel-title">${CURRENT_YEAR}紫白飛星已套用</div>
-      <div class="focus-grid">
-        ${ZIBAI_2026.map(item => focusItem(`${item.direction}｜${item.star}`, `${item.theme}：${item.action}`, item.tone)).join('')}
+      <div class="summary-panel-title">${CURRENT_YEAR}紫白飛星九宮格</div>
+      <div class="zibai-grid">
+        ${order.map(direction => {
+          const item = map[direction];
+          if(!item) return '';
+          return `<div class="zibai-cell"><span class="zibai-direction">${direction}</span><span class="zibai-star ${item.tone}">${item.star}｜${item.theme}</span><span class="zibai-action">${item.action}</span></div>`;
+        }).join('')}
       </div>
+      ${compactList([
+        '看法很簡單：先找家中對應方位，再看該格是適合催旺、適合讀書工作，還是要安靜避動。',
+        '正南五黃、西北二黑、正西三碧、西南七赤先不要急著放大型動水或強烈招財物；正東、正北、東北、東南則可依需求溫和啟動。'
+      ])}
     </div>
   `;
 }
@@ -2435,11 +2608,15 @@ const sec7Html = personalCard({
   icon:'💰', title:'你的財運分析', id:'BAZI_029',
   personalSummary:client.name+'，以你的日主【'+riTg+riWx+'】來看，財星是【'+caiStar+'】。'+lyYear+'年流年【'+lyGz+'】，'+(lyWx===caiStar?'剛好碰到你的財星，賺錢機會會比較容易被看見。':'財運不只看有沒有錢進來，也要看你能不能穩穩接住。'),
   details:[
-    isStrong?'你屬於身強格局，遇到財星時比較能主動把握資源與機會。':'你屬於身弱格局，財星出現時要記得量力而為，先穩住節奏再擴張。',
-    lyYear+'年的財星狀態可以這樣看：'+(lyWx===caiStar?'流年逢財，機會較多。':lyWx===riWx?'流年比劫，財務上要注意競爭、分帳或衝動花費。':getRelation(riWx,lyWx)+'。'),
-    ...wealthInsights,
-    new_xiyong ? '想讓財運更順，可以多靠近這類喜用神能量：'+new_xiyong : '',
-    new_buyun  ? '日常補運可以從這裡開始：'+new_buyun : '',
+    caiEntries.length
+      ? '原局不是沒有財星。你盤裡的財星位置是：'+formatTenGodEntries(caiEntries)+'。正財偏向穩定收入、現實資源與金錢秩序；偏財偏向機會、人脈與彈性收入。'
+      : '原局天干與藏干沒有明顯財星，所以財運要更重視大運、流年與食傷生財的時機。',
+    zhengCaiEntries.length ? '正財重點：'+formatTenGodEntries(zhengCaiEntries)+'，代表你其實有務實理財、穩定累積與看重安全感的一面。' : '',
+    pianCaiEntries.length ? '偏財重點：'+formatTenGodEntries(pianCaiEntries)+'，代表你也有靠機會、人脈、專案或非固定收入打開財路的可能。' : '',
+    jieCaiEntries.length ? '劫財提醒：'+formatTenGodEntries(jieCaiEntries)+'，錢容易牽涉朋友、家人、分帳或共同資源；合夥和借貸要規則清楚。' : '',
+    lyYear+'年流年是【'+lyStar+'】，不是直接的財星年；它比較像先加強學習、資源、貴人與內在整理。財運要靠你把專業整理成可收費、可成交的成果。',
+    isStrong?'你屬於身強格局，原局又有財星，適合主動整理客戶、價格、服務方案與收款規則。':'你屬於身弱格局，財星出現時要記得量力而為，先穩住節奏再擴張。',
+    '喜用方向仍可抓【'+yongshen+'】；對你來說，金代表輸出與作品，水代表財與客戶，木代表規則與職場位置，這三類能量要被好好使用。'
   ].filter(Boolean),
   tags:['財星'+caiStar, strongLabel, '流年'+lyGz]
 });
@@ -2452,6 +2629,9 @@ const sec8Html = personalCard({
     getDayunCareerNote(curDyShen)+'，所以這段時間的職涯選擇，可以多觀察自己是不是正在累積更長線的能力。',
     lyYear+'年流年是【'+lyStar+'】：'+getLiunianCareerNote(lyStar)+'。',
     '用這張盤來看，事業不是只看官殺星【'+guanStar+'】，還要看目前大運【'+curDyShen+'】怎麼讓你做事：它比較偏向先累積專業、建立方法，再用作品或成果被看見。',
+    '適合職業／職涯方向：'+careerDirectionSummary()+'。這些方向不是硬性職業名稱，而是你比較容易發揮的工作型態。',
+    guanEntries.length ? '官星落點：'+formatTenGodEntries(guanEntries)+'，表示責任、制度、名聲與被看見的位置會在這些宮位被啟動。' : '',
+    shiShangEntries.length ? '食傷落點：'+formatTenGodEntries(shiShangEntries)+'，代表你可以靠表達、作品、教學、內容輸出或方法整理來累積職涯能見度。' : '',
     ...careerInsights,
     teacherViewBlock(teacherKB, '職場人際策略', {ten_god:curDyShen}, 1, {title:'老師判斷依據（職場）', maxPoints:3}),
     '遇到壓力時，不一定要急著硬碰硬；先分清楚哪些是責任，哪些只是別人的期待，會更穩。',
@@ -2465,6 +2645,7 @@ const sec9Html = personalCard({
   personalSummary:client.name+'，以傳統八字來看，你的配偶星是【'+peiouStar+'】。'+lyYear+'年流年【'+lyGz+'】，'+(lyWx===peiouStar?'剛好碰到配偶星，感情機緣會比較容易浮上檯面。':'感情的重點不一定是突然出現大事件，而是你怎麼回應關係裡的靠近與距離。'),
   details:[
     '你的日支是【'+riDz+'】，也就是婚姻宮；它透露的是你在親密關係裡容易期待什麼、在意什麼。'+getRizhiMarriageNote(riDz)+'。',
+    ...spouseProfileSummary(),
     lyYear+'年的流年十神是【'+lyStar+'】：'+getLiunianLoveNote(lyStar)+'。這裡講的是今年關係裡比較容易出現的心理狀態，不是直接斷定一定結婚或分手。',
     lyWx===peiouStar
       ? '今年流年五行剛好碰到你的配偶星【'+peiouStar+'】，比較容易有人際、曖昧或關係議題被看見；但是否能成為穩定關係，還要看夫妻宮是否受沖合與大運是否支持。'
@@ -2530,8 +2711,8 @@ const sec12Html = `
       <div class="summary-panel-title">統整後先做這三件事</div>
       ${compactList([
         `${riWx}命本命軟裝先看徐玉蘭老師表：財位【${xuFs.wealth || '需查表'}】、事業／貴人位【${xuFs.career || '需查表'}】、文昌位【${xuFs.wenchang || '需查表'}】、桃花位【${xuFs.peach || '需查表'}】。`,
-        `${CURRENT_YEAR}年紫白飛星已套用：<span class="tone-wealth">正東八白旺財</span>、<span class="tone-career">正北六白偏財／貴人</span>、<span class="tone-career">東北四綠文昌</span>、<span class="tone-love">東南九紫喜慶</span>。`,
-        `凶位先避：<span class="tone-warn">正南五黃</span>、<span class="tone-health">西北二黑</span>、<span class="tone-warn">正西三碧</span>、<span class="tone-warn">西南七赤</span>，這些位置先求安靜整潔，不急著催旺。`
+        `${CURRENT_YEAR}年流年風水先抓四個可用位置：正東偏財與置業、正北偏財與貴人、東北讀書考試、東南人緣喜慶。想求哪件事，就先整理對應方位，不需要全部同時催旺。`,
+        `正南、西北、正西、西南今年比較需要安靜，尤其不要先放大型水缸或強動能擺件；先乾淨、少雜物、少敲打，就是第一步。`
       ])}
     </div>
     ${waterPlacementHtml}
