@@ -2082,24 +2082,24 @@ const fengshuiInsights = qSmartMany(kbNew, [
 ], 6);
 const XU_FS_LAYOUT = {
   金:{
-    男:{wealth:'西南方', wenchang:'西北方', peach:'正北方', health:'東北方'},
-    女:{wealth:'正西方', wenchang:'西北方', peach:'東南方', health:'正南方'}
+    男:{wealth:'東南方、正東方、東北方、正北方', career:'正南方、東南方、西南方、東北方', wenchang:'東南方、東北方、西北方、正北方', peach:'東南方、正東方、東北方、西北方'},
+    女:{wealth:'東南方、正東方、東北方、正北方', career:'正南方、東南方、西南方、東北方', wenchang:'東南方、東北方、西北方、正北方', peach:'東南方、正東方、東北方、西北方'}
   },
   木:{
-    男:{wealth:'正南方', wenchang:'正東方', peach:'西南方', health:'正北方'},
-    女:{wealth:'東南方', wenchang:'正東方', peach:'西北方', health:'西南方'}
+    男:{wealth:'東南方、正南方、西南方、東北方、西北方', career:'西南方、正西方、東北方、西北方', wenchang:'正南方、東南方、西南方', peach:'西南方、正西方、東北方、西北方'},
+    女:{wealth:'東南方、正南方、西南方、東北方、西北方', career:'西南方、正西方、東北方、西北方', wenchang:'正南方、東南方、西南方', peach:'西南方、正西方、東北方、西北方'}
   },
   水:{
-    男:{wealth:'正北方', wenchang:'東北方', peach:'正東方', health:'正西方'},
-    女:{wealth:'西北方', wenchang:'東北方', peach:'正南方', health:'東南方'}
+    男:{wealth:'正南方、東南方、西南方、正東方', career:'正南方、東南方、西南方、東北方、西北方', wenchang:'東南方、正東方、東北方', peach:'正南方、東南方、西南方、東北方、西北方'},
+    女:{wealth:'正南方、東南方、西南方、正東方', career:'正南方、東南方、西南方、東北方、西北方', wenchang:'東南方、正東方、東北方', peach:'正南方、東南方、西南方、東北方、西北方'}
   },
   火:{
-    男:{wealth:'正東方', wenchang:'正南方', peach:'正西方', health:'正東方'},
-    女:{wealth:'東北方', wenchang:'正南方', peach:'東北方', health:'西北方'}
+    男:{wealth:'西南方、正西方、東北方、西北方', career:'正西方、東北方、西北方、正北方', wenchang:'正南方、東南方、西南方、東北方、西北方', peach:'西南方、正西方、東北方、西北方'},
+    女:{wealth:'西南方、正西方、東北方、西北方', career:'正西方、東北方、西北方、正北方', wenchang:'正南方、東南方、西南方、東北方、西北方', peach:'西南方、正西方、東北方、西北方'}
   },
   土:{
-    男:{wealth:'東北方', wenchang:'西南方', peach:'東北方', health:'東南方'},
-    女:{wealth:'西南方', wenchang:'西南方', peach:'西南方', health:'正北方'}
+    男:{wealth:'正西方、東北方、正北方、西北方', career:'東南方、正東方、東北方、正北方', wenchang:'正西方、東北方、西北方', peach:'東南方、正東方、東北方、正北方'},
+    女:{wealth:'正西方、東北方、正北方、西北方', career:'東南方、正東方、東北方、正北方', wenchang:'正西方、東北方、西北方', peach:'東南方、正東方、東北方、正北方'}
   }
 };
 const xuFs = XU_FS_LAYOUT[riWx]?.[client.gender === '男' ? '男' : '女'] || {};
@@ -2110,6 +2110,39 @@ const XU_WATER_TANK = {
   火:'陶瓷、玻璃或金屬製，顏色以白色、灰色較合適；水缸裡可以放銅幣或錢幣。',
   土:'陶瓷或玻璃製，顏色以藍色、黑色、白色或灰色較合適；水缸裡可以放銅幣或錢幣。'
 };
+const XU_FS_REMEDIES = {
+  金:{
+    wealth:{items:'綠、藍綠色系地毯、燈具、水晶、翡翠、水缸或裝水玻璃杯、植栽、竹子、萬年青', zodiac:'虎、兔、龍、羊、豬', material:'木製材質'},
+    career:{items:'紅、黃、橘、綠色系地毯、同色系瓶身香氛蠟燭、燈具、紅／紫色鮮花', zodiac:'虎、蛇、馬、羊、狗', material:'木製材質或同色系生肖布偶'},
+    wenchang:{items:'藍、藍綠、黑色系地毯、水缸或裝水玻璃杯、同色系掛畫', zodiac:'鼠、龍、猴、豬', material:'玻璃、水晶材質或同色系生肖布偶'},
+    peach:{items:'綠、藍綠色系掛畫、地毯、燈具、水晶、翡翠、瓶身香氛與同色系床單枕套', zodiac:'虎、兔、龍、羊、豬', material:'木製材質'}
+  },
+  木:{
+    wealth:{items:'紅、橘、黃、土黃色系掛畫、水缸或裝水玻璃杯、天然玉石、陶土物件、紅／橘色地毯、紅／紫色鮮花與香氛、紅色燈具', zodiac:'牛、龍、蛇、馬、羊、狗', material:'陶瓷、玉石材質或同色系生肖布偶'},
+    career:{items:'白、灰、金、銀色系瓶身香氛、金／銀色燈具、金屬製鬧鐘、錢幣、風鈴、音樂盒', zodiac:'牛、蛇、猴、雞', material:'金屬材質'},
+    wenchang:{items:'紅、黃、橘色系地毯、掛畫、紅／紫色鮮花與香氛、紅色燈具', zodiac:'蛇、馬、羊、狗', material:'陶瓷、玉石材質或同色系生肖布偶'},
+    peach:{items:'白、灰、金、銀色系掛畫、地毯、燈具、白色瓶身香氛、金屬鬧鐘、錢幣、風鈴、音樂盒', zodiac:'牛、蛇、猴、雞', material:'金屬材質'}
+  },
+  水:{
+    wealth:{items:'紅、橘、黃、綠色系掛畫、陶瓷品、地毯、水缸或裝水玻璃杯、紅／紫色瓶身香氛與鮮花、紅色燈具、鹽燈、綠色植栽、萬年青、竹子、綠色水晶／翡翠', zodiac:'虎、蛇、馬、羊、狗', material:'木製材質或紅、黃、橘色系生肖布偶'},
+    career:{items:'紅、黃、橘、土黃色系地毯、紅／紫色鮮花與香氛蠟燭、紅色燈具、鹽燈、天然玉石、黃土色石頭', zodiac:'牛、龍、蛇、馬、羊、狗', material:'陶瓷、玉石材質'},
+    wenchang:{items:'綠、藍綠色系地毯、掛畫、綠色植栽、萬年青、竹子、綠色水晶、翡翠、燈具', zodiac:'虎、兔、龍、羊、豬', material:'木製材質或同色系生肖布偶'},
+    peach:{items:'紅、黃、橘、土黃色系掛畫、地毯、紅／紫色瓶身香氛、紅色燈具、鹽燈、天然玉石、陶土擺件', zodiac:'牛、龍、蛇、馬、羊、狗', material:'陶瓷、玉石材質'}
+  },
+  火:{
+    wealth:{items:'白、灰、金、銀色系掛畫、燈具、水缸或裝水玻璃杯、白色瓶身香氛、金屬鬧鐘、錢幣、風鈴、音樂盒', zodiac:'牛、蛇、猴、雞', material:'金屬製材質'},
+    career:{items:'藍、藍綠、黑、白、灰、金、銀色系地毯、燈具、白色鮮花／香氛蠟燭、金屬擺件', zodiac:'鼠、牛、龍、猴、雞、豬', material:'金屬、玻璃、水晶製材質'},
+    wenchang:{items:'紅、黃、橘、土黃色系地毯、掛畫、陶瓷、玉石、陶土物件、紅／紫／土黃色瓶身香氛、紅色燈具、鹽燈', zodiac:'牛、龍、蛇、馬、羊、狗', material:'陶瓷、玉石材質或同色系生肖布偶'},
+    peach:{items:'藍、藍綠、黑、白、灰、金、銀色系掛畫、地毯、同色系瓶身香氛、金屬擺品、水晶或裝水玻璃杯', zodiac:'鼠、牛、龍、猴、雞、豬', material:'金屬、玻璃、水晶材質'}
+  },
+  土:{
+    wealth:{items:'藍、藍綠、黑、白、灰、金、銀色系掛畫、水缸或裝水玻璃杯、白／灰／金／銀色燈具、白色瓶身香氛、金屬鬧鐘、錢幣、風鈴、音樂盒', zodiac:'鼠、牛、龍、猴、雞、豬', material:'金屬製材質'},
+    career:{items:'綠、藍綠色系鮮花、香氛蠟燭、水晶、翡翠、綠色燈具、木製品', zodiac:'虎、兔、龍、羊、豬', material:'木製材質'},
+    wenchang:{items:'白、灰、金、銀色系地毯、掛畫、燈具、鹽燈、白色系瓶身香氛、金屬鬧鐘、風鈴、音樂盒、錢幣', zodiac:'牛、蛇、猴、雞', material:'金屬製材質或同色系生肖布偶'},
+    peach:{items:'藍、藍綠、綠色系掛畫、地毯、燈具、同色系瓶身香氛、綠色水晶、翡翠、木製品', zodiac:'虎、兔、龍、羊、豬', material:'木製材質'}
+  }
+};
+const xuRemedies = XU_FS_REMEDIES[riWx] || {};
 const XU_WATER_COMMON = '長方形約60x30x30公分，或圓形直徑約40公分；不加蓋、不打燈，水量8～9分滿。水要乾淨流動，可用馬達、濾水器或定期換水；小空間可先用裝水玻璃杯，每天換水。';
 const XU_YEAR_WATER_NOTE = `${CURRENT_YEAR}年若搭配紫白飛星，一白、六白方位可評估小型動水；二黑、五黃等凶位以安靜化煞為主，未細看前不要放大型動水。`;
 const waterTankInsights = qSmartMany(kbNew, [
@@ -2117,17 +2150,31 @@ const waterTankInsights = qSmartMany(kbNew, [
   {subItems:'水缸佈置說明', query_keys:{scope:'general'}, limit:1},
   {subItems:'水缸佈置說明', query_keys:{year:CURRENT_YEAR}, limit:1},
 ], 3);
+function xuRemedyDetail(label, direction, remedy, toneClass = ''){
+  if(!direction || !remedy) return '';
+  return `
+    <div class="focus-item">
+      <span class="focus-label">${label}</span>
+      <span class="focus-value ${toneClass}">${direction}</span>
+      <ul class="action-list">
+        <li><strong>添運物品：</strong>${remedy.items || '需查表'}</li>
+        <li><strong>生肖擺件：</strong>${remedy.zodiac || '需查表'}</li>
+        <li><strong>材質建議：</strong>${remedy.material || '需查表'}</li>
+      </ul>
+    </div>
+  `;
+}
 const waterPlacementHtml = `
   <div class="summary-panel">
     <div class="summary-panel-title">徐玉蘭老師五行命主方位</div>
     <div class="focus-grid">
-      ${focusItem('財位／招財水缸', xuFs.wealth || '需查表', 'tone-wealth')}
-      ${focusItem('文昌／學習位', xuFs.wenchang || '需查表', 'tone-career')}
-      ${focusItem('桃花／人緣位', xuFs.peach || '需查表', 'tone-love')}
-      ${focusItem('健康／保養位', xuFs.health || '需查表', 'tone-health')}
+      ${xuRemedyDetail('財位／招財水缸', xuFs.wealth || '需查表', xuRemedies.wealth, 'tone-wealth')}
+      ${xuRemedyDetail('事業／貴人位', xuFs.career || '需查表', xuRemedies.career, 'tone-career')}
+      ${xuRemedyDetail('文昌／學習位', xuFs.wenchang || '需查表', xuRemedies.wenchang, 'tone-career')}
+      ${xuRemedyDetail('桃花／人緣位', xuFs.peach || '需查表', xuRemedies.peach, 'tone-love')}
     </div>
     ${compactList([
-      `招財水缸優先放在財位【${xuFs.wealth || '需查表'}】，其他方位以對應擺件補運，不是每一格都放水缸。`,
+      `招財水缸優先放在財位【${xuFs.wealth || '需查表'}】；若有多個財位，先選家中最乾淨、明亮、不受壓且方便維護水質的位置。`,
       `水缸材質與顏色：${XU_WATER_TANK[riWx] || waterTankInsights[0] || '需依五行命主選材質與添運色彩。'}`,
       `共通設置：${XU_WATER_COMMON}`,
       `流年提醒：${XU_YEAR_WATER_NOTE}`
