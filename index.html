@@ -2966,6 +2966,8 @@ const sec10Html = personalCard({
 });
 
 // ⑪ 流日日曆
+const HEALTH_KE_MAP = {木:'土',火:'金',土:'水',金:'木',水:'火'};
+const healthCautionWx = Object.entries(HEALTH_KE_MAP).find(([,target]) => target === riWx)?.[0] || riWx;
 const sec11Html = `
 <div class="alert-box">
   <strong>📌 ${client.name} 的個人化流日提示（${lyYear}年）</strong><br>
@@ -2990,7 +2992,7 @@ const sec11Html = `
   <div class="liuri-card">
     <div class="liuri-card-icon">🏥</div>
     <div class="liuri-card-title">健康注意日</div>
-    <div class="liuri-card-days">注意：${WX_ORGAN[riWx]?.split('、')[0]||''}（${riWx}）<br>逢${riWx}日或${Object.entries(ke).find(([,target]) => target === riWx)?.[0] || riWx}日留意</div>
+    <div class="liuri-card-days">注意：${WX_ORGAN[riWx]?.split('、')[0]||''}（${riWx}）<br>逢${riWx}日或${healthCautionWx}日留意</div>
   </div>
 </div>
 `;
