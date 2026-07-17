@@ -489,6 +489,8 @@ margin-top:6px;
 .key-token{
 color:#8B6914;
 font-weight:800;
+}
+.key-token-core{
 background:#FFF7E6;
 padding:0 3px;
 border-radius:4px;
@@ -505,12 +507,20 @@ font-weight:800;
 color:#2563EB;
 font-weight:800;
 }
+.key-output{
+color:#15803D;
+font-weight:800;
+}
 .key-love{
 color:#BE185D;
 font-weight:800;
 }
 .key-health{
 color:#15803D;
+font-weight:800;
+}
+.key-water{
+color:#1E40AF;
 font-weight:800;
 }
 .key-resource{
@@ -1701,7 +1711,7 @@ function tenGodMatches(names){
 }
 function formatTenGodEntries(entries){
   if(!entries.length) return '未在原局天干或藏干中明顯出現';
-  return entries.map(entry => `${entry.pillar}${entry.place}${entry.stem}${entry.shen}`).join('、');
+  return entries.map(entry => `${entry.pillar}${entry.place} ${entry.stem}${WX_MAP[entry.stem] || ''}（${entry.shen}）`).join('、');
 }
 const caiEntries = tenGodMatches(['正財','偏財']);
 const zhengCaiEntries = tenGodMatches('正財');
@@ -1738,13 +1748,30 @@ function relationPlain(relation){
   return relation;
 }
 
+function tenGodImpact(shen){
+  const impacts = {
+    正印:'學習、資源、保護、貴人與安全感被加強',
+    偏印:'研究、直覺、非典型學習、休息與內在整理被加強',
+    正財:'務實、金錢秩序、責任感與現實資源的掌握被加強',
+    偏財:'機會、人脈、彈性收入、資源交換與對外開拓被加強',
+    正官:'責任、制度、名聲、職場位置與穩定承諾被加強',
+    七殺:'壓力、挑戰、競爭、行動力與危機處理被加強',
+    食神:'表達、作品、享受、教學與穩定輸出被加強',
+    傷官:'創意、突破、反應速度、表達慾與不喜被管的能量被加強',
+    比肩:'自我意識、主見、同輩競爭與獨立性被加強',
+    劫財:'朋友互動、資源分配、合作競爭與財務流動被加強',
+    日主:'自我狀態、主見、核心需求與行動方式被加強'
+  };
+  return impacts[shen] || '此宮位的主題被加強';
+}
+
 function dayunAppliedSummary(){
   const tgRelation = getRelation(riWx, WX_MAP[curDyTg]);
   const dzRelation = getRelation(riWx, WX_MAP[curDyDz]);
   const firstHalf = curDyAge && curDyEnd ? `${curDyAge}～${Math.min(Number(curDyAge) + 4, Number(curDyEnd))}歲` : '前五年';
   const secondHalf = curDyAge && curDyEnd ? `${Math.min(Number(curDyAge) + 5, Number(curDyEnd))}～${curDyEnd}歲` : '後五年';
   return [
-    `這一步大運不是要你自己判斷：我已經替你定位在【${curDyGz}】。天干【${curDyTg}】看${firstHalf}較明顯的外在事件，地支【${curDyDz}】看${secondHalf}逐漸形成的環境與累積。`,
+    `這十年（${curDyAge}～${curDyEnd}歲）整體由【${curDyShen}】主導。其中前五年（${firstHalf}）外在環境與突發事件更容易顯現出【${curDyTg}${WX_MAP[curDyTg] || ''}】的訊號；後五年（${secondHalf}）則進入【${curDyDz}${WX_MAP[curDyDz] || ''}】內在心境與能量累積的深水區。`,
     `【${curDyTg}】對你的日主【${riTg}】是【${curDyShen || getShishen(riTg, curDyTg)}】，所以這十年的主題偏向：${getDayunCareerNote(curDyShen)}。`,
     `地支【${curDyDz}】五行屬【${WX_MAP[curDyDz] || '—'}】，會讓「${relationPlain(dzRelation)}」。因為你本來就是【${strongLabel}】，所以好處是底氣變足，盲點是容易想太多、拖延或變得更固執。`
   ];
@@ -1789,7 +1816,7 @@ function wealthBigSummary(){
     : pian > zheng
       ? '偏向機會財、人脈財、專案收入與彈性收入'
       : '穩定收入與機會財都要看';
-  const caution = jie ? `但同時有${jie}個劫財訊號，合夥、借貸、分帳、朋友家人牽涉金錢時要先講規則。` : '劫財訊號不重，財務上更適合靠制度穩定累積。';
+  const caution = jie ? `但同時有${jie}個劫財訊號，合夥、借貸、分帳、朋友家人牽涉金錢時要先講規則。命盤中帶有劫財，代表你對朋友大方、不拘小節；「親兄弟明算帳」不是小氣，而是幫你守住財富、同時維持和氣的防火牆。` : '劫財訊號不重，財務上更適合靠制度穩定累積。';
   return `財運總結：原局共有${total}個財星訊號（正財${zheng}、偏財${pian}），屬於「${level}」。你的財運模式${style}。${caution}`;
 }
 
@@ -1800,7 +1827,7 @@ function careerBigSummary(){
     ? '這十年的事業主軸是先累積專業、建立方法論，再用作品、課程或顧問服務被看見'
     : `這十年的事業主軸受【${curDyShen}】影響，需要搭配原局官星與食傷一起看`;
   const evidence = [
-    hasOfficial ? `官星${guanEntries.length}個，代表責任、制度、名聲與職場位置不是空的` : '',
+    hasOfficial ? `正官${guanEntries.filter(entry => entry.shen === '正官').length || guanEntries.length}個，代表責任、制度、名聲與職場位置不是空的` : '',
     hasOutput ? `食傷${shiShangEntries.length}個，代表可靠表達、教學、作品、內容輸出累積能見度` : '',
     caiEntries.length ? `財星${caiEntries.length}個，代表成果最好能轉成明確價格、服務方案與收款規則` : ''
   ].filter(Boolean).join('；');
@@ -2161,13 +2188,19 @@ function focusItem(label, value, toneClass = ''){
 function enhanceReportText(text){
   if(!text) return '';
   let html = String(text);
+  const coreTokens = new Set([riTg, riWx, riTg+riWx, yueDz, yueDzWx, strongLabel, curDyGz, lyGz, lyTg, lyDz]);
+  html = html.replace(/【([^】]+)】/g, (_, token) => {
+    const cls = coreTokens.has(token) ? 'key-token key-token-core' : 'key-token';
+    return `<span class="${cls}">【${token}】</span>`;
+  });
+  html = html.replace(/(偏印|正印|印星|資源|學習|貴人|休息|內在整理|研究|宗教|藝術|獨立研究|進修)/g, '<span class="key-resource">$1</span>');
   html = html.replace(/(財星|財位|招財|正財|偏財|劫財|得財|破財|收入)/g, '<span class="key-wealth">$1</span>');
-  html = html.replace(/(官殺|正官|七殺|食神|傷官|適合職業|職涯方向|文昌|升遷|貴人)/g, '<span class="key-career">$1</span>');
+  html = html.replace(/(食神|傷官|食傷|輸出|表達|作品|教學|內容輸出|創意)/g, '<span class="key-output">$1</span>');
+  html = html.replace(/(官星|正官|七殺|官殺|適合職業|職涯方向|文昌|升遷|責任|制度|名聲|職場位置)/g, '<span class="key-career">$1</span>');
   html = html.replace(/(配偶星|夫妻宮|感情|桃花|婚姻宮|婚姻|親密關係|伴侶|正緣)/g, '<span class="key-love">$1</span>');
-  html = html.replace(/(健康|脾胃|腎臟|膀胱|保養|病符|五黃)/g, '<span class="key-health">$1</span>');
-  html = html.replace(/(偏印|正印|印星|資源|學習|休息|內在整理|研究|宗教|藝術|獨立研究)/g, '<span class="key-resource">$1</span>');
+  html = html.replace(/(腎臟|膀胱)/g, '<span class="key-water">$1</span>');
+  html = html.replace(/(健康|脾胃|消化系統|保養|病符|五黃)/g, '<span class="key-health">$1</span>');
   html = html.replace(/(身強|身弱|喜用神|忌神|用神)/g, '<span class="key-strength">$1</span>');
-  html = html.replace(/【([^】]+)】/g, '<span class="key-token">【$1】</span>');
   html = html.replace(/^([^：:]{2,14}[：:])/, '<span class="detail-label">$1</span>');
   return html;
 }
@@ -2519,10 +2552,10 @@ function section(icon, title, bodyHtml, open=false){
 // ① 日主特質
 const sec1Html = personalCard({
   icon:'🌟', title:'日主【'+riTg+'】與五行【'+riWx+'】特質分析', id:'BAZI_001',
-  personalSummary:client.name+'，你的日主天干是【'+riTg+'】，屬於'+yinYang+riWx+'。'+(new_gexing||teacher_inner||''),
+  personalSummary:'親愛的'+client.name+'，從你的命盤來看，你的日主天干是【'+riTg+riWx+'】，屬於'+yinYang+riWx+'。'+(new_gexing||teacher_inner||''),
   details:[
     new_wxTrait ? '從五行來看，你帶著【'+riWx+'】的底色：'+new_wxTrait : '',
-    '你的陰陽屬性是【'+yinYang+riTg+'】，所以表達方式通常'+(isYang?'比較主動、直接，也比較容易把想法放到檯面上。':'比較內斂、細膩，很多感受會先在心裡消化。'),
+    '你的日主天干是【'+riTg+riWx+'】，屬於'+yinYang+riWx+'，所以表達方式通常'+(isYang?'比較主動、直接，也比較容易把想法放到檯面上。':'比較內斂、細膩，很多感受會先在心裡消化。'),
     '月支落在【'+yueDz+'】，五行屬【'+yueDzWx+'】，所以這張命盤先看作【'+strongLabel+'】來解讀。',
     yueStar ? '月干十神是【'+yueStar+'】，這會影響你面對家人、資源與現實壓力時的反應方式。' : '',
     new_image || teacher_image ? '別人第一眼感受到的你：'+(new_image||teacher_image) : '',
@@ -2557,7 +2590,6 @@ const GONG_FOCUS = {
   shi:'看晚年、子女、作品成果，也能觀察你把能力留給世界的方式。'
 };
 function gongJudgement(key, shen, wx){
-  const relation = getRelation(riWx, wx);
   const shenText = {
     正印:'偏向照顧、學習、資源與保護，也容易重視安全感。',
     偏印:'偏向研究、直覺、非典型學習與獨處思考。',
@@ -2576,7 +2608,7 @@ function gongJudgement(key, shen, wx){
     ri:'放在日柱，表示這是你自己與親密關係最核心的互動方式。',
     shi:'放在時柱，表示晚年、子女、作品成果或長期累積會帶出這種能量。'
   }[key] || '';
-  return `${roleText}${shenText}這個位置會讓「${relationPlain(relation)}」，所以不是只列五行，而是直接看它怎麼影響這個人生宮位。`;
+  return `${roleText}${shenText}這個位置會讓「${tenGodImpact(shen)}」，所以不是只列五行，而是直接看它怎麼影響這個人生宮位。`;
 }
 const GONG_DATA = [
   {key:'nian',data:bazi['年柱']||{}},
@@ -2639,6 +2671,7 @@ const sec5Html = personalCard({
     '所謂【'+curDyShen+'】課題，白話就是：'+relationPlain(dyRelation)+'。對你來說會表現在進修、研究、信念整理、貴人資源、休息節奏，以及把專業沉澱成方法。',
     '這段時間大約落在 '+curDyAge+' 到 '+curDyEnd+' 歲，會比較明顯地把這些課題帶到你生活裡。',
     ...dayunAppliedSummary(),
+    curDyShen.includes('印') ? '老師的溫馨提醒：這幾年想得多、做得少是很正常的。這不是拖延，而是你的大腦正在做深度整理；最適合你的破局方式，是把想到的東西寫下來，或做成作品、課程、文章，讓食傷能量把內在想法帶出去。' : '',
   ].filter(Boolean),
   tags:['大運'+curDyGz, curDyShen, '五行'+curDyWx]
 });
@@ -2679,10 +2712,10 @@ const sec8Html = personalCard({
   icon:'💼', title:'你的事業職涯分析', id:'BAZI_032',
   personalSummary:careerBigSummary(),
   details:[
-    client.name+'，你的官殺星是【'+guanStar+'】，它代表職場裡的責任、規則、主管，也代表你可以被看見的位置。目前大運【'+curDyGz+'】帶著【'+curDyShen+'】的主題。',
+    client.name+'，你的正官星五行是【'+guanStar+'】，它代表職場裡的責任、規則、主管，也代表你可以被看見的位置。目前大運【'+curDyGz+'】帶著【'+curDyShen+'】的主題。',
     getDayunCareerNote(curDyShen)+'，所以這段時間的職涯選擇，可以多觀察自己是不是正在累積更長線的能力。',
     lyYear+'年流年是【'+lyStar+'】：'+getLiunianCareerNote(lyStar)+'。',
-    '用這張盤來看，事業不是只看官殺星【'+guanStar+'】，還要看目前大運【'+curDyShen+'】怎麼讓你做事：它比較偏向先累積專業、建立方法，再用作品或成果被看見。',
+    '用這張盤來看，事業不是只看正官星【'+guanStar+'】，還要看目前大運【'+curDyShen+'】怎麼讓你做事：它比較偏向先累積專業、建立方法，再用作品或成果被看見。',
     '適合職業／職涯方向：'+careerDirectionSummary()+'。這些方向不是硬性職業名稱，而是你比較容易發揮的工作型態。',
     guanEntries.length ? '官星落點：'+formatTenGodEntries(guanEntries)+'，表示責任、制度、名聲與被看見的位置會在這些宮位被啟動。' : '',
     shiShangEntries.length ? '食傷落點：'+formatTenGodEntries(shiShangEntries)+'，代表你可以靠表達、作品、教學、內容輸出或方法整理來累積職涯能見度。' : '',
@@ -2690,7 +2723,7 @@ const sec8Html = personalCard({
     teacherViewBlock(teacherKB, '職場人際策略', {ten_god:curDyShen}, 1, {title:'老師判斷依據（職場）', maxPoints:3}),
     '遇到壓力時，不一定要急著硬碰硬；先分清楚哪些是責任，哪些只是別人的期待，會更穩。',
   ].filter(Boolean),
-  tags:['官殺'+guanStar, '大運'+curDyShen, '流年'+lyStar]
+  tags:['正官'+guanStar, '大運'+curDyShen, '流年'+lyStar]
 });
 
 // ⑨ 感情
@@ -2704,6 +2737,7 @@ const sec9Html = personalCard({
     lyWx===peiouStar
       ? '今年流年五行剛好碰到你的配偶星【'+peiouStar+'】，比較容易有人際、曖昧或關係議題被看見；但是否能成為穩定關係，還要看夫妻宮是否受沖合與大運是否支持。'
       : '今年流年五行不是直接碰到你的配偶星【'+peiouStar+'】，所以感情比較像是調整互動方式，而不是單純等一個桃花事件。',
+    lyWx!==peiouStar ? '感情心法：今年沒有直接牽動配偶星，反而代表感情世界少一點外在雜音。這一年更適合靜下心來建立共識、重新調整步調，把關係裡真正需要修復的地方慢慢說清楚。' : '',
     ...loveInsights,
     '這段時間感情上最重要的不是猜對方，而是把自己的界線和需要說清楚。',
   ].filter(Boolean),
@@ -2738,7 +2772,7 @@ const sec11Html = `
   <div class="liuri-card">
     <div class="liuri-card-icon">💼</div>
     <div class="liuri-card-title">工作機會日</div>
-    <div class="liuri-card-days">官殺星：${guanStar}<br>逢${guanStar}日留意</div>
+    <div class="liuri-card-days">正官星：${guanStar}<br>逢${guanStar}日留意</div>
   </div>
   <div class="liuri-card">
     <div class="liuri-card-icon">🌸</div>
