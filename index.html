@@ -527,6 +527,10 @@ font-weight:800;
 color:#7C3AED;
 font-weight:800;
 }
+.key-context{
+color:#7C2D12;
+font-weight:800;
+}
 .detail-label{
 color:#7C2D12;
 font-weight:800;
@@ -2185,22 +2189,97 @@ function focusItem(label, value, toneClass = ''){
   return `<div class="focus-item"><span class="focus-label">${label}</span><span class="focus-value ${toneClass}">${value}</span></div>`;
 }
 
+function reportTokenClass(token, coreTokens){
+  if(coreTokens.has(token)) return 'key-token key-token-core';
+  if(['偏印','正印','印星'].includes(token)) return 'key-token key-resource';
+  if(['財星','正財','偏財','劫財'].includes(token)) return 'key-token key-wealth';
+  if(['官星','正官','七殺','官殺'].includes(token)) return 'key-token key-career';
+  if(['食神','傷官','食傷'].includes(token)) return 'key-token key-output';
+  if(['配偶星','夫妻宮','婚姻宮','桃花'].includes(token)) return 'key-token key-love';
+  if(['腎臟','膀胱'].includes(token)) return 'key-token key-water';
+  if(['身強','身弱','喜用神','忌神','用神'].includes(token)) return 'key-token key-strength';
+  return 'key-token';
+}
+
+function applyReportHighlights(html){
+  const highlightGroups = [
+    ['key-resource', [
+      '資源、學習、貴人、休息與內在整理',
+      '資源學習',
+      '內在整理',
+      '獨立研究',
+      '偏印課題',
+      '偏印',
+      '正印',
+      '印星',
+      '資源',
+      '學習',
+      '貴人',
+      '休息',
+      '進修',
+      '研究',
+      '宗教',
+      '藝術'
+    ]],
+    ['key-wealth', ['財星','正財','偏財','劫財','財位','招財','得財','破財','收入']],
+    ['key-career', ['適合職業／職涯方向','適合職業','職涯方向','官星','正官','七殺','官殺','文昌','升遷','職場位置']],
+    ['key-output', ['內容輸出','食神','傷官','食傷','輸出']],
+    ['key-love', ['配偶星','夫妻宮','感情','桃花','婚姻宮','婚姻','親密關係','伴侶','正緣']],
+    ['key-water', ['腎臟','膀胱']],
+    ['key-health', ['脾胃','消化系統','病符','五黃']],
+    ['key-strength', ['身強','身弱','喜用神','忌神','用神']],
+    ['key-context', [
+      '現實壓力',
+      '現實環境',
+      '工作節奏',
+      '原生家庭',
+      '家族背景',
+      '父母手足',
+      '家人',
+      '父母',
+      '手足',
+      '安全感',
+      '務實',
+      '金錢秩序',
+      '現實資源',
+      '責任感',
+      '外在環境',
+      '突發事件',
+      '內在心境',
+      '能量累積',
+      '同輩競爭',
+      '主見',
+      '行動力'
+    ]]
+  ];
+  let output = html;
+  highlightGroups.forEach(([className, words]) => {
+    const escaped = words
+      .slice()
+      .sort((a, b) => b.length - a.length)
+      .map(word => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    if(!escaped.length) return;
+    const pattern = new RegExp(`(${escaped.join('|')})`, 'g');
+    output = output.replace(pattern, `<span class="${className}">$1</span>`);
+  });
+  return output;
+}
+
 function enhanceReportText(text){
   if(!text) return '';
   let html = String(text);
   const coreTokens = new Set([riTg, riWx, riTg+riWx, yueDz, yueDzWx, strongLabel, curDyGz, lyGz, lyTg, lyDz]);
-  html = html.replace(/【([^】]+)】/g, (_, token) => {
-    const cls = coreTokens.has(token) ? 'key-token key-token-core' : 'key-token';
-    return `<span class="${cls}">【${token}】</span>`;
+  const protectedTokens = [];
+  html = html.replace(/【([^】]+)】/g, (_, rawToken) => {
+    const token = String(rawToken).trim();
+    const marker = `@@REPORT_TOKEN_${protectedTokens.length}@@`;
+    protectedTokens.push(`<span class="${reportTokenClass(token, coreTokens)}">【${token}】</span>`);
+    return marker;
   });
-  html = html.replace(/(偏印|正印|印星|資源|學習|貴人|休息|內在整理|研究|宗教|藝術|獨立研究|進修)/g, '<span class="key-resource">$1</span>');
-  html = html.replace(/(財星|財位|招財|正財|偏財|劫財|得財|破財|收入)/g, '<span class="key-wealth">$1</span>');
-  html = html.replace(/(食神|傷官|食傷|輸出|表達|作品|教學|內容輸出|創意)/g, '<span class="key-output">$1</span>');
-  html = html.replace(/(官星|正官|七殺|官殺|適合職業|職涯方向|文昌|升遷|責任|制度|名聲|職場位置)/g, '<span class="key-career">$1</span>');
-  html = html.replace(/(配偶星|夫妻宮|感情|桃花|婚姻宮|婚姻|親密關係|伴侶|正緣)/g, '<span class="key-love">$1</span>');
-  html = html.replace(/(腎臟|膀胱)/g, '<span class="key-water">$1</span>');
-  html = html.replace(/(健康|脾胃|消化系統|保養|病符|五黃)/g, '<span class="key-health">$1</span>');
-  html = html.replace(/(身強|身弱|喜用神|忌神|用神)/g, '<span class="key-strength">$1</span>');
+  html = applyReportHighlights(html);
+  protectedTokens.forEach((tokenHtml, index) => {
+    html = html.replace(`@@REPORT_TOKEN_${index}@@`, tokenHtml);
+  });
   html = html.replace(/^([^：:]{2,14}[：:])/, '<span class="detail-label">$1</span>');
   return html;
 }
