@@ -598,27 +598,64 @@ margin-top:10px;
 background:#FDF8EF;
 border-left:3px solid #D4B896;
 border-radius:6px;
-padding:9px 10px;
+padding:10px 11px;
 min-height:92px;
 line-height:1.55;
 }
 .zibai-direction{
 display:block;
-font-size:0.74rem;
-font-weight:800;
+font-size:0.9rem;
+font-weight:900;
 color:#8B6914;
 }
 .zibai-star{
 display:block;
-font-size:0.84rem;
-font-weight:800;
+font-size:0.95rem;
+font-weight:900;
 margin-top:2px;
 }
 .zibai-action{
 display:block;
-font-size:0.78rem;
+font-size:0.72rem;
 margin-top:4px;
 color:#5A4030;
+}
+.combo-board{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+gap:8px;
+margin:8px 0;
+}
+.combo-board-item{
+background:#FFFDF8;
+border:1px solid #F0E2CF;
+border-left:3px solid #D4B896;
+border-radius:7px;
+padding:9px 10px;
+line-height:1.65;
+}
+.combo-board-label{
+display:block;
+font-size:0.72rem;
+font-weight:800;
+color:#8B6914;
+margin-bottom:2px;
+}
+.combo-board-value{
+font-weight:800;
+color:#5A4030;
+}
+.teacher-accordion{
+background:#FDF8EF;
+border-left:4px solid #D4B896;
+border-radius:8px;
+padding:8px 12px;
+margin-top:10px;
+}
+.teacher-accordion summary{
+cursor:pointer;
+font-weight:800;
+color:#8B6914;
 }
 .focus-item{
 background:#FDF8EF;
@@ -1522,7 +1559,7 @@ const ke={木:'土',火:'金',土:'水',金:'木',水:'火'};
 if(sheng[riWx]===targetWx) return '表達輸出增加（食傷）';
 if(sheng[targetWx]===riWx) return '資源學習加強（印星）';
 if(ke[riWx]===targetWx) return '財務資源浮現（財星）';
-if(ke[targetWx]===riWx) return '責任壓力增加（官殺）';
+if(ke[targetWx]===riWx) return '責任壓力增加（官星）';
 return '關係複雜，需綜合判斷';
 }
 
@@ -1739,7 +1776,7 @@ function relationTone(relation, strength){
   }
   if(relation.includes('食傷')) return '會把能量往外帶，適合表達、作品、教學、輸出與建立個人風格。';
   if(relation.includes('財')) return strength === '身強' ? '財星被帶出來，適合談資源、收入、客戶與可落地的成果。' : '財星會帶來機會，也會帶來消耗，財務和承諾要量力而為。';
-  if(relation.includes('官殺')) return '責任、規則、主管與外界要求變明顯，適合建立紀律，但不要硬扛所有壓力。';
+  if(relation.includes('官星') || relation.includes('官殺')) return '責任、規則、主管與外界要求變明顯，適合建立紀律，但不要硬扛所有壓力。';
   return '需要合併大運、本命強弱與宮位一起看，不宜只用單一五行下結論。';
 }
 
@@ -1748,7 +1785,7 @@ function relationPlain(relation){
   if(relation.includes('自我') || relation.includes('比劫')) return '自我意識、同輩競爭、主見與行動力被加強';
   if(relation.includes('食傷')) return '表達、作品、輸出、教學與創意被加強';
   if(relation.includes('財')) return '金錢、客戶、資源交換與現實成果被加強';
-  if(relation.includes('官殺')) return '責任、規則、壓力、主管與外界要求被加強';
+  if(relation.includes('官星') || relation.includes('官殺')) return '官星能量：責任、規則、壓力、主管與外界要求被加強';
   return relation;
 }
 
@@ -1779,6 +1816,13 @@ function dayunAppliedSummary(){
     `【${curDyTg}】對你的日主【${riTg}】是【${curDyShen || getShishen(riTg, curDyTg)}】，所以這十年的主題偏向：${getDayunCareerNote(curDyShen)}。`,
     `地支【${curDyDz}】五行屬【${WX_MAP[curDyDz] || '—'}】，會讓「${relationPlain(dzRelation)}」。因為你本來就是【${strongLabel}】，所以好處是底氣變足，盲點是容易想太多、拖延或變得更固執。`
   ];
+}
+
+function advisoryGuideFor(shen){
+  if(['偏印','正印'].includes(shen)){
+    return '諮商行動指南：把想到的東西「寫下來」或「做出作品」，讓能量流動起來；當想法有出口，固執就會比較容易轉成專念。';
+  }
+  return '';
 }
 
 function liunianAppliedSummary(){
@@ -1876,6 +1920,13 @@ function analyzeCombinations(){
     '丁壬':'淫暱之合',
     '戊癸':'無情之合'
   };
+  const stemComboLifeNotes = {
+    '戊癸':'生活化論斷：對感情容易理智、界線分明，外表不一定熱情，但內在重感受；另一半、工作圈或原生家庭之間容易高度綁定，需要把關係界線說清楚。',
+    '甲己':'生活化論斷：重承諾、講信用，但容易為了顧全大局而壓住自己的感受。',
+    '乙庚':'生活化論斷：重義氣與原則，關係裡容易一邊想配合，一邊又不想失去主導權。',
+    '丙辛':'生活化論斷：外在氣場與內在細節感互相拉扯，容易在形象、合作或親密關係裡出現強弱角力。',
+    '丁壬':'生活化論斷：情感感受細膩，容易被品味、陪伴、情緒交流牽動。'
+  };
   const branchSix = [
     ['子','丑','土'],['寅','亥','木'],['卯','戌','火'],['辰','酉','金'],['巳','申','水'],['午','未','土']
   ];
@@ -1894,21 +1945,37 @@ function analyzeCombinations(){
       const sameWxBranches = branches.filter(p => WX_MAP[p.dz] === wx).map(p => `${p.label}【${p.dz}】`);
       if(sameWxBranches.length) supportReasons.push(`${sameWxBranches.join('、')}帶${wx}氣`);
       const comboKey = a + b;
-      const supportText = supportReasons.length
-        ? `盤面有${wx}的支援：${supportReasons.join('，')}。但合化仍要看月令、透干與全盤力量，所以這裡先判作「合象明顯、${wx}氣有參與」，不直接說已完全化${wx}。`
-        : `盤面缺少明顯${wx}氣支援，所以先以「有合象、有牽動」解讀，不直接斷成化${wx}。`;
-      rows.push(`天干合：${pa.label}【${a}】與${pb.label}【${b}】形成「${a}${b}合${wx}・${stemComboNames[comboKey] || '天干五合'}」。${stemComboNotes[comboKey] || ''}這代表${pa.role}和${pb.role}容易互相牽動。${supportText}`);
+      rows.push(`
+        <div class="combo-board">
+          <div class="combo-board-item"><span class="combo-board-label">合化組合</span><span class="combo-board-value">${a}${b}合${wx}・${stemComboNames[comboKey] || '天干五合'}</span></div>
+          <div class="combo-board-item"><span class="combo-board-label">牽動宮位</span><span class="combo-board-value">${pa.label}（${pa.role}）＋${pb.label}（${pb.role}）</span></div>
+          <div class="combo-board-item"><span class="combo-board-label">最終判定</span><span class="combo-board-value">合而不化，相互牽動</span></div>
+          <div class="combo-board-item"><span class="combo-board-label">生活化論斷</span><span class="combo-board-value">${stemComboLifeNotes[comboKey] || stemComboNotes[comboKey] || '相關宮位容易互相影響，做判斷時要分開看，不要混成單一事件。'}</span></div>
+        </div>
+      `);
     }
   }
   for(const [a,b,wx] of branchSix){
     const pa = branches.find(p => p.dz === a);
     const pb = branches.find(p => p.dz === b);
-    if(pa && pb) rows.push(`地支六合：${pa.label}【${a}】與${pb.label}【${b}】形成「${a}${b}合${wx}」，表示相關宮位有黏著、合作或牽制關係。`);
+    if(pa && pb) rows.push(`
+      <div class="combo-board">
+        <div class="combo-board-item"><span class="combo-board-label">地支互動</span><span class="combo-board-value">${a}${b}合${wx}</span></div>
+        <div class="combo-board-item"><span class="combo-board-label">牽動宮位</span><span class="combo-board-value">${pa.label}＋${pb.label}</span></div>
+        <div class="combo-board-item"><span class="combo-board-label">最終判定</span><span class="combo-board-value">六合牽動，合作與黏著並存</span></div>
+      </div>
+    `);
   }
   for(const [a,b] of clashes){
     const pa = branches.find(p => p.dz === a);
     const pb = branches.find(p => p.dz === b);
-    if(pa && pb) rows.push(`地支沖：${pa.label}【${a}】與${pb.label}【${b}】形成「${a}${b}沖」，相關宮位較容易出現變動、拉扯或需要調整的事件。`);
+    if(pa && pb) rows.push(`
+      <div class="combo-board">
+        <div class="combo-board-item"><span class="combo-board-label">地支互動</span><span class="combo-board-value">${a}${b}沖</span></div>
+        <div class="combo-board-item"><span class="combo-board-label">牽動宮位</span><span class="combo-board-value">${pa.label}＋${pb.label}</span></div>
+        <div class="combo-board-item"><span class="combo-board-label">最終判定</span><span class="combo-board-value">有沖動訊號，代表變動與拉扯</span></div>
+      </div>
+    `);
   }
   return rows;
 }
@@ -1939,8 +2006,9 @@ function personalizeContent(text){
     .replaceAll('{{喜用神}}', yongshenText)
     .replaceAll('{{喜用神五行}}', yongshenText)
     .replaceAll('{{喜神／忌神}}', isStrong ? '能量偏旺，需要用金、水、木來疏通和平衡' : '能量需要被補足，適合靠近能支持日主的五行')
-    .replaceAll('{{忌神}}', strongLabel === '身強' ? '印、比劫' : '財、官殺、食傷')
+    .replaceAll('{{忌神}}', strongLabel === '身強' ? '印、比劫' : '財、官星、食傷')
     .replace(/平級聤/g, '平級聊')
+    .replace(/官殺/g, '官星')
     .replace(/多聤/g, '多聊')
     .replace(/咊啊/g, '咖啡')
     .replace(/咊咊/g, '咖啡')
@@ -2008,7 +2076,7 @@ function qSmartMany(kb, specs, limit = 6){
 
 function tenGodFamily(shen){
   if(['正財','偏財'].includes(shen)) return '財星';
-  if(['正官','七殺'].includes(shen)) return '官殺';
+  if(['正官','七殺'].includes(shen)) return '官星';
   if(['食神','傷官'].includes(shen)) return '食傷';
   if(['正印','偏印'].includes(shen)) return '印';
   if(['比肩','劫財'].includes(shen)) return '比劫';
@@ -2017,7 +2085,7 @@ function tenGodFamily(shen){
 
 function balanceTenGodKey(strength, shen){
   const family = tenGodFamily(shen);
-  if(strength === '身強') return ['財星','官殺','食傷'].includes(family) ? '食傷' : '比劫';
+  if(strength === '身強') return ['財星','官星','食傷'].includes(family) ? '食傷' : '比劫';
   return ['印','比劫'].includes(family) ? '比劫' : '食傷';
 }
 
@@ -2201,14 +2269,44 @@ function reportTokenClass(token, coreTokens){
   return 'key-token';
 }
 
+function reportPhraseClass(phrase){
+  const text = String(phrase || '');
+  if(/財|金錢|收入|客戶|價格|收款|務實|現實資源/.test(text)) return 'key-wealth';
+  if(/偏印|正印|印星|資源、學習|學習|貴人|休息|內在整理|照顧|保護|安全感|進修|研究|宗教|藝術/.test(text)) return 'key-resource';
+  if(/官星|正官|七殺|官殺|職場|事業|工作|制度|名聲|升遷|文昌/.test(text)) return 'key-career';
+  if(/食神|傷官|食傷|表達|作品|享受|教學|輸出|創意/.test(text)) return 'key-output';
+  if(/配偶|夫妻|感情|桃花|婚姻|親密|伴侶|正緣/.test(text)) return 'key-love';
+  if(/腎臟|膀胱/.test(text)) return 'key-water';
+  if(/健康|脾胃|消化系統|病符|五黃/.test(text)) return 'key-health';
+  if(/身強|身弱|喜用神|忌神|用神/.test(text)) return 'key-strength';
+  return 'key-context';
+}
+
+function protectReportPhrases(html, protectedPhrases){
+  const protect = phrase => {
+    const marker = `@@REPORT_PHRASE_${protectedPhrases.length}@@`;
+    protectedPhrases.push(`<span class="${reportPhraseClass(phrase)}">${phrase}</span>`);
+    return marker;
+  };
+  let output = html;
+  output = output.replace(/「([^」]{2,120})」/g, (_, phrase) => `「${protect(phrase)}」`);
+  output = output.replace(/(面對)([^，。；]{2,60})(時)/g, (_, prefix, phrase, suffix) => `${prefix}${protect(phrase)}${suffix}`);
+  output = output.replace(/(偏向)([^，。；]{2,80})/g, (_, prefix, phrase) => `${prefix}${protect(phrase)}`);
+  output = output.replace(/(適合)([^，。；]{2,80})/g, (_, prefix, phrase) => `${prefix}${protect(phrase)}`);
+  output = output.replace(/(代表)([^，。；]{2,80})/g, (_, prefix, phrase) => `${prefix}${protect(phrase)}`);
+  return output;
+}
+
 function applyReportHighlights(html){
   const highlightGroups = [
     ['key-resource', [
       '資源、學習、貴人、休息與內在整理',
+      '照顧、學習、資源與保護',
       '資源學習',
       '內在整理',
       '獨立研究',
       '偏印課題',
+      '安全感',
       '偏印',
       '正印',
       '印星',
@@ -2221,14 +2319,36 @@ function applyReportHighlights(html){
       '宗教',
       '藝術'
     ]],
-    ['key-wealth', ['財星','正財','偏財','劫財','財位','招財','得財','破財','收入']],
+    ['key-wealth', [
+      '務實、金錢秩序、責任感與對現實資源的掌握',
+      '穩定收入',
+      '現實資源',
+      '金錢秩序',
+      '財星',
+      '正財',
+      '偏財',
+      '劫財',
+      '財位',
+      '招財',
+      '得財',
+      '破財',
+      '收入'
+    ]],
     ['key-career', ['適合職業／職涯方向','適合職業','職涯方向','官星','正官','七殺','官殺','文昌','升遷','職場位置']],
-    ['key-output', ['內容輸出','食神','傷官','食傷','輸出']],
+    ['key-output', [
+      '表達、作品、享受、教學與穩定輸出',
+      '內容輸出',
+      '食神',
+      '傷官',
+      '食傷',
+      '輸出'
+    ]],
     ['key-love', ['配偶星','夫妻宮','感情','桃花','婚姻宮','婚姻','親密關係','伴侶','正緣']],
     ['key-water', ['腎臟','膀胱']],
     ['key-health', ['脾胃','消化系統','病符','五黃']],
     ['key-strength', ['身強','身弱','喜用神','忌神','用神']],
     ['key-context', [
+      '自我狀態、主見、核心需求與行動方式',
       '現實壓力',
       '現實環境',
       '工作節奏',
@@ -2241,7 +2361,6 @@ function applyReportHighlights(html){
       '安全感',
       '務實',
       '金錢秩序',
-      '現實資源',
       '責任感',
       '外在環境',
       '突發事件',
@@ -2252,31 +2371,37 @@ function applyReportHighlights(html){
       '行動力'
     ]]
   ];
-  let output = html;
-  highlightGroups.forEach(([className, words]) => {
-    const escaped = words
-      .slice()
-      .sort((a, b) => b.length - a.length)
-      .map(word => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-    if(!escaped.length) return;
-    const pattern = new RegExp(`(${escaped.join('|')})`, 'g');
-    output = output.replace(pattern, `<span class="${className}">$1</span>`);
+  const highlightTerms = highlightGroups
+    .flatMap(([className, words]) => words.map(word => ({ word, className })))
+    .filter(item => item.word)
+    .sort((a, b) => b.word.length - a.word.length);
+  if(!highlightTerms.length) return html;
+  const classByWord = new Map();
+  highlightTerms.forEach(item => {
+    if(!classByWord.has(item.word)) classByWord.set(item.word, item.className);
   });
-  return output;
+  const escaped = highlightTerms.map(item => item.word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  const pattern = new RegExp(`(${escaped.join('|')})`, 'g');
+  return html.replace(pattern, match => `<span class="${classByWord.get(match)}">${match}</span>`);
 }
 
 function enhanceReportText(text){
   if(!text) return '';
-  let html = String(text);
+  let html = String(text).replace(/官殺/g, '官星');
   const coreTokens = new Set([riTg, riWx, riTg+riWx, yueDz, yueDzWx, strongLabel, curDyGz, lyGz, lyTg, lyDz]);
   const protectedTokens = [];
+  const protectedPhrases = [];
   html = html.replace(/【([^】]+)】/g, (_, rawToken) => {
     const token = String(rawToken).trim();
     const marker = `@@REPORT_TOKEN_${protectedTokens.length}@@`;
     protectedTokens.push(`<span class="${reportTokenClass(token, coreTokens)}">【${token}】</span>`);
     return marker;
   });
+  html = protectReportPhrases(html, protectedPhrases);
   html = applyReportHighlights(html);
+  protectedPhrases.forEach((phraseHtml, index) => {
+    html = html.replace(`@@REPORT_PHRASE_${index}@@`, phraseHtml);
+  });
   protectedTokens.forEach((tokenHtml, index) => {
     html = html.replace(`@@REPORT_TOKEN_${index}@@`, tokenHtml);
   });
@@ -2537,8 +2662,9 @@ function zibai2026Html(){
 }
 function fengshuiEvidenceHtml(){
   return `
-    <div class="teacher-view">
-      <div class="teacher-view-title">老師觀點依據（已篩選）</div>
+    <details class="teacher-accordion">
+      <summary>老師判斷依據（空間篇，已篩選）</summary>
+      <div class="teacher-view">
       <div class="teacher-source"><strong>徐玉蘭老師（${riWx}命軟裝表）</strong>
         ${compactList([
           `${riWx}命財位：${xuFs.wealth || '需查表'}；水缸材質：${XU_WATER_TANK[riWx] || '需查表'}`,
@@ -2557,7 +2683,8 @@ function fengshuiEvidenceHtml(){
           '桃花位重點是人緣、魅力與互動，不等於每個人都要用同一套土命方位。'
         ])}
       </div>
-    </div>
+      </div>
+    </details>
   `;
 }
 const waterTankInsights = qSmartMany(kbNew, [
@@ -2735,8 +2862,8 @@ const sec4Html = personalCard({
   details:[
     '用神方向可以先抓【'+yongshen+'】，也就是讓命盤能量更平衡的方向。',
     new_strength ? new_strength : '',
-    new_xiyong   ? '適合多靠近的能量：'+new_xiyong : '',
-    new_jishen   ? '比較需要節制的能量：'+new_jishen : '',
+    new_xiyong   ? '適合多靠近的能量：'+new_xiyong+'；白話說，是幫助你順暢洩秀，把能力轉化為作品、成果與財富。' : '',
+    new_jishen   ? '比較需要節制的能量：'+new_jishen+'；白話說，是避免能量過滿，導致固執、想太多或壓力累積。' : '',
   ].filter(Boolean),
   tags:[strongLabel,'用神：'+yongshen.split('（')[0],'月支'+yueDz]
 });
@@ -2763,6 +2890,7 @@ const sec6Html = personalCard({
   details:[
     ...liunianAppliedSummary(),
     '大運【'+curDyGz+'】遇上流年【'+lyGz+'】：'+getDayunLiunianNote(curDyWx, lyWx)+'。',
+    advisoryGuideFor(lyStar),
   ].filter(Boolean),
   tags:['流年'+lyGz, lyStar, lyYear+'年']
 });
@@ -2779,6 +2907,7 @@ const sec7Html = personalCard({
     zhengCaiEntries.length ? '正財重點：'+formatTenGodEntries(zhengCaiEntries)+'，代表你其實有務實理財、穩定累積與看重安全感的一面。' : '',
     pianCaiEntries.length ? '偏財重點：'+formatTenGodEntries(pianCaiEntries)+'，代表你也有靠機會、人脈、專案或非固定收入打開財路的可能。' : '',
     jieCaiEntries.length ? '劫財提醒：'+formatTenGodEntries(jieCaiEntries)+'，錢容易牽涉朋友、家人、分帳或共同資源；合夥和借貸要規則清楚。' : '',
+    jieCaiEntries.length ? '防禦型提醒：「親兄弟明算帳」並不是小氣，而是幫你守住財富、維持和氣的防火牆。' : '',
     lyYear+'年流年是【'+lyStar+'】，不是直接的財星年；它比較像先加強學習、資源、貴人與內在整理。財運要靠你把專業整理成可收費、可成交的成果。',
     isStrong?'你屬於身強格局，原局又有財星，適合主動整理客戶、價格、服務方案與收款規則。':'你屬於身弱格局，財星出現時要記得量力而為，先穩住節奏再擴張。',
     '喜用方向仍可抓【'+yongshen+'】；對你來說，金代表輸出與作品，水代表財與客戶，木代表規則與職場位置，這三類能量要被好好使用。'
@@ -2861,7 +2990,7 @@ const sec11Html = `
   <div class="liuri-card">
     <div class="liuri-card-icon">🏥</div>
     <div class="liuri-card-title">健康注意日</div>
-    <div class="liuri-card-days">注意：${WX_ORGAN[riWx]?.split('、')[0]||''}<br>逢${weakWx}日留意</div>
+    <div class="liuri-card-days">注意：${WX_ORGAN[riWx]?.split('、')[0]||''}（${riWx}）<br>逢${riWx}日或${Object.entries(ke).find(([,target]) => target === riWx)?.[0] || riWx}日留意</div>
   </div>
 </div>
 `;
