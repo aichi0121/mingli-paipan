@@ -181,6 +181,40 @@ gap:8px;
 flex-wrap:wrap;
 justify-content:flex-start;
 }
+.auth-tools{
+border-top:1px solid #F0E8DC;
+padding-top:10px;
+}
+.auth-tools label{
+display:block;
+font-size:0.72rem;
+font-weight:700;
+color:#8B6914;
+margin-bottom:6px;
+}
+.auth-tools-row{
+display:flex;
+gap:6px;
+}
+.auth-tools-row input{
+flex:1;
+min-width:0;
+border:1.5px solid #E8DDD0;
+border-radius:8px;
+padding:7px 9px;
+font-family:inherit;
+font-size:0.78rem;
+color:#4A3728;
+background:#fff;
+outline:none;
+}
+.auth-tools-row input:focus{border-color:#D4B896;}
+.auth-tools-note{
+font-size:0.68rem;
+line-height:1.5;
+color:#B89C7D;
+margin-top:6px;
+}
 
 /* ══════════════════════════════════════
  畫面一：客戶列表
@@ -311,6 +345,58 @@ margin-bottom:24px;
 flex-wrap:wrap;
 gap:10px;
 }
+.gemini-card{
+border:1px solid #E8DDD0;
+background:#FFFDF8;
+border-radius:14px;
+padding:16px;
+margin-top:18px;
+}
+.gemini-card h3{
+font-size:0.98rem;
+color:#8B6914;
+margin-bottom:8px;
+}
+.gemini-card p{
+font-size:0.78rem;
+line-height:1.7;
+color:#B89C7D;
+margin-bottom:10px;
+}
+.gemini-input{
+width:100%;
+min-height:78px;
+resize:vertical;
+border:1.5px solid #E8DDD0;
+border-radius:10px;
+padding:11px 12px;
+font-family:inherit;
+font-size:0.9rem;
+line-height:1.7;
+color:#4A3728;
+background:#fff;
+outline:none;
+}
+.gemini-input:focus{border-color:#D4B896;}
+.gemini-actions{
+display:flex;
+justify-content:flex-end;
+gap:8px;
+margin-top:10px;
+}
+.gemini-answer{
+display:none;
+margin-top:14px;
+padding:14px 16px;
+border-left:3px solid #D4B896;
+background:#FFFCF8;
+border-radius:0 10px 10px 0;
+font-size:0.9rem;
+line-height:1.85;
+color:#4A3728;
+white-space:pre-wrap;
+}
+.gemini-answer.active{display:block;}
 
 /* 基本訊息表格 */
 .info-table{width:100%;border-collapse:collapse;}
@@ -1020,6 +1106,14 @@ details.kb-section summary::after{display:none;}
   <button id="btn-cloud-sync" class="btn btn-ghost btn-small hidden" onclick="syncLocalClientsToCloud()">同步本機資料</button>
   <button id="btn-google-logout" class="btn btn-ghost btn-small hidden" onclick="signOutGoogle()">登出</button>
 </div>
+<div class="auth-tools">
+  <label for="gemini-api-key">Gemini API Key</label>
+  <div class="auth-tools-row">
+    <input id="gemini-api-key" type="password" placeholder="貼上自己的 API Key">
+    <button class="btn btn-ghost btn-small" type="button" onclick="saveGeminiKey()">儲存</button>
+  </div>
+  <div id="gemini-key-note" class="auth-tools-note">只存在這台裝置；正式付費版建議改用後端保護。</div>
+</div>
 </div>
 </div>
 </div>
@@ -1197,6 +1291,16 @@ details.kb-section summary::after{display:none;}
 </div>
 <div id="tab-full"><div class="kb-loading">知識庫載入中⋯</div></div>
 <div id="tab-quick" class="hidden"><div class="kb-loading">知識庫載入中⋯</div></div>
+<div id="gemini-card" class="gemini-card no-print">
+  <h3>💬 針對這份報告提問</h3>
+  <p>這裡會把目前這份命盤報告當作上下文，適合問「報告外延伸但仍和這張盤有關」的問題。</p>
+  <textarea id="gemini-question" class="gemini-input" placeholder="例如：這個客戶如果問今年工作要注意什麼，我可以怎麼白話回答？"></textarea>
+  <div class="gemini-actions">
+    <button class="btn btn-ghost btn-small" type="button" onclick="clearGeminiAnswer()">清空</button>
+    <button id="btn-ask-gemini" class="btn btn-primary btn-small" type="button" onclick="askGeminiAboutReport()">送出提問</button>
+  </div>
+  <div id="gemini-answer" class="gemini-answer"></div>
+</div>
 </div>
 
 </div><!-- /screen-report -->
@@ -1208,6 +1312,8 @@ details.kb-section summary::after{display:none;}
 // ══════════════════════════════════════════════
 const CURRENT_YEAR = new Date().getFullYear();
 const LS_KEY = 'doris_clients';
+const GEMINI_KEY = 'doris_gemini_api_key';
+const GEMINI_MODEL = 'gemini-2.5-flash';
 const GITHUB_RAW = 'https://raw.githubusercontent.com/aichi0121/mingli-paipan/main/data/';
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyBHUerxO5VyQA_taGIJxD0vYv1-scdgfM0",
@@ -1225,6 +1331,7 @@ let fbAuth = null;
 let fbDb = null;
 let currentUser = null;
 let currentRole = 'guest';
+let currentReportClient = null;
 let cloudClients = [];
 let cloudStatusText = '';
 
@@ -1412,6 +1519,40 @@ const panel=document.getElementById('auth-panel');
 if(panel && !panel.contains(e.target)) toggleAuthMenu(false);
 });
 
+function getGeminiKey(){
+return localStorage.getItem(GEMINI_KEY)||'';
+}
+
+function saveGeminiKey(){
+const input=document.getElementById('gemini-api-key');
+const note=document.getElementById('gemini-key-note');
+if(!input) return;
+const key=input.value.trim();
+if(!key){
+  localStorage.removeItem(GEMINI_KEY);
+  if(note) note.textContent='已清除 API Key。';
+  updateGeminiKeyUI();
+  return;
+}
+localStorage.setItem(GEMINI_KEY,key);
+input.value='';
+if(note) note.textContent='已儲存，可在報告頁使用 Gemini 提問。';
+updateGeminiKeyUI();
+}
+
+function updateGeminiKeyUI(){
+const input=document.getElementById('gemini-api-key');
+const note=document.getElementById('gemini-key-note');
+if(!input || !note) return;
+if(getGeminiKey()){
+  input.placeholder='已儲存 API Key；留空按儲存可清除';
+  note.textContent=note.textContent.includes('已儲存') ? note.textContent : 'Gemini 已可使用。API Key 只存在這台裝置。';
+}else{
+  input.placeholder='貼上自己的 API Key';
+  note.textContent='只存在這台裝置；正式付費版建議改用後端保護。';
+}
+}
+
 function updateAuthUI(){
 const avatar = document.getElementById('auth-avatar');
 const title = document.getElementById('auth-title');
@@ -1437,6 +1578,7 @@ if(currentUser){
   syncBtn.classList.add('hidden');
 }
 badge.textContent = roleLabel();
+updateGeminiKeyUI();
 }
 
 // ══════════════════════════════════════════════
@@ -1855,12 +1997,91 @@ document.getElementById('loading-overlay').classList.toggle('hidden',!show);
 if(msg) document.getElementById('loading-msg').textContent=msg;
 }
 
+function clearGeminiAnswer(){
+const q=document.getElementById('gemini-question');
+const ans=document.getElementById('gemini-answer');
+if(q) q.value='';
+if(ans){
+  ans.textContent='';
+  ans.classList.remove('active');
+}
+}
+
+function getReportContextForGemini(){
+const info=document.getElementById('info-table')?.textContent||'';
+const bazi=document.getElementById('bazi-table')?.textContent||'';
+const dayun=document.getElementById('dayun-table')?.textContent||'';
+const full=document.getElementById('tab-full')?.textContent||'';
+const quick=document.getElementById('tab-quick')?.textContent||'';
+const allowedReport=canViewTeacherReport()?full:quick;
+const client=currentReportClient;
+const header=client ? `客戶：${client.name}，性別：${client.gender}，生日：${client.year}-${client.month}-${client.day} ${client.hour}:${client.minute}` : '';
+return [header,'基本訊息：'+info,'四柱排盤：'+bazi,'大運流年：'+dayun,'目前可見報告：'+allowedReport]
+  .join('\n\n')
+  .replace(/\s+/g,' ')
+  .slice(0,18000);
+}
+
+async function askGeminiAboutReport(){
+const key=getGeminiKey();
+const question=document.getElementById('gemini-question')?.value.trim()||'';
+const answer=document.getElementById('gemini-answer');
+const btn=document.getElementById('btn-ask-gemini');
+if(!key){
+  toggleAuthMenu(true);
+  alert('請先在右上角帳號選單貼上 Gemini API Key。');
+  return;
+}
+if(!question){
+  alert('請先輸入想問的問題。');
+  return;
+}
+if(answer){
+  answer.textContent='正在整理回答中⋯';
+  answer.classList.add('active');
+}
+if(btn) btn.disabled=true;
+try{
+  const prompt=[
+    '你是命理師 Doris 的報告助理，請使用繁體中文回答。',
+    '只能依據下方命盤報告內容與一般八字概念延伸，不要假裝有看到未提供的老師講義。',
+    '若問題超出命盤可判斷範圍，請溫和說明限制，並給可追問方向。',
+    '語氣要口語、清楚、適合命理師拿去對客戶說明；不要恐嚇，不做醫療、法律、投資保證。',
+    '',
+    '【目前報告內容】',
+    getReportContextForGemini(),
+    '',
+    '【使用者問題】',
+    question
+  ].join('\n');
+  const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-goog-api-key':key},
+    body:JSON.stringify({
+      contents:[{role:'user',parts:[{text:prompt}]}],
+      generationConfig:{temperature:0.45,maxOutputTokens:900}
+    })
+  });
+  const data=await res.json();
+  if(!res.ok) throw new Error(data.error?.message || `Gemini API 錯誤：${res.status}`);
+  const text=(data.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join('\n').trim();
+  if(answer) answer.textContent=text || 'Gemini 沒有回傳文字，請稍後再試。';
+}catch(err){
+  console.error('Gemini ask error:', err);
+  if(answer) answer.textContent='Gemini 問答失敗：'+err.message;
+}finally{
+  if(btn) btn.disabled=false;
+}
+}
+
 // ══════════════════════════════════════════════
 // 載入並渲染報告
 // ══════════════════════════════════════════════
 function loadReport(id){
 const client=getClients().find(c=>c.id===id);
 if(!client) return;
+currentReportClient=client;
+clearGeminiAnswer();
 renderReport(client);
 showScreen('screen-report');
 }
