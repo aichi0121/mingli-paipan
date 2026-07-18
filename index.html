@@ -1426,6 +1426,7 @@ details.kb-section summary::after{display:none;}
   <textarea id="gemini-question" class="gemini-input" placeholder="例如：這個客戶如果問今年工作要注意什麼，我可以怎麼白話回答？"></textarea>
   <div class="gemini-actions">
     <button class="btn btn-ghost btn-small" type="button" onclick="clearGeminiAnswer()">清空對話</button>
+    <button id="btn-gemini-continue" class="btn btn-ghost btn-small hidden" type="button" onclick="continueGeminiAnswer()">繼續補充</button>
     <button id="btn-ask-gemini" class="btn btn-primary btn-small" type="button" onclick="askGeminiAboutReport()">送出提問</button>
   </div>
 </div>
@@ -2149,9 +2150,11 @@ if(msg) document.getElementById('loading-msg').textContent=msg;
 function clearGeminiAnswer(){
 const q=document.getElementById('gemini-question');
 const log=document.getElementById('gemini-chat-log');
+const continueBtn=document.getElementById('btn-gemini-continue');
 geminiChatHistory=[];
 if(q) q.value='';
 if(log) log.innerHTML='';
+if(continueBtn) continueBtn.classList.add('hidden');
 }
 
 function appendGeminiMessage(role,text,extraClass=''){
@@ -2180,6 +2183,13 @@ return geminiChatHistory
   .join('\n');
 }
 
+function getLastGeminiAnswer(){
+for(let i=geminiChatHistory.length-1;i>=0;i--){
+  if(geminiChatHistory[i].role==='assistant') return geminiChatHistory[i].text;
+}
+return '';
+}
+
 function getReportContextForGemini(){
 const info=document.getElementById('info-table')?.textContent||'';
 const bazi=document.getElementById('bazi-table')?.textContent||'';
@@ -2195,7 +2205,15 @@ return [header,'基本訊息：'+info,'四柱排盤：'+bazi,'大運流年：'+d
   .slice(0,18000);
 }
 
-async function callGeminiText(key, prompt, maxOutputTokens=1800){
+function looksGeminiIncomplete(text, finishReason){
+const trimmed=(text||'').trim();
+if(!trimmed) return true;
+if(finishReason === 'MAX_TOKENS') return true;
+const compact=trimmed.replace(/\s+/g,'');
+return /[，、；：]$/.test(compact) || /(擁有|包含|以及|例如|可以|能夠|代表|表示|因為|所以|但是|不過|並且|而且|與|和)$/.test(compact);
+}
+
+async function callGeminiOnce(key, prompt, maxOutputTokens=2200){
 let data=null,lastModelErr='';
 for(const model of GEMINI_MODELS){
   const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,{
@@ -2215,7 +2233,31 @@ for(const model of GEMINI_MODELS){
   data=null;
 }
 if(!data) throw new Error(lastModelErr || 'Gemini 模型目前不可用，請稍後再試。');
-return (data.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join('\n').trim();
+const candidate=data.candidates?.[0] || {};
+return {
+  text:(candidate.content?.parts||[]).map(p=>p.text||'').join('\n').trim(),
+  finishReason:candidate.finishReason || ''
+};
+}
+
+async function callGeminiText(key, prompt, maxOutputTokens=2200, continueLimit=2){
+let finalText='';
+let nextPrompt=prompt;
+for(let i=0;i<=continueLimit;i++){
+  const result=await callGeminiOnce(key,nextPrompt,maxOutputTokens);
+  const piece=(result.text||'').trim();
+  if(piece) finalText=finalText ? `${finalText}\n\n${piece}` : piece;
+  if(!looksGeminiIncomplete(finalText,result.finishReason) || i===continueLimit) break;
+  nextPrompt=[
+    prompt,
+    '',
+    '【已經回答到這裡】',
+    finalText,
+    '',
+    '請從上面最後一句中斷處自然接續，不要重複前文。請把尚未完成的段落補完，最後一句要完整收尾。'
+  ].join('\n');
+}
+return finalText;
 }
 
 async function askGeminiAboutReport(){
@@ -2282,9 +2324,56 @@ try{
   const finalText=text || 'Gemini 沒有回傳文字，請稍後再試。';
   setGeminiMessage(pending,finalText);
   geminiChatHistory.push({role:'assistant',text:finalText});
+  document.getElementById('btn-gemini-continue')?.classList.remove('hidden');
 }catch(err){
   console.error('Gemini ask error:', err);
   setGeminiMessage(pending,'Gemini 問答失敗：'+err.message,'error');
+}finally{
+  if(btn) btn.disabled=false;
+}
+}
+
+async function continueGeminiAnswer(){
+const key=getGeminiKey();
+const lastAnswer=getLastGeminiAnswer();
+const btn=document.getElementById('btn-gemini-continue');
+if(!key){
+  toggleAuthMenu(true);
+  document.getElementById('gemini-key-box')?.setAttribute('open','');
+  setTimeout(()=>document.getElementById('gemini-api-key')?.focus(),50);
+  alert('請先在右上角帳號選單貼上 Gemini API Key。');
+  return;
+}
+if(!lastAnswer){
+  alert('目前還沒有可以接續的 Gemini 回答。');
+  return;
+}
+const userText='請繼續補充上一題，避免重複前面已經說過的內容。';
+appendGeminiMessage('user',userText);
+geminiChatHistory.push({role:'user',text:userText});
+const pending=appendGeminiMessage('assistant','繼續補充中⋯');
+if(btn) btn.disabled=true;
+try{
+  const prompt=[
+    '你是命理師 Doris 的報告助理，請使用繁體中文回答。',
+    '請接續上一則回答，補充尚未說完或可以更白話說明的部分。',
+    '不要重複前文，不要重新從第一段開始。',
+    '請用 2 到 4 段口語文字補充，最後加一段「可以對客戶這樣說」。',
+    '不要做醫療、法律、投資保證。',
+    '',
+    '【目前對話紀錄】',
+    getGeminiHistoryText(),
+    '',
+    '【目前報告內容】',
+    getReportContextForGemini()
+  ].join('\n');
+  const text=await callGeminiText(key,prompt,1800,2);
+  const finalText=text || 'Gemini 沒有回傳補充內容，請稍後再試。';
+  setGeminiMessage(pending,finalText);
+  geminiChatHistory.push({role:'assistant',text:finalText});
+}catch(err){
+  console.error('Gemini continue error:', err);
+  setGeminiMessage(pending,'Gemini 補充失敗：'+err.message,'error');
 }finally{
   if(btn) btn.disabled=false;
 }
