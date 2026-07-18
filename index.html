@@ -2210,17 +2210,28 @@ const trimmed=(text||'').trim();
 if(!trimmed) return true;
 if(finishReason === 'MAX_TOKENS') return true;
 const compact=trimmed.replace(/\s+/g,'');
-return /[，、；：]$/.test(compact) || /(擁有|包含|以及|例如|可以|能夠|代表|表示|因為|所以|但是|不過|並且|而且|與|和)$/.test(compact);
+return /[，、；：]$/.test(compact) || /(擁有|包含|以及|例如|可以|能夠|代表|表示|因為|所以|但是|不過|並且|而且|與|和|願意|只要|需要|透過|將|把|在|從|用|讓)$/.test(compact);
 }
 
-async function callGeminiOnce(key, prompt, maxOutputTokens=2200){
+function sanitizeGeminiOutput(text){
+return (text||'')
+  .replace(/\*\*/g,'')
+  .replace(/\n?\s*\*?\s*Wait,\s*let['’]s refine[\s\S]*$/i,'')
+  .replace(/\n?\s*Interrupted text:[\s\S]*$/i,'')
+  .replace(/\n?\s*My continuation:[\s\S]*$/i,'')
+  .replace(/\n?\s*["“]?\s*\(?the end of system prompt[\s\S]*$/i,'')
+  .replace(/\n?\s*請從上面最後一句中斷處[\s\S]*$/,'')
+  .trim();
+}
+
+async function callGeminiOnce(key, contents, maxOutputTokens=2200){
 let data=null,lastModelErr='';
 for(const model of GEMINI_MODELS){
   const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,{
     method:'POST',
     headers:{'Content-Type':'application/json','x-goog-api-key':key},
     body:JSON.stringify({
-      contents:[{role:'user',parts:[{text:prompt}]}],
+      contents,
       generationConfig:{temperature:0.38,maxOutputTokens}
     })
   });
@@ -2235,27 +2246,24 @@ for(const model of GEMINI_MODELS){
 if(!data) throw new Error(lastModelErr || 'Gemini 模型目前不可用，請稍後再試。');
 const candidate=data.candidates?.[0] || {};
 return {
-  text:(candidate.content?.parts||[]).map(p=>p.text||'').join('\n').trim(),
+  text:sanitizeGeminiOutput((candidate.content?.parts||[]).map(p=>p.text||'').join('\n')),
   finishReason:candidate.finishReason || ''
 };
 }
 
 async function callGeminiText(key, prompt, maxOutputTokens=2200, continueLimit=2){
 let finalText='';
-let nextPrompt=prompt;
+let contents=[{role:'user',parts:[{text:prompt}]}];
 for(let i=0;i<=continueLimit;i++){
-  const result=await callGeminiOnce(key,nextPrompt,maxOutputTokens);
-  const piece=(result.text||'').trim();
+  const result=await callGeminiOnce(key,contents,maxOutputTokens);
+  const piece=sanitizeGeminiOutput(result.text);
   if(piece) finalText=finalText ? `${finalText}\n\n${piece}` : piece;
   if(!looksGeminiIncomplete(finalText,result.finishReason) || i===continueLimit) break;
-  nextPrompt=[
-    prompt,
-    '',
-    '【已經回答到這裡】',
-    finalText,
-    '',
-    '請從上面最後一句中斷處自然接續，不要重複前文。請把尚未完成的段落補完，最後一句要完整收尾。'
-  ].join('\n');
+  contents=[
+    {role:'user',parts:[{text:prompt}]},
+    {role:'model',parts:[{text:finalText}]},
+    {role:'user',parts:[{text:'請直接接續上一則回答未完成的地方。不要重複前文，不要提到 prompt、system、Interrupted text、continuation，也不要解釋你正在接續；只輸出給客戶看的繁體中文內容，最後一句要完整收尾。'}]}
+  ];
 }
 return finalText;
 }
@@ -2288,6 +2296,8 @@ try{
     '若問題超出命盤可判斷範圍，請溫和說明限制，並給可追問方向。',
     '語氣要口語、清楚、適合命理師拿去對客戶說明；不要恐嚇，不做醫療、法律、投資保證。',
     '不要使用「嗨、老師、我幫你整理」這類寒暄開頭，直接回答問題。',
+    '不得輸出英文思考字樣或技術字樣，例如 Wait、refine、Interrupted text、My continuation、prompt、system prompt。',
+    '不要使用 Markdown 符號，例如 **粗體** 或項目符號星號。',
     '回答格式固定為三段，每段都要有標題：一、結論；二、命盤依據；三、可以對客戶這樣說。',
     '不可只回答一句話。總長度請控制在 300 到 700 個中文字之間，句子必須完整收尾。',
     '如果答案需要保留彈性，請說「比較偏向」或「可以這樣觀察」，不要講成絕對判斷。',
@@ -2307,6 +2317,8 @@ try{
       '請把下方回答重寫成完整的繁體中文命理師話術。',
       '不可只回一句。請固定三段：一、結論；二、命盤依據；三、可以對客戶這樣說。',
       '總長度 300 到 700 個中文字，語氣溫和、口語、可直接對客戶說，最後一句必須完整收尾。',
+      '不得輸出英文思考字樣或技術字樣，例如 Wait、refine、Interrupted text、My continuation、prompt、system prompt。',
+      '不要使用 Markdown 符號，例如 **粗體** 或項目符號星號。',
       '',
       '【目前對話紀錄】',
       getGeminiHistoryText() || '（尚無）',
@@ -2359,6 +2371,8 @@ try{
     '請接續上一則回答，補充尚未說完或可以更白話說明的部分。',
     '不要重複前文，不要重新從第一段開始。',
     '請用 2 到 4 段口語文字補充，最後加一段「可以對客戶這樣說」。',
+    '不得輸出英文思考字樣或技術字樣，例如 Wait、refine、Interrupted text、My continuation、prompt、system prompt。',
+    '不要使用 Markdown 符號，例如 **粗體** 或項目符號星號。',
     '不要做醫療、法律、投資保證。',
     '',
     '【目前對話紀錄】',
