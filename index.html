@@ -1597,6 +1597,140 @@ if(currentUser){
 }
 
 // ══════════════════════════════════════════════
+// 排盤 API 備援
+// ══════════════════════════════════════════════
+function fetchJsonWithTimeout(url, options={}, timeoutMs=9000){
+const controller=new AbortController();
+const timer=setTimeout(()=>controller.abort(),timeoutMs);
+return fetch(url,{...options,signal:controller.signal})
+  .then(async res=>{
+    const text=await res.text();
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    return JSON.parse(text);
+  })
+  .finally(()=>clearTimeout(timer));
+}
+
+const HIDDEN_STEMS = {
+子:{主气:{天干:'癸'}},
+丑:{余气:{天干:'辛'},中气:{天干:'癸'},主气:{天干:'己'}},
+寅:{余气:{天干:'戊'},中气:{天干:'丙'},主气:{天干:'甲'}},
+卯:{主气:{天干:'乙'}},
+辰:{余气:{天干:'癸'},中气:{天干:'乙'},主气:{天干:'戊'}},
+巳:{余气:{天干:'戊'},中气:{天干:'庚'},主气:{天干:'丙'}},
+午:{中气:{天干:'己'},主气:{天干:'丁'}},
+未:{余气:{天干:'乙'},中气:{天干:'丁'},主气:{天干:'己'}},
+申:{余气:{天干:'戊'},中气:{天干:'壬'},主气:{天干:'庚'}},
+酉:{主气:{天干:'辛'}},
+戌:{余气:{天干:'丁'},中气:{天干:'辛'},主气:{天干:'戊'}},
+亥:{中气:{天干:'甲'},主气:{天干:'壬'}}
+};
+
+const GZ_CYCLE = (() => {
+const stems=['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+const branches=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+return Array.from({length:60},(_,i)=>stems[i%10]+branches[i%12]);
+})();
+
+function addMonths(date, months){
+const d=new Date(date);
+d.setMonth(d.getMonth()+months);
+return d;
+}
+
+function formatDateLoose(date){
+return `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}`;
+}
+
+function getQiYunInfoApprox(year, month, day, gender, yearStem){
+const all=[];
+for(let y=year-1;y<=year+1;y++){
+  JIEQI_LIST.forEach(jq=>all.push({date:new Date(y,jq.month-1,jq.day)}));
+}
+all.sort((a,b)=>a.date-b.date);
+const birth=new Date(year,month-1,day);
+const yangStem=['甲','丙','戊','庚','壬'].includes(yearStem);
+const forward=(gender==='1'&&yangStem)||(gender==='0'&&!yangStem);
+const target=forward
+  ? all.find(jq=>jq.date>birth)
+  : [...all].reverse().find(jq=>jq.date<birth);
+const days=target?Math.max(1,Math.abs(target.date-birth)/86400000):15;
+const age=Math.max(1,Math.round(days/3));
+const startDate=addMonths(birth,Math.round(days*4));
+return {forward,age,startDate};
+}
+
+function buildHiddenStemData(branch, dayStem){
+const raw=HIDDEN_STEMS[branch]||{};
+const out={};
+Object.keys(raw).forEach(key=>{
+  const stem=raw[key]?.['天干']||'';
+  if(!stem) return;
+  out[key]={天干:stem,五行:WX_MAP[stem]||'',十神:toTrad(getShishen(dayStem,stem))};
+});
+return out;
+}
+
+function buildPillarData(gz, dayStem, isDay=false){
+const stem=gz?.[0]||'';
+const branch=gz?.[1]||'';
+return {
+  天干:{天干:stem,五行:WX_MAP[stem]||'',十神:isDay?'日主':toTrad(getShishen(dayStem,stem))},
+  地支:{地支:branch,五行:WX_MAP[branch]||'',藏干:buildHiddenStemData(branch,dayStem)}
+};
+}
+
+function buildDayunList(monthPillar, dayStem, year, gender, birthMonth, birthDay, yearStem){
+const qiyun=getQiYunInfoApprox(year,birthMonth,birthDay,gender,yearStem);
+const monthIdx=GZ_CYCLE.indexOf(monthPillar);
+const list=[];
+for(let i=0;i<10;i++){
+  const idx=(monthIdx+(qiyun.forward?i+1:-(i+1))+60*2)%60;
+  const gz=GZ_CYCLE[idx];
+  const startAge=qiyun.age+i*10;
+  const startYear=year+startAge-1;
+  list.push({
+    干支:gz,
+    开始年龄:startAge,
+    结束年龄:startAge+9,
+    开始年份:startYear,
+    结束:startYear+9,
+    天干十神:toTrad(getShishen(dayStem,gz[0]))
+  });
+}
+return {qiyun,list};
+}
+
+function buildLocalBaziData({year,month,day,hour,minute,gender}){
+if(!window.Solar) throw new Error('本機排盤套件尚未載入');
+const solar=Solar.fromYmdHms(year,month,day,hour,minute,0);
+const lunar=solar.getLunar();
+const eightChar=lunar.getEightChar();
+const yearPillar=eightChar.getYear();
+const monthPillar=eightChar.getMonth();
+const dayPillar=eightChar.getDay();
+const timePillar=eightChar.getTime();
+const dayStem=dayPillar[0];
+const {qiyun,list}=buildDayunList(monthPillar,dayStem,year,gender,month,day,yearPillar[0]);
+const lunarText=`农历${lunar.getYearInGanZhi()}年${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}${timePillar}时`;
+return {
+  阳历:`${year}-${month}-${day} ${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`,
+  农历:lunarText,
+  生肖:typeof lunar.getYearShengXiao==='function'?lunar.getYearShengXiao():'',
+  年柱:buildPillarData(yearPillar,dayStem),
+  月柱:buildPillarData(monthPillar,dayStem),
+  日柱:buildPillarData(dayPillar,dayStem,true),
+  时柱:buildPillarData(timePillar,dayStem),
+  大运:{
+    起运日期:formatDateLoose(qiyun.startDate),
+    起运年龄:qiyun.age,
+    大运:list
+  },
+  本机排盘:true
+};
+}
+
+// ══════════════════════════════════════════════
 // 產生報告
 // ══════════════════════════════════════════════
 async function doGenerate(){
@@ -1617,22 +1751,44 @@ const min=String(minute).padStart(2,'0');
 const dt=`${year}-${mm}-${dd}T${hh}:${min}:00+08:00`;
 const payload={dateType:'solar',solarDatetime:dt,gender:parseInt(gender),eightCharProviderSect:2};
 const apiUrls=[
-'https://bazi.jianbao.org/api/bazi',
-'https://corsproxy.io/?url='+encodeURIComponent('https://bazi.jianbao.org/api/bazi'),
-'https://api.allorigins.win/raw?url='+encodeURIComponent('https://bazi.jianbao.org/api/bazi')
+{url:'https://bazi.jianbao.org/api/bazi',timeout:8000},
+{url:'https://corsproxy.io/?url='+encodeURIComponent('https://bazi.jianbao.org/api/bazi'),timeout:3500},
+{url:'https://api.allorigins.win/raw?url='+encodeURIComponent('https://bazi.jianbao.org/api/bazi'),timeout:3500}
 ];
 setLoading(true,'命盤推算中⋯');
 let json=null,lastErr='';
-for(const url of apiUrls){
+for(const api of apiUrls){
 try{
-  const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-  const text=await res.text();
-  json=JSON.parse(text);
+  json=await fetchJsonWithTimeout(api.url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)},api.timeout);
   if(json.success) break;
-}catch(e){lastErr=e.message;continue;}
+}catch(e){
+  lastErr=e.name==='AbortError'?'排盤 API 請求逾時':e.message;
+  console.warn('Bazi API failed:', api.url, e);
+  setLoading(true,'排盤通道不穩，改用本機備援中⋯');
+}
+}
+if(!json||!json.success){
+  try{
+    json={
+      success:true,
+      data:buildLocalBaziData({
+        year:parseInt(year),
+        month:parseInt(month),
+        day:parseInt(day),
+        hour:parseInt(hour),
+        minute:parseInt(minute),
+        gender
+      })
+    };
+    cloudStatusText='外部排盤 API 暫時不穩，已改用本機排盤備援。';
+    updateAuthUI();
+  }catch(e){
+    setLoading(false);
+    alert('命盤推算暫時無法連線，本機備援也無法完成，請稍後再試\n'+(e.message||lastErr));
+    return;
+  }
 }
 setLoading(false);
-if(!json||!json.success){alert('命盤推算暫時無法連線，請稍後再試\n'+lastErr);return;}
 const client={
 id:Date.now().toString(),
 name,year:parseInt(year),month:parseInt(month),day:parseInt(day),
