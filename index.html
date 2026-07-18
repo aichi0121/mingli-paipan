@@ -181,41 +181,6 @@ gap:8px;
 flex-wrap:wrap;
 justify-content:flex-start;
 }
-.auth-tools{
-border-top:1px solid #F0E8DC;
-padding-top:10px;
-}
-.auth-tools label{
-display:block;
-font-size:0.72rem;
-font-weight:700;
-color:#8B6914;
-margin-bottom:6px;
-}
-.auth-tools-row{
-display:flex;
-gap:6px;
-}
-.auth-tools-row input{
-flex:1;
-min-width:0;
-border:1.5px solid #E8DDD0;
-border-radius:8px;
-padding:7px 9px;
-font-family:inherit;
-font-size:0.78rem;
-color:#4A3728;
-background:#fff;
-outline:none;
-}
-.auth-tools-row input:focus{border-color:#D4B896;}
-.auth-tools-note{
-font-size:0.68rem;
-line-height:1.5;
-color:#B89C7D;
-margin-top:6px;
-}
-
 /* ══════════════════════════════════════
  畫面一：客戶列表
 ══════════════════════════════════════ */
@@ -345,23 +310,107 @@ margin-bottom:24px;
 flex-wrap:wrap;
 gap:10px;
 }
+.gemini-launcher{
+position:fixed;
+right:22px;
+bottom:22px;
+z-index:80;
+width:54px;
+height:54px;
+border-radius:50%;
+border:1.5px solid #D4B896;
+background:#8B6914;
+color:#FFFDF8;
+box-shadow:0 8px 24px rgba(74,55,40,0.24);
+font-size:1.35rem;
+cursor:pointer;
+display:flex;
+align-items:center;
+justify-content:center;
+transition:all 0.2s;
+}
+.gemini-launcher:hover{transform:translateY(-2px);background:#6F5410;}
 .gemini-card{
+position:fixed;
+right:22px;
+bottom:86px;
+z-index:81;
+width:min(380px,calc(100vw - 32px));
+max-height:min(680px,calc(100vh - 120px));
+overflow:auto;
+display:none;
 border:1px solid #E8DDD0;
 background:#FFFDF8;
 border-radius:14px;
 padding:16px;
-margin-top:18px;
+box-shadow:0 10px 30px rgba(74,55,40,0.2);
+}
+.gemini-card.active{display:block;}
+.gemini-header{
+display:flex;
+align-items:flex-start;
+justify-content:space-between;
+gap:12px;
+margin-bottom:10px;
 }
 .gemini-card h3{
 font-size:0.98rem;
 color:#8B6914;
-margin-bottom:8px;
+margin-bottom:4px;
 }
 .gemini-card p{
 font-size:0.78rem;
 line-height:1.7;
 color:#B89C7D;
 margin-bottom:10px;
+}
+.gemini-close{
+width:30px;
+height:30px;
+border:none;
+border-radius:50%;
+background:#FAF6F1;
+color:#8B6914;
+font-size:1.1rem;
+cursor:pointer;
+}
+.gemini-close:hover{background:#F0E8DC;}
+.gemini-key-box{
+border:1px solid #F0E8DC;
+background:#FFFCF8;
+border-radius:10px;
+padding:10px;
+margin-bottom:12px;
+}
+.gemini-key-box label{
+display:block;
+font-size:0.74rem;
+font-weight:700;
+color:#8B6914;
+margin-bottom:6px;
+}
+.gemini-key-row{
+display:flex;
+gap:6px;
+}
+.gemini-key-row input{
+flex:1;
+min-width:0;
+border:1.5px solid #E8DDD0;
+border-radius:8px;
+padding:8px 9px;
+font-family:inherit;
+font-size:0.78rem;
+color:#4A3728;
+background:#fff;
+outline:none;
+}
+.gemini-key-row input:focus{border-color:#D4B896;}
+.gemini-key-note{
+font-size:0.68rem;
+line-height:1.5;
+color:#B89C7D;
+margin-top:6px;
 }
 .gemini-input{
 width:100%;
@@ -1106,14 +1155,6 @@ details.kb-section summary::after{display:none;}
   <button id="btn-cloud-sync" class="btn btn-ghost btn-small hidden" onclick="syncLocalClientsToCloud()">同步本機資料</button>
   <button id="btn-google-logout" class="btn btn-ghost btn-small hidden" onclick="signOutGoogle()">登出</button>
 </div>
-<div class="auth-tools">
-  <label for="gemini-api-key">Gemini API Key</label>
-  <div class="auth-tools-row">
-    <input id="gemini-api-key" type="password" placeholder="貼上自己的 API Key">
-    <button class="btn btn-ghost btn-small" type="button" onclick="saveGeminiKey()">儲存</button>
-  </div>
-  <div id="gemini-key-note" class="auth-tools-note">只存在這台裝置；正式付費版建議改用後端保護。</div>
-</div>
 </div>
 </div>
 </div>
@@ -1291,9 +1332,26 @@ details.kb-section summary::after{display:none;}
 </div>
 <div id="tab-full"><div class="kb-loading">知識庫載入中⋯</div></div>
 <div id="tab-quick" class="hidden"><div class="kb-loading">知識庫載入中⋯</div></div>
-<div id="gemini-card" class="gemini-card no-print">
-  <h3>💬 針對這份報告提問</h3>
-  <p>這裡會把目前這份命盤報告當作上下文，適合問「報告外延伸但仍和這張盤有關」的問題。</p>
+</div>
+
+</div><!-- /screen-report -->
+<button id="gemini-launcher" class="gemini-launcher no-print" type="button" onclick="toggleGeminiChat()" aria-label="開啟 Gemini 報告問答">✦</button>
+<div id="gemini-card" class="gemini-card no-print" aria-live="polite">
+  <div class="gemini-header">
+    <div>
+      <h3>💬 Gemini 報告問答</h3>
+      <p>會以目前這份命盤報告為上下文，幫你整理客戶追問時可以怎麼回答。</p>
+    </div>
+    <button class="gemini-close" type="button" onclick="toggleGeminiChat(false)" aria-label="關閉 Gemini 問答">×</button>
+  </div>
+  <div class="gemini-key-box">
+    <label for="gemini-api-key">Gemini API Key</label>
+    <div class="gemini-key-row">
+      <input id="gemini-api-key" type="password" placeholder="貼上自己的 API Key">
+      <button class="btn btn-ghost btn-small" type="button" onclick="saveGeminiKey()">儲存</button>
+    </div>
+    <div id="gemini-key-note" class="gemini-key-note">只存在這台裝置；正式付費版建議改用後端保護。</div>
+  </div>
   <textarea id="gemini-question" class="gemini-input" placeholder="例如：這個客戶如果問今年工作要注意什麼，我可以怎麼白話回答？"></textarea>
   <div class="gemini-actions">
     <button class="btn btn-ghost btn-small" type="button" onclick="clearGeminiAnswer()">清空</button>
@@ -1301,9 +1359,6 @@ details.kb-section summary::after{display:none;}
   </div>
   <div id="gemini-answer" class="gemini-answer"></div>
 </div>
-</div>
-
-</div><!-- /screen-report -->
 </div><!-- /container -->
 
 <script>
@@ -1551,6 +1606,16 @@ if(getGeminiKey()){
   input.placeholder='貼上自己的 API Key';
   note.textContent='只存在這台裝置；正式付費版建議改用後端保護。';
 }
+}
+
+function toggleGeminiChat(force){
+const card=document.getElementById('gemini-card');
+const launcher=document.getElementById('gemini-launcher');
+if(!card) return;
+const open=typeof force==='boolean' ? force : !card.classList.contains('active');
+card.classList.toggle('active',open);
+if(launcher) launcher.setAttribute('aria-expanded',open?'true':'false');
+if(open) updateGeminiKeyUI();
 }
 
 function updateAuthUI(){
@@ -2028,8 +2093,9 @@ const question=document.getElementById('gemini-question')?.value.trim()||'';
 const answer=document.getElementById('gemini-answer');
 const btn=document.getElementById('btn-ask-gemini');
 if(!key){
-  toggleAuthMenu(true);
-  alert('請先在右上角帳號選單貼上 Gemini API Key。');
+  toggleGeminiChat(true);
+  setTimeout(()=>document.getElementById('gemini-api-key')?.focus(),50);
+  alert('請先在右下角 Gemini 浮窗貼上 API Key。');
   return;
 }
 if(!question){
