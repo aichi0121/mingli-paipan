@@ -1368,7 +1368,7 @@ details.kb-section summary::after{display:none;}
 const CURRENT_YEAR = new Date().getFullYear();
 const LS_KEY = 'doris_clients';
 const GEMINI_KEY = 'doris_gemini_api_key';
-const GEMINI_MODEL = 'gemini-2.5-flash';
+const GEMINI_MODELS = ['gemini-3.5-flash','gemini-2.5-flash-lite'];
 const GITHUB_RAW = 'https://raw.githubusercontent.com/aichi0121/mingli-paipan/main/data/';
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyBHUerxO5VyQA_taGIJxD0vYv1-scdgfM0",
@@ -2120,16 +2120,25 @@ try{
     '【使用者問題】',
     question
   ].join('\n');
-  const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,{
-    method:'POST',
-    headers:{'Content-Type':'application/json','x-goog-api-key':key},
-    body:JSON.stringify({
-      contents:[{role:'user',parts:[{text:prompt}]}],
-      generationConfig:{temperature:0.45,maxOutputTokens:900}
-    })
-  });
-  const data=await res.json();
-  if(!res.ok) throw new Error(data.error?.message || `Gemini API 錯誤：${res.status}`);
+  let data=null,lastModelErr='';
+  for(const model of GEMINI_MODELS){
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-goog-api-key':key},
+      body:JSON.stringify({
+        contents:[{role:'user',parts:[{text:prompt}]}],
+        generationConfig:{temperature:0.45,maxOutputTokens:900}
+      })
+    });
+    data=await res.json();
+    if(res.ok) break;
+    lastModelErr=data.error?.message || `Gemini API 錯誤：${res.status}`;
+    if(!/not found|not available|not supported|is no longer available/i.test(lastModelErr)) {
+      throw new Error(lastModelErr);
+    }
+    data=null;
+  }
+  if(!data) throw new Error(lastModelErr || 'Gemini 模型目前不可用，請稍後再試。');
   const text=(data.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join('\n').trim();
   if(answer) answer.textContent=text || 'Gemini 沒有回傳文字，請稍後再試。';
 }catch(err){
