@@ -433,19 +433,41 @@ justify-content:flex-end;
 gap:8px;
 margin-top:10px;
 }
-.gemini-answer{
-display:none;
+.gemini-chat-log{
+display:flex;
+flex-direction:column;
+gap:10px;
 margin-top:14px;
-padding:14px 16px;
-border-left:3px solid #D4B896;
-background:#FFFCF8;
-border-radius:0 10px 10px 0;
+max-height:260px;
+overflow:auto;
+padding:2px 2px 4px;
+}
+.gemini-chat-log:empty{display:none;}
+.gemini-message{
+padding:12px 14px;
+border-radius:12px;
 font-size:0.9rem;
 line-height:1.85;
 color:#4A3728;
 white-space:pre-wrap;
 }
-.gemini-answer.active{display:block;}
+.gemini-message.user{
+align-self:flex-end;
+max-width:88%;
+background:#F4E8D9;
+border:1px solid #E8DDD0;
+}
+.gemini-message.assistant{
+align-self:flex-start;
+max-width:94%;
+background:#FFFCF8;
+border-left:3px solid #D4B896;
+border-radius:0 12px 12px 0;
+}
+.gemini-message.error{
+border-left-color:#C0392B;
+color:#8A2F24;
+}
 
 /* 基本訊息表格 */
 .info-table{width:100%;border-collapse:collapse;}
@@ -1352,12 +1374,12 @@ details.kb-section summary::after{display:none;}
     </div>
     <div id="gemini-key-note" class="gemini-key-note">只存在這台裝置；正式付費版建議改用後端保護。</div>
   </div>
+  <div id="gemini-chat-log" class="gemini-chat-log"></div>
   <textarea id="gemini-question" class="gemini-input" placeholder="例如：這個客戶如果問今年工作要注意什麼，我可以怎麼白話回答？"></textarea>
   <div class="gemini-actions">
-    <button class="btn btn-ghost btn-small" type="button" onclick="clearGeminiAnswer()">清空</button>
+    <button class="btn btn-ghost btn-small" type="button" onclick="clearGeminiAnswer()">清空對話</button>
     <button id="btn-ask-gemini" class="btn btn-primary btn-small" type="button" onclick="askGeminiAboutReport()">送出提問</button>
   </div>
-  <div id="gemini-answer" class="gemini-answer"></div>
 </div>
 </div><!-- /container -->
 
@@ -1387,6 +1409,7 @@ let fbDb = null;
 let currentUser = null;
 let currentRole = 'guest';
 let currentReportClient = null;
+let geminiChatHistory = [];
 let cloudClients = [];
 let cloudStatusText = '';
 
@@ -2064,12 +2087,36 @@ if(msg) document.getElementById('loading-msg').textContent=msg;
 
 function clearGeminiAnswer(){
 const q=document.getElementById('gemini-question');
-const ans=document.getElementById('gemini-answer');
+const log=document.getElementById('gemini-chat-log');
+geminiChatHistory=[];
 if(q) q.value='';
-if(ans){
-  ans.textContent='';
-  ans.classList.remove('active');
+if(log) log.innerHTML='';
 }
+
+function appendGeminiMessage(role,text,extraClass=''){
+const log=document.getElementById('gemini-chat-log');
+if(!log) return null;
+const msg=document.createElement('div');
+msg.className=`gemini-message ${role}${extraClass ? ' '+extraClass : ''}`;
+msg.textContent=text;
+log.appendChild(msg);
+log.scrollTop=log.scrollHeight;
+return msg;
+}
+
+function setGeminiMessage(el,text,extraClass=''){
+if(!el) return;
+el.textContent=text;
+if(extraClass) el.classList.add(extraClass);
+const log=document.getElementById('gemini-chat-log');
+if(log) log.scrollTop=log.scrollHeight;
+}
+
+function getGeminiHistoryText(){
+return geminiChatHistory
+  .slice(-8)
+  .map(item=>`${item.role==='user' ? '使用者' : 'Gemini'}：${item.text}`)
+  .join('\n');
 }
 
 function getReportContextForGemini(){
@@ -2087,10 +2134,33 @@ return [header,'基本訊息：'+info,'四柱排盤：'+bazi,'大運流年：'+d
   .slice(0,18000);
 }
 
+async function callGeminiText(key, prompt, maxOutputTokens=1100){
+let data=null,lastModelErr='';
+for(const model of GEMINI_MODELS){
+  const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-goog-api-key':key},
+    body:JSON.stringify({
+      contents:[{role:'user',parts:[{text:prompt}]}],
+      generationConfig:{temperature:0.38,maxOutputTokens}
+    })
+  });
+  data=await res.json();
+  if(res.ok) break;
+  lastModelErr=data.error?.message || `Gemini API 錯誤：${res.status}`;
+  if(!/not found|not available|not supported|is no longer available/i.test(lastModelErr)) {
+    throw new Error(lastModelErr);
+  }
+  data=null;
+}
+if(!data) throw new Error(lastModelErr || 'Gemini 模型目前不可用，請稍後再試。');
+return (data.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join('\n').trim();
+}
+
 async function askGeminiAboutReport(){
 const key=getGeminiKey();
-const question=document.getElementById('gemini-question')?.value.trim()||'';
-const answer=document.getElementById('gemini-answer');
+const q=document.getElementById('gemini-question');
+const question=q?.value.trim()||'';
 const btn=document.getElementById('btn-ask-gemini');
 if(!key){
   toggleGeminiChat(true);
@@ -2102,10 +2172,10 @@ if(!question){
   alert('請先輸入想問的問題。');
   return;
 }
-if(answer){
-  answer.textContent='正在整理回答中⋯';
-  answer.classList.add('active');
-}
+appendGeminiMessage('user',question);
+geminiChatHistory.push({role:'user',text:question});
+if(q) q.value='';
+const pending=appendGeminiMessage('assistant','正在整理回答中⋯');
 if(btn) btn.disabled=true;
 try{
   const prompt=[
@@ -2114,8 +2184,12 @@ try{
     '若問題超出命盤可判斷範圍，請溫和說明限制，並給可追問方向。',
     '語氣要口語、清楚、適合命理師拿去對客戶說明；不要恐嚇，不做醫療、法律、投資保證。',
     '不要使用「嗨、老師、我幫你整理」這類寒暄開頭，直接回答問題。',
-    '回答格式固定為三段：1. 先給一句明確結論。2. 說明命盤依據。3. 提供一段可以直接對客戶說的白話話術。',
+    '回答格式固定為三段，每段都要有標題：一、結論；二、命盤依據；三、可以對客戶這樣說。',
+    '不可只回答一句話。總長度請控制在 250 到 600 個中文字之間。',
     '如果答案需要保留彈性，請說「比較偏向」或「可以這樣觀察」，不要講成絕對判斷。',
+    '',
+    '【目前對話紀錄】',
+    getGeminiHistoryText() || '（尚無）',
     '',
     '【目前報告內容】',
     getReportContextForGemini(),
@@ -2123,30 +2197,32 @@ try{
     '【使用者問題】',
     question
   ].join('\n');
-  let data=null,lastModelErr='';
-  for(const model of GEMINI_MODELS){
-    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-goog-api-key':key},
-      body:JSON.stringify({
-        contents:[{role:'user',parts:[{text:prompt}]}],
-        generationConfig:{temperature:0.45,maxOutputTokens:900}
-      })
-    });
-    data=await res.json();
-    if(res.ok) break;
-    lastModelErr=data.error?.message || `Gemini API 錯誤：${res.status}`;
-    if(!/not found|not available|not supported|is no longer available/i.test(lastModelErr)) {
-      throw new Error(lastModelErr);
-    }
-    data=null;
+  let text=await callGeminiText(key,prompt,1100);
+  if(text.replace(/\s/g,'').length<120 || !/一、|二、|三、/.test(text)){
+    text=await callGeminiText(key,[
+      '請把下方回答重寫成完整的繁體中文命理師話術。',
+      '不可只回一句。請固定三段：一、結論；二、命盤依據；三、可以對客戶這樣說。',
+      '總長度 250 到 600 個中文字，語氣溫和、口語、可直接對客戶說。',
+      '',
+      '【目前對話紀錄】',
+      getGeminiHistoryText() || '（尚無）',
+      '',
+      '【原問題】',
+      question,
+      '',
+      '【原回答】',
+      text,
+      '',
+      '【目前報告內容】',
+      getReportContextForGemini()
+    ].join('\n'),1300);
   }
-  if(!data) throw new Error(lastModelErr || 'Gemini 模型目前不可用，請稍後再試。');
-  const text=(data.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join('\n').trim();
-  if(answer) answer.textContent=text || 'Gemini 沒有回傳文字，請稍後再試。';
+  const finalText=text || 'Gemini 沒有回傳文字，請稍後再試。';
+  setGeminiMessage(pending,finalText);
+  geminiChatHistory.push({role:'assistant',text:finalText});
 }catch(err){
   console.error('Gemini ask error:', err);
-  if(answer) answer.textContent='Gemini 問答失敗：'+err.message;
+  setGeminiMessage(pending,'Gemini 問答失敗：'+err.message,'error');
 }finally{
   if(btn) btn.disabled=false;
 }
