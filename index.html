@@ -80,9 +80,79 @@ transition:all 0.2s;
 .btn-primary:hover{background:#C4A882;}
 .btn-ghost{background:transparent;color:#8B6914;border:1.5px solid #D4B896;}
 .btn-ghost:hover{background:#FAF6F1;}
+.btn-small{font-size:0.78rem;padding:6px 12px;border-radius:8px;}
 .btn-danger{background:transparent;color:#C0392B;border:1.5px solid #E8A090;font-size:0.75rem;padding:4px 10px;}
 .btn-danger:hover{background:#FFEBEE;}
 .btn-full{width:100%;padding:14px;font-size:1rem;}
+
+/* ══════════════════════════════════════
+ 登入同步
+══════════════════════════════════════ */
+.auth-panel{
+background:#FFFDF8;
+border:1px solid #E8DDD0;
+border-radius:14px;
+padding:12px 14px;
+margin-bottom:16px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:12px;
+box-shadow:0 2px 8px rgba(74,55,40,0.05);
+}
+.auth-main{
+display:flex;
+align-items:center;
+gap:10px;
+min-width:0;
+}
+.auth-avatar{
+width:34px;
+height:34px;
+border-radius:50%;
+background:#F4E8D9;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:0.9rem;
+font-weight:700;
+color:#8B6914;
+overflow:hidden;
+flex-shrink:0;
+}
+.auth-avatar img{width:100%;height:100%;object-fit:cover;}
+.auth-copy{min-width:0;}
+.auth-title{
+font-size:0.84rem;
+font-weight:700;
+color:#8B6914;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+.auth-subtitle{
+font-size:0.72rem;
+color:#B89C7D;
+margin-top:2px;
+}
+.role-badge{
+display:inline-flex;
+align-items:center;
+padding:2px 8px;
+border-radius:999px;
+background:#FDF5EA;
+border:1px solid #E8DDD0;
+font-size:0.7rem;
+color:#8B6914;
+font-weight:700;
+}
+.auth-actions{
+display:flex;
+align-items:center;
+gap:8px;
+flex-wrap:wrap;
+justify-content:flex-end;
+}
 
 /* ══════════════════════════════════════
  畫面一：客戶列表
@@ -858,6 +928,8 @@ border-radius:2px;
 
 /* RWD */
 @media(max-width:600px){
+.auth-panel{align-items:flex-start;flex-direction:column;}
+.auth-actions{width:100%;justify-content:flex-start;}
 .wuxing-wrap{flex-direction:column;}
 .date-row{flex-wrap:wrap;}
 .compare-wrap{grid-template-columns:1fr;}
@@ -882,6 +954,9 @@ details.kb-section summary::after{display:none;}
 .canggan-cell span{font-size:0.85rem;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -897,6 +972,23 @@ details.kb-section summary::after{display:none;}
 <div class="site-header no-print">
 <h1>源澄潤設計事務所</h1>
 <p>Doris 的八字路口相談室</p>
+</div>
+
+<!-- Google 登入與雲端同步 -->
+<div id="auth-panel" class="auth-panel no-print">
+<div class="auth-main">
+  <div id="auth-avatar" class="auth-avatar">訪</div>
+  <div class="auth-copy">
+    <div id="auth-title" class="auth-title">尚未登入 Google</div>
+    <div id="auth-subtitle" class="auth-subtitle">未登入時資料只存在這台裝置；登入後可同步到雲端。</div>
+  </div>
+</div>
+<div class="auth-actions">
+  <span id="role-badge" class="role-badge">guest</span>
+  <button id="btn-google-login" class="btn btn-primary btn-small" onclick="signInWithGoogle()">使用 Google 登入</button>
+  <button id="btn-cloud-sync" class="btn btn-ghost btn-small hidden" onclick="syncLocalClientsToCloud()">同步本機資料</button>
+  <button id="btn-google-logout" class="btn btn-ghost btn-small hidden" onclick="signOutGoogle()">登出</button>
+</div>
 </div>
 
 <!-- 畫面一：客戶列表 -->
@@ -1067,8 +1159,8 @@ details.kb-section summary::after{display:none;}
 <div class="card">
 <div class="section-title">命理分析報告</div>
 <div class="tab-bar no-print">
-<button class="tab-btn active" onclick="switchTab('full',this)">📋 完整版</button>
-<button class="tab-btn" onclick="switchTab('quick',this)">⚡ 快速版</button>
+<button id="tab-btn-full" class="tab-btn active" onclick="switchTab('full',this)">📋 完整版</button>
+<button id="tab-btn-quick" class="tab-btn" onclick="switchTab('quick',this)">⚡ 快速版</button>
 </div>
 <div id="tab-full"><div class="kb-loading">知識庫載入中⋯</div></div>
 <div id="tab-quick" class="hidden"><div class="kb-loading">知識庫載入中⋯</div></div>
@@ -1084,6 +1176,24 @@ details.kb-section summary::after{display:none;}
 const CURRENT_YEAR = new Date().getFullYear();
 const LS_KEY = 'doris_clients';
 const GITHUB_RAW = 'https://raw.githubusercontent.com/aichi0121/mingli-paipan/main/data/';
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBHUerxO5VyQA_taGIJxD0vYv1-scdgfM0",
+  authDomain: "mingli-paipan.firebaseapp.com",
+  projectId: "mingli-paipan",
+  storageBucket: "mingli-paipan.firebasestorage.app",
+  messagingSenderId: "197801233550",
+  appId: "1:197801233550:web:6e2b3be96c4d4158a90ddf"
+};
+// 管理員權限以 Firestore 的 users/{uid}.role 為準。
+// 你第一次登入後，到 Firebase Console 把自己的 user 文件 role 改成 "admin"。
+
+let firebaseReady = false;
+let fbAuth = null;
+let fbDb = null;
+let currentUser = null;
+let currentRole = 'guest';
+let cloudClients = [];
+let cloudStatusText = '';
 
 const WX_MAP = {
 甲:'木',乙:'木',丙:'火',丁:'火',戊:'土',
@@ -1100,6 +1210,186 @@ const SIMP_TO_TRAD = {
 function toTrad(s){
 if(!s) return s;
 return s.replace(/劫财|伤官|正财|偏财|七杀|枭神/g, m=>SIMP_TO_TRAD[m]||m);
+}
+
+// ══════════════════════════════════════════════
+// Firebase 登入與雲端同步
+// ══════════════════════════════════════════════
+function initFirebase(){
+if(!window.firebase){
+  cloudStatusText = 'Firebase SDK 尚未載入，暫時使用本機資料。';
+  updateAuthUI();
+  return;
+}
+try{
+  if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+  fbAuth = firebase.auth();
+  fbDb = firebase.firestore();
+  firebaseReady = true;
+  fbAuth.onAuthStateChanged(handleAuthStateChanged);
+}catch(err){
+  console.error('Firebase init error:', err);
+  cloudStatusText = 'Firebase 初始化失敗，暫時使用本機資料。';
+  updateAuthUI();
+}
+}
+
+async function handleAuthStateChanged(user){
+currentUser = user || null;
+currentRole = user ? 'tester' : 'guest';
+cloudStatusText = user ? '正在同步雲端資料⋯' : '未登入時資料只存在這台裝置；登入後可同步到雲端。';
+updateAuthUI();
+if(!user){
+  cloudClients = [];
+  renderClientList();
+  return;
+}
+try{
+  await ensureUserProfile(user);
+  await loadCloudClients();
+  cloudStatusText = '已同步雲端資料。';
+}catch(err){
+  console.error('Firebase sync error:', err);
+  cloudStatusText = '雲端同步失敗，請確認 Firestore Rules 是否已貼上。';
+}
+updateAuthUI();
+renderClientList();
+}
+
+async function ensureUserProfile(user){
+if(!fbDb || !user) return;
+const userRef = fbDb.collection('users').doc(user.uid);
+const snap = await userRef.get();
+const savedRole = snap.exists ? snap.data().role : '';
+const role = savedRole || 'tester';
+currentRole = role;
+await userRef.set({
+  uid:user.uid,
+  email:user.email || '',
+  displayName:user.displayName || '',
+  photoURL:user.photoURL || '',
+  role,
+  lastLoginAt:firebase.firestore.FieldValue.serverTimestamp(),
+  updatedAt:firebase.firestore.FieldValue.serverTimestamp(),
+  createdAt:snap.exists ? snap.data().createdAt : firebase.firestore.FieldValue.serverTimestamp()
+},{merge:true});
+}
+
+async function loadCloudClients(){
+if(!fbDb || !currentUser) return;
+const snap = await fbDb.collection('users').doc(currentUser.uid)
+  .collection('clients')
+  .orderBy('sortTime','desc')
+  .get();
+cloudClients = snap.docs.map(doc => ({id:doc.id, ...doc.data()}));
+localStorage.setItem(LS_KEY, JSON.stringify(cloudClients));
+}
+
+async function saveClientToCloud(client){
+if(!fbDb || !currentUser || !client) return;
+const sortTime = Number(client.id) || Date.now();
+await fbDb.collection('users').doc(currentUser.uid)
+  .collection('clients').doc(String(client.id))
+  .set({
+    ...client,
+    ownerUid:currentUser.uid,
+    ownerEmail:currentUser.email || '',
+    sortTime,
+    updatedAt:firebase.firestore.FieldValue.serverTimestamp(),
+    createdAt:client.createdAt || firebase.firestore.FieldValue.serverTimestamp()
+  },{merge:true});
+}
+
+async function syncAllClientsToCloud(clients){
+if(!fbDb || !currentUser) return;
+for(const client of clients){
+  await saveClientToCloud(client);
+}
+await loadCloudClients();
+renderClientList();
+}
+
+async function syncLocalClientsToCloud(){
+if(!currentUser){
+  alert('請先登入 Google');
+  return;
+}
+const localClients = JSON.parse(localStorage.getItem(LS_KEY)||'[]');
+if(!localClients.length){
+  alert('目前沒有本機資料需要同步');
+  return;
+}
+setLoading(true,'同步本機資料到雲端⋯');
+try{
+  await syncAllClientsToCloud(localClients);
+  cloudStatusText = '本機資料已同步到雲端。';
+  updateAuthUI();
+  alert('同步完成');
+}catch(err){
+  console.error('Manual sync error:', err);
+  alert('同步失敗，請確認 Firestore 規則是否已設定。');
+}finally{
+  setLoading(false);
+}
+}
+
+async function deleteClientFromCloud(id){
+if(!fbDb || !currentUser || !id) return;
+await fbDb.collection('users').doc(currentUser.uid)
+  .collection('clients').doc(String(id)).delete();
+}
+
+function signInWithGoogle(){
+if(!firebaseReady || !fbAuth){
+  alert('Firebase 尚未載入完成，請重新整理後再試。');
+  return;
+}
+const provider = new firebase.auth.GoogleAuthProvider();
+fbAuth.signInWithPopup(provider).catch(err => {
+  console.error('Google sign-in error:', err);
+  alert('Google 登入失敗：'+err.message);
+});
+}
+
+function signOutGoogle(){
+if(fbAuth) fbAuth.signOut();
+}
+
+function canViewTeacherReport(){
+return currentRole === 'admin' || currentRole === 'teacher';
+}
+
+function roleLabel(){
+return currentRole === 'admin' ? 'admin 完整版' :
+  currentRole === 'teacher' ? 'teacher 完整版' :
+  currentRole === 'tester' ? 'tester 客戶版' : 'guest 單機版';
+}
+
+function updateAuthUI(){
+const avatar = document.getElementById('auth-avatar');
+const title = document.getElementById('auth-title');
+const subtitle = document.getElementById('auth-subtitle');
+const badge = document.getElementById('role-badge');
+const loginBtn = document.getElementById('btn-google-login');
+const logoutBtn = document.getElementById('btn-google-logout');
+const syncBtn = document.getElementById('btn-cloud-sync');
+if(!avatar || !title || !subtitle || !badge) return;
+if(currentUser){
+  avatar.innerHTML = currentUser.photoURL ? `<img src="${currentUser.photoURL}" alt="">` : (currentUser.displayName || currentUser.email || '已').slice(0,1);
+  title.textContent = currentUser.displayName || currentUser.email || '已登入 Google';
+  subtitle.textContent = cloudStatusText || '已登入，資料會同步到雲端。';
+  loginBtn.classList.add('hidden');
+  logoutBtn.classList.remove('hidden');
+  syncBtn.classList.remove('hidden');
+}else{
+  avatar.textContent = '訪';
+  title.textContent = '尚未登入 Google';
+  subtitle.textContent = cloudStatusText || '未登入時資料只存在這台裝置；登入後可同步到雲端。';
+  loginBtn.classList.remove('hidden');
+  logoutBtn.classList.add('hidden');
+  syncBtn.classList.add('hidden');
+}
+badge.textContent = roleLabel();
 }
 
 // ══════════════════════════════════════════════
@@ -1256,8 +1546,19 @@ return el?el.dataset.val:null;
 // ══════════════════════════════════════════════
 // 客戶列表
 // ══════════════════════════════════════════════
-function getClients(){return JSON.parse(localStorage.getItem(LS_KEY)||'[]');}
-function saveClients(arr){localStorage.setItem(LS_KEY,JSON.stringify(arr));}
+function getLocalClients(){return JSON.parse(localStorage.getItem(LS_KEY)||'[]');}
+function getClients(){return currentUser ? cloudClients : getLocalClients();}
+function saveClients(arr){
+localStorage.setItem(LS_KEY,JSON.stringify(arr));
+if(currentUser){
+  cloudClients = arr;
+  syncAllClientsToCloud(arr).catch(err => {
+    console.error('Cloud save error:', err);
+    cloudStatusText = '雲端儲存失敗，本機資料仍已保留。';
+    updateAuthUI();
+  });
+}
+}
 
 function renderClientList(){
 const clients=getClients();
@@ -1277,10 +1578,22 @@ container.innerHTML=clients.map(c=>`
 `).join('');
 }
 
-function deleteClient(id){
+async function deleteClient(id){
 if(!confirm('確定要刪除此客戶資料？')) return;
-saveClients(getClients().filter(c=>c.id!==id));
+const nextClients = getClients().filter(c=>c.id!==id);
+localStorage.setItem(LS_KEY,JSON.stringify(nextClients));
+cloudClients = nextClients;
 renderClientList();
+if(currentUser){
+  try{
+    await deleteClientFromCloud(id);
+    cloudStatusText = '已刪除雲端資料。';
+    updateAuthUI();
+  }catch(err){
+    console.error('Cloud delete error:', err);
+    alert('本機已刪除，但雲端刪除失敗，請稍後再試。');
+  }
+}
 }
 
 // ══════════════════════════════════════════════
@@ -3113,8 +3426,25 @@ ${section('📅','④ '+lyYear+'年提醒',quickSec6Html,true)}
 </div>
 `;
 
-document.getElementById('tab-full').innerHTML  = fullHtml;
+const lockedFullHtml = `
+<div class="kb-card">
+  <div class="kb-card-title">🔒 完整版已保護</div>
+  <div class="kb-content">
+    <p>目前帳號權限是「${roleLabel()}」，只顯示客戶快速版。</p>
+    <p>完整版包含老師觀點、完整推論與風水依據，僅開放 admin / teacher 帳號查看。</p>
+  </div>
+</div>
+`;
+const fullBtn = document.getElementById('tab-btn-full');
+const quickBtn = document.getElementById('tab-btn-quick');
+document.getElementById('tab-full').innerHTML  = canViewTeacherReport() ? fullHtml : lockedFullHtml;
 document.getElementById('tab-quick').innerHTML = quickHtml;
+if(canViewTeacherReport()){
+  fullBtn?.classList.remove('hidden');
+}else{
+  fullBtn?.classList.add('hidden');
+  switchTab('quick', quickBtn);
+}
 }
 
 
@@ -3122,6 +3452,11 @@ document.getElementById('tab-quick').innerHTML = quickHtml;
 // Tab 切換
 // ══════════════════════════════════════════════
 function switchTab(tab,btn){
+if(tab === 'full' && !canViewTeacherReport()){
+  alert('完整版只開放給管理員或命理師帳號。朋友試用會看到客戶快速版。');
+  tab = 'quick';
+  btn = document.getElementById('tab-btn-quick') || btn;
+}
 document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
 btn.classList.add('active');
 document.getElementById('tab-full') .classList.toggle('hidden',tab!=='full');
@@ -3171,6 +3506,8 @@ return[minguo,lunarMonth,lunarDay,shi].filter(Boolean).join(' ');
 // ══════════════════════════════════════════════
 window.onload=()=>{
 initSelects();
+initFirebase();
+updateAuthUI();
 showScreen('screen-list');
 };
 </script>
