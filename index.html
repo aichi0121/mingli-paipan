@@ -131,7 +131,7 @@ flex-shrink:0;
 position:absolute;
 right:0;
 top:50px;
-width:min(290px,calc(100vw - 32px));
+width:min(360px,calc(100vw - 32px));
 background:#FFFDF8;
 border:1px solid #E8DDD0;
 border-radius:14px;
@@ -180,6 +180,9 @@ align-items:center;
 gap:8px;
 flex-wrap:wrap;
 justify-content:flex-start;
+}
+.auth-menu .gemini-key-box{
+margin:0;
 }
 /* ══════════════════════════════════════
  畫面一：客戶列表
@@ -335,9 +338,10 @@ position:fixed;
 right:22px;
 bottom:86px;
 z-index:81;
-width:min(380px,calc(100vw - 32px));
-max-height:min(680px,calc(100vh - 120px));
-overflow:auto;
+width:min(520px,calc(100vw - 32px));
+height:min(760px,calc(100vh - 120px));
+max-height:calc(100vh - 120px);
+overflow:hidden;
 display:none;
 border:1px solid #E8DDD0;
 background:#FFFDF8;
@@ -345,13 +349,17 @@ border-radius:14px;
 padding:16px;
 box-shadow:0 10px 30px rgba(74,55,40,0.2);
 }
-.gemini-card.active{display:block;}
+.gemini-card.active{
+display:flex;
+flex-direction:column;
+}
 .gemini-header{
 display:flex;
 align-items:flex-start;
 justify-content:space-between;
 gap:12px;
 margin-bottom:10px;
+flex-shrink:0;
 }
 .gemini-card h3{
 font-size:0.98rem;
@@ -381,13 +389,29 @@ background:#FFFCF8;
 border-radius:10px;
 padding:10px;
 margin-bottom:12px;
+flex-shrink:0;
 }
-.gemini-key-box label{
-display:block;
+.gemini-key-box summary{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:10px;
 font-size:0.74rem;
 font-weight:700;
 color:#8B6914;
-margin-bottom:6px;
+cursor:pointer;
+list-style:none;
+}
+.gemini-key-box summary::-webkit-details-marker{display:none;}
+.gemini-key-box[open] summary{margin-bottom:8px;}
+.gemini-key-status{
+font-size:0.68rem;
+font-weight:700;
+color:#B89C7D;
+}
+.gemini-key-box.has-key:not([open]){
+padding:8px 10px;
+margin-bottom:10px;
 }
 .gemini-key-row{
 display:flex;
@@ -414,7 +438,8 @@ margin-top:6px;
 }
 .gemini-input{
 width:100%;
-min-height:78px;
+min-height:86px;
+max-height:150px;
 resize:vertical;
 border:1.5px solid #E8DDD0;
 border-radius:10px;
@@ -425,6 +450,7 @@ line-height:1.7;
 color:#4A3728;
 background:#fff;
 outline:none;
+flex-shrink:0;
 }
 .gemini-input:focus{border-color:#D4B896;}
 .gemini-actions{
@@ -432,17 +458,24 @@ display:flex;
 justify-content:flex-end;
 gap:8px;
 margin-top:10px;
+flex-shrink:0;
 }
 .gemini-chat-log{
 display:flex;
 flex-direction:column;
 gap:10px;
-margin-top:14px;
-max-height:260px;
+flex:1;
+min-height:190px;
 overflow:auto;
-padding:2px 2px 4px;
+padding:6px 2px 12px;
+margin:2px 0 10px;
 }
-.gemini-chat-log:empty{display:none;}
+.gemini-chat-log:empty{
+display:block;
+min-height:8px;
+padding:0;
+margin:0 0 10px;
+}
 .gemini-message{
 padding:12px 14px;
 border-radius:12px;
@@ -453,13 +486,13 @@ white-space:pre-wrap;
 }
 .gemini-message.user{
 align-self:flex-end;
-max-width:88%;
+max-width:82%;
 background:#F4E8D9;
 border:1px solid #E8DDD0;
 }
 .gemini-message.assistant{
 align-self:flex-start;
-max-width:94%;
+max-width:100%;
 background:#FFFCF8;
 border-left:3px solid #D4B896;
 border-radius:0 12px 12px 0;
@@ -467,6 +500,18 @@ border-radius:0 12px 12px 0;
 .gemini-message.error{
 border-left-color:#C0392B;
 color:#8A2F24;
+}
+@media(max-width:700px){
+.gemini-card{
+right:12px;
+left:12px;
+bottom:78px;
+width:auto;
+height:min(760px,calc(100vh - 96px));
+max-height:calc(100vh - 96px);
+padding:14px;
+}
+.gemini-launcher{right:16px;bottom:16px;}
 }
 
 /* 基本訊息表格 */
@@ -1177,6 +1222,17 @@ details.kb-section summary::after{display:none;}
   <button id="btn-cloud-sync" class="btn btn-ghost btn-small hidden" onclick="syncLocalClientsToCloud()">同步本機資料</button>
   <button id="btn-google-logout" class="btn btn-ghost btn-small hidden" onclick="signOutGoogle()">登出</button>
 </div>
+<details id="gemini-key-box" class="gemini-key-box" open>
+  <summary>
+    <span>Gemini API Key</span>
+    <span id="gemini-key-status" class="gemini-key-status">尚未設定</span>
+  </summary>
+  <div class="gemini-key-row">
+    <input id="gemini-api-key" type="password" placeholder="貼上自己的 API Key">
+    <button class="btn btn-ghost btn-small" type="button" onclick="saveGeminiKey()">儲存</button>
+  </div>
+  <div id="gemini-key-note" class="gemini-key-note">只存在這台裝置；正式付費版建議改用後端保護。</div>
+</details>
 </div>
 </div>
 </div>
@@ -1365,14 +1421,6 @@ details.kb-section summary::after{display:none;}
       <p>會以目前這份命盤報告為上下文，幫你整理客戶追問時可以怎麼回答。</p>
     </div>
     <button class="gemini-close" type="button" onclick="toggleGeminiChat(false)" aria-label="關閉 Gemini 問答">×</button>
-  </div>
-  <div class="gemini-key-box">
-    <label for="gemini-api-key">Gemini API Key</label>
-    <div class="gemini-key-row">
-      <input id="gemini-api-key" type="password" placeholder="貼上自己的 API Key">
-      <button class="btn btn-ghost btn-small" type="button" onclick="saveGeminiKey()">儲存</button>
-    </div>
-    <div id="gemini-key-note" class="gemini-key-note">只存在這台裝置；正式付費版建議改用後端保護。</div>
   </div>
   <div id="gemini-chat-log" class="gemini-chat-log"></div>
   <textarea id="gemini-question" class="gemini-input" placeholder="例如：這個客戶如果問今年工作要注意什麼，我可以怎麼白話回答？"></textarea>
@@ -1590,6 +1638,7 @@ if(!menu || !trigger) return;
 const open=typeof force==='boolean' ? force : menu.classList.contains('hidden');
 menu.classList.toggle('hidden',!open);
 trigger.setAttribute('aria-expanded',open?'true':'false');
+if(open) updateGeminiKeyUI();
 }
 
 document.addEventListener('click', e=>{
@@ -1621,13 +1670,25 @@ updateGeminiKeyUI();
 function updateGeminiKeyUI(){
 const input=document.getElementById('gemini-api-key');
 const note=document.getElementById('gemini-key-note');
+const box=document.getElementById('gemini-key-box');
+const status=document.getElementById('gemini-key-status');
 if(!input || !note) return;
 if(getGeminiKey()){
   input.placeholder='已儲存 API Key；留空按儲存可清除';
   note.textContent=note.textContent.includes('已儲存') ? note.textContent : 'Gemini 已可使用。API Key 只存在這台裝置。';
+  if(status) status.textContent='已儲存';
+  if(box){
+    box.classList.add('has-key');
+    box.open=false;
+  }
 }else{
   input.placeholder='貼上自己的 API Key';
   note.textContent='只存在這台裝置；正式付費版建議改用後端保護。';
+  if(status) status.textContent='尚未設定';
+  if(box){
+    box.classList.remove('has-key');
+    box.open=true;
+  }
 }
 }
 
@@ -2134,7 +2195,7 @@ return [header,'基本訊息：'+info,'四柱排盤：'+bazi,'大運流年：'+d
   .slice(0,18000);
 }
 
-async function callGeminiText(key, prompt, maxOutputTokens=1100){
+async function callGeminiText(key, prompt, maxOutputTokens=1800){
 let data=null,lastModelErr='';
 for(const model of GEMINI_MODELS){
   const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,{
@@ -2163,9 +2224,10 @@ const q=document.getElementById('gemini-question');
 const question=q?.value.trim()||'';
 const btn=document.getElementById('btn-ask-gemini');
 if(!key){
-  toggleGeminiChat(true);
+  toggleAuthMenu(true);
+  document.getElementById('gemini-key-box')?.setAttribute('open','');
   setTimeout(()=>document.getElementById('gemini-api-key')?.focus(),50);
-  alert('請先在右下角 Gemini 浮窗貼上 API Key。');
+  alert('請先在右上角帳號選單貼上 Gemini API Key。');
   return;
 }
 if(!question){
@@ -2185,7 +2247,7 @@ try{
     '語氣要口語、清楚、適合命理師拿去對客戶說明；不要恐嚇，不做醫療、法律、投資保證。',
     '不要使用「嗨、老師、我幫你整理」這類寒暄開頭，直接回答問題。',
     '回答格式固定為三段，每段都要有標題：一、結論；二、命盤依據；三、可以對客戶這樣說。',
-    '不可只回答一句話。總長度請控制在 250 到 600 個中文字之間。',
+    '不可只回答一句話。總長度請控制在 300 到 700 個中文字之間，句子必須完整收尾。',
     '如果答案需要保留彈性，請說「比較偏向」或「可以這樣觀察」，不要講成絕對判斷。',
     '',
     '【目前對話紀錄】',
@@ -2197,12 +2259,12 @@ try{
     '【使用者問題】',
     question
   ].join('\n');
-  let text=await callGeminiText(key,prompt,1100);
-  if(text.replace(/\s/g,'').length<120 || !/一、|二、|三、/.test(text)){
+  let text=await callGeminiText(key,prompt,1800);
+  if(text.replace(/\s/g,'').length<160 || !/一、|二、|三、/.test(text) || /[，、；：]$/.test(text.trim())){
     text=await callGeminiText(key,[
       '請把下方回答重寫成完整的繁體中文命理師話術。',
       '不可只回一句。請固定三段：一、結論；二、命盤依據；三、可以對客戶這樣說。',
-      '總長度 250 到 600 個中文字，語氣溫和、口語、可直接對客戶說。',
+      '總長度 300 到 700 個中文字，語氣溫和、口語、可直接對客戶說，最後一句必須完整收尾。',
       '',
       '【目前對話紀錄】',
       getGeminiHistoryText() || '（尚無）',
@@ -2215,7 +2277,7 @@ try{
       '',
       '【目前報告內容】',
       getReportContextForGemini()
-    ].join('\n'),1300);
+    ].join('\n'),2200);
   }
   const finalText=text || 'Gemini 沒有回傳文字，請稍後再試。';
   setGeminiMessage(pending,finalText);
