@@ -1752,7 +1752,7 @@ function tenGodMatches(names){
 }
 function formatTenGodEntries(entries){
   if(!entries.length) return '未在原局天干或藏干中明顯出現';
-  return entries.map(entry => `${entry.pillar}${entry.place} ${entry.stem}${WX_MAP[entry.stem] || ''}（${entry.shen}）`).join('、');
+  return entries.map(entry => `${entry.pillar}${entry.place} ${entry.stem}${WX_MAP[entry.stem] || ''}[${entry.shen}]`).join('、');
 }
 const caiEntries = tenGodMatches(['正財','偏財']);
 const zhengCaiEntries = tenGodMatches('正財');
@@ -2009,6 +2009,9 @@ function personalizeContent(text){
     .replaceAll('{{忌神}}', strongLabel === '身強' ? '印、比劫' : '財、官星、食傷')
     .replace(/平級聤/g, '平級聊')
     .replace(/官殺/g, '官星')
+    .replace(/擺放馬虎狗羊蛇(?:駝)?陶土小物/g, '擺放【馬、虎、狗、羊、蛇】等陶土小物')
+    .replace(/馬虎狗羊蛇(?:駝)?陶土小物/g, '【馬、虎、狗、羊、蛇】等陶土小物')
+    .replace(/馬虎狗羊蛇/g, '馬、虎、狗、羊、蛇')
     .replace(/多聤/g, '多聊')
     .replace(/咊啊/g, '咖啡')
     .replace(/咊咊/g, '咖啡')
@@ -2259,12 +2262,13 @@ function focusItem(label, value, toneClass = ''){
 
 function reportTokenClass(token, coreTokens){
   if(coreTokens.has(token)) return 'key-token key-token-core';
+  if(/腎臟|膀胱/.test(token)) return 'key-token key-water';
+  if(/脾胃|消化系統/.test(token)) return 'key-token key-health';
   if(['偏印','正印','印星'].includes(token)) return 'key-token key-resource';
   if(['財星','正財','偏財','劫財'].includes(token)) return 'key-token key-wealth';
   if(['官星','正官','七殺','官殺'].includes(token)) return 'key-token key-career';
   if(['食神','傷官','食傷'].includes(token)) return 'key-token key-output';
   if(['配偶星','夫妻宮','婚姻宮','桃花'].includes(token)) return 'key-token key-love';
-  if(['腎臟','膀胱'].includes(token)) return 'key-token key-water';
   if(['身強','身弱','喜用神','忌神','用神'].includes(token)) return 'key-token key-strength';
   return 'key-token';
 }
@@ -2290,10 +2294,10 @@ function protectReportPhrases(html, protectedPhrases){
   };
   let output = html;
   output = output.replace(/「([^」]{2,120})」/g, (_, phrase) => `「${protect(phrase)}」`);
-  output = output.replace(/(面對)([^，。；]{2,60})(時)/g, (_, prefix, phrase, suffix) => `${prefix}${protect(phrase)}${suffix}`);
-  output = output.replace(/(偏向)([^，。；]{2,80})/g, (_, prefix, phrase) => `${prefix}${protect(phrase)}`);
-  output = output.replace(/(適合)([^，。；]{2,80})/g, (_, prefix, phrase) => `${prefix}${protect(phrase)}`);
-  output = output.replace(/(代表)([^，。；]{2,80})/g, (_, prefix, phrase) => `${prefix}${protect(phrase)}`);
+  output = output.replace(/(面對)([^，。；「」@]{2,60})(時)/g, (_, prefix, phrase, suffix) => `${prefix}${protect(phrase)}${suffix}`);
+  output = output.replace(/(偏向)([^，。；「」@]{2,80})/g, (_, prefix, phrase) => `${prefix}${protect(phrase)}`);
+  output = output.replace(/(適合)([^，。；「」@]{2,80})/g, (_, prefix, phrase) => `${prefix}${protect(phrase)}`);
+  output = output.replace(/(代表)([^，。；「」@]{2,80})/g, (_, prefix, phrase) => `${prefix}${protect(phrase)}`);
   return output;
 }
 
@@ -2388,7 +2392,7 @@ function applyReportHighlights(html){
 function enhanceReportText(text){
   if(!text) return '';
   let html = String(text).replace(/官殺/g, '官星');
-  const coreTokens = new Set([riTg, riWx, riTg+riWx, yueDz, yueDzWx, strongLabel, curDyGz, lyGz, lyTg, lyDz]);
+  const coreTokens = new Set([riTg, riWx, riTg+riWx]);
   const protectedTokens = [];
   const protectedPhrases = [];
   html = html.replace(/【([^】]+)】/g, (_, rawToken) => {
@@ -2399,9 +2403,11 @@ function enhanceReportText(text){
   });
   html = protectReportPhrases(html, protectedPhrases);
   html = applyReportHighlights(html);
-  protectedPhrases.forEach((phraseHtml, index) => {
-    html = html.replace(`@@REPORT_PHRASE_${index}@@`, phraseHtml);
-  });
+  for(let pass = 0; pass < 3; pass++){
+    protectedPhrases.forEach((phraseHtml, index) => {
+      html = html.replaceAll(`@@REPORT_PHRASE_${index}@@`, phraseHtml);
+    });
+  }
   protectedTokens.forEach((tokenHtml, index) => {
     html = html.replace(`@@REPORT_TOKEN_${index}@@`, tokenHtml);
   });
@@ -2590,6 +2596,18 @@ function xuOverlapSummary(){
     {label:'文昌／學習位', direction:xuFs.wenchang, remedy:xuRemedies.wenchang},
     {label:'桃花／人緣位', direction:xuFs.peach, remedy:xuRemedies.peach}
   ].filter(item => item.direction && item.remedy);
+  const readableDirectionLabels = labels => {
+    const words = labels.flatMap(label => {
+      if(label === '財位') return ['財位'];
+      return label
+        .replace(/位/g, '')
+        .split(/[／/+＋]/)
+        .map(word => word.trim())
+        .filter(Boolean);
+    });
+    const unique = [...new Set(words)];
+    return `${unique.join('、')}位牽動`;
+  };
   const directionRows = categories.flatMap(cat => splitDirections(cat.direction).map(direction => ({direction, label:cat.label})));
   const directionMap = new Map();
   directionRows.forEach(({direction, label}) => {
@@ -2599,7 +2617,7 @@ function xuOverlapSummary(){
   const sharedDirections = [...directionMap.entries()]
     .filter(([,labels]) => labels.length >= 2)
     .sort((a,b) => b[1].length - a[1].length || a[0].localeCompare(b[0], 'zh-Hant'))
-    .map(([direction, labels]) => `${direction}：${labels.join('＋')}`);
+    .map(([direction, labels]) => `${direction}：${readableDirectionLabels(labels)}`);
   const sharedItems = frequencySummary(categories.map(cat => splitZhList(cat.remedy.items)), 2);
   const sharedZodiac = frequencySummary(categories.map(cat => splitZhList(cat.remedy.zodiac)), 2);
   const sharedMaterials = frequencySummary(categories.map(cat => splitZhList(cat.remedy.material)), 2);
