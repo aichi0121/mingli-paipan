@@ -1,5 +1,6 @@
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-1.5-flash-latest';
-const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+const DEFAULT_GEMINI_MODEL = 'gemini-3.5-flash';
+const MODEL_PREFERENCES = [DEFAULT_GEMINI_MODEL, 'gemini-3.1-flash-lite', 'gemini-3-flash-preview', 'gemini-2.5-flash'];
+let cachedGeminiModel = '';
 
 function setCors(res) {
   res.setHeader('Access-Control-Allow-Origin', process.env.ALLOWED_ORIGIN || '*');
@@ -109,15 +110,35 @@ function buildPrompt(body) {
   ].join('\n');
 }
 
-async function callGemini(prompt, body) {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    const err = new Error('後端尚未設定 GEMINI_API_KEY。');
-    err.statusCode = 500;
-    throw err;
-  }
+function cleanModelName(name) {
+  return String(name || '').replace(/^models\//, '');
+}
 
-  const response = await fetch(`${GEMINI_ENDPOINT}?key=${encodeURIComponent(apiKey)}`, {
+async function listTextModels(apiKey) {
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`);
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) return [];
+  return (data.models || [])
+    .filter((model) => (model.supportedGenerationMethods || []).includes('generateContent'))
+    .map((model) => cleanModelName(model.name));
+}
+
+async function resolveGeminiModel(apiKey, excluded = []) {
+  if (cachedGeminiModel && !excluded.includes(cachedGeminiModel)) return cachedGeminiModel;
+  const configured = cleanModelName(process.env.GEMINI_MODEL);
+  const available = await listTextModels(apiKey);
+  const candidates = [configured, ...MODEL_PREFERENCES].filter(Boolean);
+  const selected = candidates.find((name) => available.includes(name) && !excluded.includes(name))
+    || available.find((name) => /flash/i.test(name) && !/image|audio|live|tts/i.test(name) && !excluded.includes(name))
+    || candidates.find((name) => !excluded.includes(name))
+    || DEFAULT_GEMINI_MODEL;
+  cachedGeminiModel = selected;
+  return selected;
+}
+
+async function requestGemini(apiKey, model, prompt, body) {
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+  const response = await fetch(`${endpoint}?key=${encodeURIComponent(apiKey)}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -130,8 +151,29 @@ async function callGemini(prompt, body) {
       }
     })
   });
-
   const data = await response.json().catch(() => ({}));
+  return { response, data };
+}
+
+async function callGemini(prompt, body) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    const err = new Error('後端尚未設定 GEMINI_API_KEY。');
+    err.statusCode = 500;
+    throw err;
+  }
+
+  let model = await resolveGeminiModel(apiKey);
+  let { response, data } = await requestGemini(apiKey, model, prompt, body);
+  const unavailable = /not found|not supported|no longer available|deprecated|shut down/i.test(data.error?.message || '');
+  if (!response.ok && (response.status === 404 || unavailable)) {
+    cachedGeminiModel = '';
+    const replacement = await resolveGeminiModel(apiKey, [model]);
+    if (replacement !== model) {
+      model = replacement;
+      ({ response, data } = await requestGemini(apiKey, model, prompt, body));
+    }
+  }
   if (!response.ok) {
     const message = data.error?.message || `Gemini API 錯誤：${response.status}`;
     const err = new Error(message);
@@ -141,6 +183,7 @@ async function callGemini(prompt, body) {
 
   const candidate = data.candidates?.[0] || {};
   return {
+    model,
     text: sanitizeGeminiOutput((candidate.content?.parts || []).map((part) => part.text || '').join('\n')),
     finishReason: candidate.finishReason || '',
     usageMetadata: data.usageMetadata || null
@@ -168,7 +211,7 @@ module.exports = async function handler(req, res) {
 
     res.status(200).json({
       ok: true,
-      model: GEMINI_MODEL,
+      model: result.model,
       outputType: body.outputType || body.format || 'article',
       text: result.text,
       json: parsedJson,
