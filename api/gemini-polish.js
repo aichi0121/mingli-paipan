@@ -115,6 +115,10 @@ function cleanModelName(name) {
   return String(name || '').replace(/^models\//, '');
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 async function listTextModels(apiKey) {
   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`);
   const data = await response.json().catch(() => ({}));
@@ -165,7 +169,19 @@ async function callGemini(prompt, body) {
   }
 
   let model = await resolveGeminiModel(apiKey);
-  let { response, data } = await requestGemini(apiKey, model, prompt, body);
+  let response;
+  let data;
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    ({ response, data } = await requestGemini(apiKey, model, prompt, body));
+    if (response.ok) break;
+    if (![429, 500, 502, 503, 504].includes(response.status) || attempt === 2) break;
+    const retryAfter = Number(response.headers.get('retry-after'));
+    const delay = Number.isFinite(retryAfter) && retryAfter > 0
+      ? Math.min(retryAfter * 1000, 5000)
+      : 700 * (2 ** attempt);
+    await sleep(delay);
+  }
   const unavailable = /not found|not supported|no longer available|deprecated|shut down/i.test(data.error?.message || '');
   if (!response.ok && (response.status === 404 || unavailable)) {
     cachedGeminiModel = '';
@@ -179,6 +195,7 @@ async function callGemini(prompt, body) {
     const message = data.error?.message || `Gemini API 錯誤：${response.status}`;
     const err = new Error(message);
     err.statusCode = response.status;
+    err.code = response.status === 429 ? 'GEMINI_RATE_LIMIT' : 'GEMINI_REQUEST_FAILED';
     throw err;
   }
 
@@ -222,7 +239,8 @@ module.exports = async function handler(req, res) {
   } catch (error) {
     res.status(error.statusCode || 500).json({
       ok: false,
-      error: error.message || 'Gemini route failed.'
+      error: error.message || 'Gemini route failed.',
+      code: error.code || 'GEMINI_ROUTE_FAILED'
     });
   }
 };
