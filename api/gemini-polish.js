@@ -40,11 +40,56 @@ function tryParseJson(text) {
   }
 }
 
+function enforceStructuredFacts(data, tags) {
+  if (!data || typeof data !== 'object') return data;
+  const counts = tags?.domains?.health?.elementCounts || {};
+  const correctHealthText = (value) => {
+    let text = String(value || '');
+    for (const [element, rawCount] of Object.entries(counts)) {
+      const count = Number(rawCount || 0);
+      if (count >= 3) {
+        text = text.replace(new RegExp(`${element}(?:氣)?(?:較弱|偏弱|不足|缺乏)`, 'g'), `${element}氣偏旺`);
+      } else if (count === 0) {
+        text = text.replace(new RegExp(`${element}(?:氣)?(?:旺盛|過旺|偏旺|較旺)`, 'g'), `${element}氣不足`);
+      }
+    }
+    return text;
+  };
+  if (data.health && typeof data.health === 'object') {
+    for (const key of ['headline', 'analysis', 'action']) data.health[key] = correctHealthText(data.health[key]);
+  }
+  const chapter11 = (data.chapterSummaries || []).find((chapter) => String(chapter?.number) === '⑪');
+  if (chapter11) {
+    chapter11.bullets = (chapter11.bullets || []).map((item) => ({
+      ...item,
+      value: correctHealthText(item?.value)
+    }));
+  }
+  const children = tags?.domains?.children || {};
+  const chapter10 = (data.chapterSummaries || []).find((chapter) => String(chapter?.number) === '⑩');
+  if (chapter10 && children.gender) {
+    const isMale = children.gender === '男';
+    const childRule = isMale ? '男命以官星看子女緣' : '女命以食傷看子女緣';
+    const workRule = isMale ? '作品與專業輸出另看食傷' : '作品與成果承接另看官星、財星';
+    const hour = children.hourPillar || {};
+    const hourGods = [hour.stemTenGod, hour.branchTenGod].filter(Boolean).join('／');
+    const childConclusion = Number(children.childStarCount || 0) > 0
+      ? `原局共有${children.childStarCount}個相關訊號；${children.samePillarRooted ? '可見同柱透藏，根氣較完整' : '星位可見，但不直接等同固定子女數量'}，實際時機仍看大運、流年與現實選擇。`
+      : '原局相關星位不明顯，緣分與時機需搭配大運、流年及後天選擇。';
+    chapter10.bullets = [
+      { label: '性別與星位', value: `${childRule}，${workRule}。${childConclusion}` },
+      { label: `時柱【${hour.ganzhi || '待判'}】`, value: `${hourGods ? `十神為${hourGods}；` : ''}${hour.elementRelation ? `${hour.elementRelation}，` : ''}${hour.structureSignal || '用來補充晚年、晚輩與成果質地。'}` },
+      { label: '作品與成果', value: Number(children.workStarCount || 0) > 0 ? `原局有${children.workStarCount}個作品／成果相關訊號，須結合時柱判斷適合的承接方式。` : `原局作品／成果星位較弱，可依時柱建立固定且適合自己的累積路線。` }
+    ];
+  }
+  return data;
+}
+
 function buildPrompt(body) {
   const mode = body.mode || 'polish';
   const outputType = body.outputType || body.format || 'article';
   const tone = body.tone || '專業、口語、清楚、溫暖，但不要像罐頭模板';
-  const tags = safeString(body.tags || body.baziTags || {}, 14000);
+  const tags = safeString(body.tags || body.baziTags || {}, 36000);
   const draft = safeString(body.reportDraft || body.draft || body.article || '', 14000);
   const question = safeString(body.question || '', 2000);
   const history = safeString(body.history || [], 5000);
@@ -83,6 +128,8 @@ function buildPrompt(body) {
     '3-1. chart 是原局，timing 是大運與流年，兩者嚴禁混寫。不得因大運或流年是印星，就說「原局印星旺」或「命格中官印俱旺」。',
     '3-2. 只有 chart.originStructure.officialResourceBothPresent 為 true，才可說原局同見官印；仍不得僅憑數量直接稱為「極佳官印相生格局」。',
     '3-3. 若原局官星較旺，而 timing.currentLuck.isResource 或 timing.annual.isResource 為 true，應寫成：「原局官星較旺、責任壓力較重；目前印星大運／流年補入後，階段性形成官印相生，讓壓力有機會轉成資源、專業與成果。」',
+    '3-4. 健康判讀必須逐項核對 domains.health.elementCounts、dominantElements、missingElements 與 controllingPressure。數量高才可寫旺，數量為 0 才可寫缺；只能依當次命盤的動態數值描述五行生剋、臟腑與生活壓力，禁止套用範例命盤或把旺寫成弱。',
+    '3-5. 第⑩章採雙軌動態判讀：男命以正官、七殺看子女緣，以食神、傷官看作品輸出；女命以食神、傷官看子女緣，以官星、財星看作品與成果承接。另須讀取 domains.children.hourPillar，以時柱天干、地支、十神與五行生剋說明晚年、晚輩與成果質地。只能在 samePillarRooted 為 true 時稱為「同柱透藏／天透地藏」，不得用有根與未透互相矛盾的套話。',
     '4. 風水或擺件只輸出 1 到 2 個最精準交集，不要把所有方位全列出。',
     '5. 避免重複罐頭警語，請換成具體行動建議。',
     `6. 語氣：${tone}。`,
@@ -99,9 +146,14 @@ function buildPrompt(body) {
           '  "relationship": {"headline":"一句結論","analysis":"2到4句串聯分析","action":"一項溝通行動"},',
           '  "annual": {"headline":"一句年度主題","analysis":"2到4句大運與流年串聯分析","action":"一項年度行動"},',
           '  "fengShui": {"headline":"一句空間重點","analysis":"只取1到2個交集方位的2到3句分析","action":"一項可執行佈置"},',
-          '  "teacherFriendlyScript": "命理師可直接口頭說明的3到6句連貫講稿"',
+          '  "teacherFriendlyScript": "命理師可直接口頭說明的3到6句連貫講稿",',
+          '  "chapterSummaries": [{"number":"①","title":"日主與五行特質","bullets":[{"label":"日主與格局","value":"具體結論"}]}]',
           '}',
           'keywords 請提供 5 到 7 個，tone 只能使用指定值。各 analysis 必須是連貫文章，不得用條列符號。',
+          'chapterSummaries 必須依序完整輸出 ① 到 ⑬，不能缺章。每章只能有 2 到 3 個 bullets，每個 bullet 必須使用 label 與 value 的 Key-Value 結構。',
+          '各章內容責任：①日主屬性、特質、盲點；②四柱宮位與十神作用；③實際合化刑沖與生活牽動；④格局、喜用與節制；⑤大運主軸與前後期；⑥流年氣場與大運疊加；⑦財星結構與風險；⑧十神組合後的職涯定位；⑨依性別判定配偶星與夫妻宮；⑩性別星位、時柱成果質地與綜合結論；⑪依五行統計判定健康；⑫流日方向；⑬只留1至2個風水交集與可執行擺設。',
+          'chapterSummaries 的內容只可摘要 tags.rawChapters 與已計算 Tag；禁止開場白、稱呼、段落散文、Markdown、HTML、cite 標記或虛構來源。',
+          '全域去重：同一結論、形容詞或十神定義若已在前章說明，後章不得換句話重複；後章只保留該章獨有的判讀。',
           '不得虛構老師姓名、引言、課程內容或未提供的命盤事實；老師原始觀點由前端既有知識庫另外呈現。'
         ].join('\n')
       : '請回傳可直接放進網頁的文章內容，分段清楚，每段 2 到 4 句。',
@@ -243,7 +295,9 @@ module.exports = async function handler(req, res) {
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
     const prompt = buildPrompt(body);
     const result = await callGemini(prompt, body);
-    const parsedJson = (body.outputType || body.format) === 'json' ? tryParseJson(result.text) : null;
+    const parsedJson = (body.outputType || body.format) === 'json'
+      ? enforceStructuredFacts(tryParseJson(result.text), body.tags || body.baziTags || {})
+      : null;
 
     res.status(200).json({
       ok: true,
