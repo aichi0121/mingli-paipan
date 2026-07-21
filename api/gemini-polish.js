@@ -160,6 +160,22 @@ async function requestGemini(apiKey, model, prompt, body) {
   return { response, data };
 }
 
+async function requestGeminiWithRetry(apiKey, model, prompt, body) {
+  let response;
+  let data;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    ({ response, data } = await requestGemini(apiKey, model, prompt, body));
+    if (response.ok) break;
+    if (![429, 500, 502, 503, 504].includes(response.status) || attempt === 1) break;
+    const retryAfter = Number(response.headers.get('retry-after'));
+    const delay = Number.isFinite(retryAfter) && retryAfter > 0
+      ? Math.min(retryAfter * 1000, 2000)
+      : 700 * (2 ** attempt);
+    await sleep(delay);
+  }
+  return { response, data };
+}
+
 async function callGemini(prompt, body) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
@@ -169,26 +185,25 @@ async function callGemini(prompt, body) {
   }
 
   let model = await resolveGeminiModel(apiKey);
-  let response;
-  let data;
-
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    ({ response, data } = await requestGemini(apiKey, model, prompt, body));
-    if (response.ok) break;
-    if (![429, 500, 502, 503, 504].includes(response.status) || attempt === 2) break;
-    const retryAfter = Number(response.headers.get('retry-after'));
-    const delay = Number.isFinite(retryAfter) && retryAfter > 0
-      ? Math.min(retryAfter * 1000, 5000)
-      : 700 * (2 ** attempt);
-    await sleep(delay);
-  }
+  let { response, data } = await requestGeminiWithRetry(apiKey, model, prompt, body);
   const unavailable = /not found|not supported|no longer available|deprecated|shut down/i.test(data.error?.message || '');
   if (!response.ok && (response.status === 404 || unavailable)) {
     cachedGeminiModel = '';
     const replacement = await resolveGeminiModel(apiKey, [model]);
     if (replacement !== model) {
       model = replacement;
-      ({ response, data } = await requestGemini(apiKey, model, prompt, body));
+      ({ response, data } = await requestGeminiWithRetry(apiKey, model, prompt, body));
+    }
+  }
+
+  // Free-tier quotas are often model-specific. If the preferred model is
+  // exhausted, try one available Flash alternative before returning 429.
+  if (!response.ok && response.status === 429) {
+    cachedGeminiModel = '';
+    const replacement = await resolveGeminiModel(apiKey, [model]);
+    if (replacement !== model) {
+      model = replacement;
+      ({ response, data } = await requestGeminiWithRetry(apiKey, model, prompt, body));
     }
   }
   if (!response.ok) {
