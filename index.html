@@ -15,7 +15,10 @@ font-family:'Noto Serif TC','PingFang TC','Microsoft JhengHei',serif;
 background:#FAF6F1;
 color:#4A3728;
 min-height:100vh;
+overflow-x:hidden;
 }
+html{overflow-x:hidden;}
+img{max-width:100%;height:auto;}
 .hidden{display:none!important;}
 
 /* ══════════════════════════════════════
@@ -58,6 +61,7 @@ border-radius:16px;
 box-shadow:0 2px 12px rgba(74,55,40,0.08);
 padding:24px;
 margin-bottom:16px;
+max-width:100%;
 }
 
 /* ══════════════════════════════════════
@@ -536,6 +540,13 @@ display:flex;
 gap:24px;
 align-items:stretch;
 flex-wrap:wrap;
+}
+.wuxing-chart-box{
+flex-shrink:0;
+min-width:420px;
+display:flex;
+align-items:center;
+justify-content:center;
 }
 .wuxing-legend{flex:1;min-width:180px;}
 .wuxing-legend h4{
@@ -1158,15 +1169,272 @@ border-radius:2px;
 
 /* RWD */
 @media(max-width:600px){
-.site-header{padding-right:64px;text-align:left;}
-.auth-panel{right:8px;top:18px;}
-.auth-menu{right:-8px;}
-.auth-actions{width:100%;justify-content:flex-start;}
-.wuxing-wrap{flex-direction:column;}
+body{
+font-size:16px;
+}
+.container{
+width:100%;
+max-width:100%;
+padding:26px 14px 112px;
+}
+.site-header{
+padding:24px 58px 20px 4px;
+text-align:left;
+margin-bottom:22px;
+}
+.site-header h1{
+font-size:1.6rem;
+line-height:1.25;
+letter-spacing:0;
+}
+.site-header p{
+font-size:0.95rem;
+margin-top:6px;
+}
+.auth-panel{
+right:4px;
+top:28px;
+}
+.auth-trigger{
+width:46px;
+height:46px;
+}
+.auth-menu{
+position:fixed;
+left:12px;
+right:12px;
+top:84px;
+width:auto;
+max-width:none;
+}
+.auth-actions{
+width:100%;
+justify-content:flex-start;
+}
+.page-topbar,
+.report-topbar{
+gap:12px;
+align-items:stretch;
+margin-bottom:18px;
+}
+.page-topbar .btn,
+.report-topbar .btn{
+min-width:0;
+padding:12px 10px;
+font-size:1rem;
+border-radius:12px;
+white-space:nowrap;
+}
+.report-topbar > div{
+display:flex;
+flex:1;
+}
+.report-topbar > .btn,
+.report-topbar > div .btn{
+flex:1;
+}
+.card{
+border-radius:18px;
+padding:20px 18px;
+margin-bottom:20px;
+overflow:hidden;
+}
+.section-title{
+font-size:1.32rem;
+line-height:1.35;
+margin-bottom:16px;
+padding-bottom:12px;
+}
+.info-table,
+.info-table tbody{
+display:block;
+width:100%;
+}
+.info-table tr{
+display:grid;
+grid-template-columns:88px minmax(0,1fr);
+width:100%;
+border:1px solid #F0E8DC;
+border-bottom:0;
+}
+.info-table tr:last-child{
+border-bottom:1px solid #F0E8DC;
+}
+.info-table td{
+display:block;
+border:0!important;
+border-bottom:1px solid #F0E8DC!important;
+padding:12px 11px;
+font-size:1rem;
+line-height:1.6;
+word-break:keep-all;
+overflow-wrap:anywhere;
+min-width:0;
+}
+.info-table tr:last-child td{
+border-bottom:0!important;
+}
+.info-table td.label{
+width:auto;
+background:#FAF6F1;
+font-weight:700;
+}
+.info-table td.value{
+background:#fff;
+}
+.info-table td[colspan]{
+grid-column:auto;
+}
+.wuxing-wrap{
+display:block;
+}
+.wuxing-chart-box{
+width:100%;
+min-width:0!important;
+display:block!important;
+}
+.wuxing-chart-box img,
+#wuxing-fallback{
+width:100%!important;
+max-width:100%!important;
+height:auto!important;
+}
+#wuxing-fallback{
+aspect-ratio:1/1;
+padding-top:42%!important;
+}
+.wuxing-legend{
+min-width:0;
+margin-top:18px;
+}
+.legend-item{
+font-size:0.92rem;
+line-height:1.7;
+align-items:flex-start;
+}
+.bazi-wrap,
+.dayun-row-wrap,
+.dayun-wrap{
+width:100%;
+max-width:100%;
+overflow-x:auto;
+overflow-y:hidden;
+-webkit-overflow-scrolling:touch;
+}
+.bazi-table{
+min-width:0;
+width:100%;
+table-layout:fixed;
+}
+.bazi-table th,
+.bazi-table td{
+padding:7px 4px;
+font-size:0.78rem;
+line-height:1.35;
+}
+.col-label{
+width:38px;
+font-size:0.72rem;
+padding:7px 3px!important;
+}
+.tg-char,
+.dz-char{
+font-size:1.95rem;
+}
+.canggan-cell{
+font-size:0.72rem;
+letter-spacing:1px;
+}
+.star-cell{
+font-size:0.7rem;
+line-height:1.55;
+}
+.fs-item{
+display:inline;
+font-size:0.68rem;
+margin:0 1px;
+}
+.qiyun-row{
+font-size:0.86rem;
+line-height:1.5;
+}
+.dayun-row-table,
+.dayun-table{
+width:max-content;
+min-width:620px;
+}
+.dayun-row-table td,
+.dayun-table th,
+.dayun-table td{
+padding:8px 10px;
+font-size:0.86rem;
+}
+.gz-big{
+font-size:1.35rem;
+line-height:1.45;
+}
+.dayun-row-label,
+.row-label-cell{
+position:sticky;
+right:0;
+z-index:1;
+box-shadow:-1px 0 0 #F0E8DC;
+}
+.tab-bar{
+margin-bottom:18px;
+}
+.tab-btn{
+font-size:1rem;
+padding:13px 8px;
+}
+details.kb-section summary{
+padding:14px 13px;
+font-size:1rem;
+line-height:1.45;
+gap:10px;
+}
+details.kb-section .section-body{
+padding:14px 0 2px;
+}
+.kb-card{
+padding:16px 14px;
+border-radius:12px;
+}
+.kb-card-title{
+font-size:1rem;
+line-height:1.45;
+}
+.kb-content,
+.report-summary,
+.report-detail p{
+font-size:0.98rem;
+line-height:1.9;
+}
+.focus-grid,
+.combo-board,
+.compare-wrap,
+.zibai-grid{
+grid-template-columns:1fr;
+}
+.liuri-grid{
+grid-template-columns:1fr;
+}
+.gemini-launcher{
+right:14px;
+bottom:calc(env(safe-area-inset-bottom, 0px) + 74px);
+width:52px;
+height:52px;
+}
+.gemini-card{
+left:12px;
+right:12px;
+bottom:calc(env(safe-area-inset-bottom, 0px) + 138px);
+width:auto;
+height:min(640px,calc(100vh - 190px));
+max-height:calc(100vh - 190px);
+padding:14px;
+}
 .date-row{flex-wrap:wrap;}
-.compare-wrap{grid-template-columns:1fr;}
-.zibai-grid{grid-template-columns:1fr;}
-.liuri-grid{grid-template-columns:repeat(2,1fr);}
 }
 
 /* 列印 */
@@ -1305,7 +1573,7 @@ details.kb-section summary::after{display:none;}
 <div class="card">
 <div class="section-title">五行相生相剋</div>
 <div class="wuxing-wrap">
-<div style="flex-shrink:0;min-width:420px;display:flex;align-items:center;justify-content:center;">
+<div class="wuxing-chart-box">
   <img
     src="https://raw.githubusercontent.com/aichi0121/mingli-paipan/main/wuxing-chart.png"
     alt="五行相生相剋圖"
@@ -2730,13 +2998,51 @@ const yangTg   = ['甲','丙','戊','庚','壬'];
 const isYang   = yangTg.includes(riTg);
 const yinYang  = isYang?'陽':'陰';
 
-const isStrong = (yueDzWx===riWx)||
+const STEM_ARR_FOR_COUNT = [nian['天干']?.['天干']||'', yue['天干']?.['天干']||'', riTg, shi['天干']?.['天干']||''].filter(Boolean);
+const BRANCH_ARR_FOR_COUNT = [nian['地支']?.['地支']||'', yueDz, riDz, shi['地支']?.['地支']||''].filter(Boolean);
+function countWx(items){
+  return items.reduce((acc, item) => {
+    const wx = WX_MAP[item] || '';
+    if(wx) acc[wx] = (acc[wx] || 0) + 1;
+    return acc;
+  }, {});
+}
+const stemWxCounts = countWx(STEM_ARR_FOR_COUNT);
+const branchWxCounts = countWx(BRANCH_ARR_FOR_COUNT);
+const visibleWxCounts = ['木','火','土','金','水'].reduce((acc, wx) => {
+  acc[wx] = (stemWxCounts[wx] || 0) + (branchWxCounts[wx] || 0);
+  return acc;
+}, {});
+const supportWxByTarget = {木:'水',火:'木',土:'火',金:'土',水:'金'};
+const wealthWxByTarget = {木:'土',火:'金',土:'水',金:'木',水:'火'};
+const officialWxByTarget = {木:'金',火:'水',土:'木',金:'火',水:'土'};
+const outputWxByTarget = {木:'火',火:'土',土:'金',金:'水',水:'木'};
+const sameBranchCount = branchWxCounts[riWx] || 0;
+const branchSupportCount = branchWxCounts[supportWxByTarget[riWx]] || 0;
+const wealthRootCount = branchWxCounts[wealthWxByTarget[riWx]] || 0;
+const officialRootCount = branchWxCounts[officialWxByTarget[riWx]] || 0;
+const baseStrong = (yueDzWx===riWx)||
   (riWx==='木'&&yueDzWx==='水')||
   (riWx==='火'&&yueDzWx==='木')||
   (riWx==='土'&&yueDzWx==='火')||
   (riWx==='金'&&yueDzWx==='土')||
   (riWx==='水'&&yueDzWx==='金');
-const strongLabel = isStrong?'身強':'身弱';
+let isStrong = baseStrong;
+let strengthTier = baseStrong ? 'strong' : 'weak';
+let strongLabel = baseStrong ? '身強' : '身弱';
+const hasDifferentStem = STEM_ARR_FOR_COUNT.some(stem => {
+  const wx = WX_MAP[stem] || '';
+  return wx && wx !== riWx && wx !== supportWxByTarget[riWx];
+});
+if(sameBranchCount >= 3 && yueDzWx === riWx && wealthRootCount === 0 && officialRootCount === 0){
+  isStrong = true;
+  strengthTier = sameBranchCount >= 4 ? 'dominant' : 'extreme';
+  strongLabel = '專旺／從強格';
+}else if(baseStrong && sameBranchCount >= 3 && branchSupportCount >= 1){
+  strengthTier = 'extreme';
+  strongLabel = '身極旺';
+}
+const strengthKey = isStrong ? '身強' : '身弱';
 
 const dayunList = bazi['大运']?.['大运']||[];
 const curDy = dayunList.find(dy=>
@@ -2816,6 +3122,68 @@ const pianCaiEntries = tenGodMatches('偏財');
 const jieCaiEntries = tenGodMatches('劫財');
 const guanEntries = tenGodMatches(['正官','七殺']);
 const shiShangEntries = tenGodMatches(['食神','傷官']);
+const yinEntries = tenGodMatches(['正印','偏印']);
+const biJieEntries = tenGodMatches(['比肩','劫財']);
+const tenGodCounts = tenGodEntries.reduce((acc, entry) => {
+  acc[entry.shen] = (acc[entry.shen] || 0) + 1;
+  return acc;
+}, {});
+const tenGodFamilyCounts = {
+  財星:caiEntries.length,
+  官星:guanEntries.length,
+  印星:yinEntries.length,
+  食傷:shiShangEntries.length,
+  比劫:biJieEntries.length
+};
+const comboFlags = {
+  outputMakesWealth: shiShangEntries.length >= 1 && caiEntries.length >= 1,
+  officialWithResource: guanEntries.length >= 1 && yinEntries.length >= 1,
+  wealthHeavyWeak: caiEntries.length >= 3 && !isStrong && (yinEntries.length + biJieEntries.length) <= 2,
+  outputWealthDominant: shiShangEntries.length >= 1 && pianCaiEntries.length >= 1 && isExtremeStrength(),
+  resourceTooHeavy: yinEntries.length >= 3 && isStrong,
+  wealthTransformed: zhengCaiEntries.length >= 2 || caiEntries.length >= 4
+};
+function transformedTenGodNotes(){
+  const notes = [];
+  if(zhengCaiEntries.length >= 2){
+    notes.push('正財不只代表固定收入；正財多時會變成很強的現實感與資源管理能力，也容易想同時掌握多個穩定管道。重點是訂出收費規則與優先順序，避免每個機會都想抓。');
+  }
+  if(pianCaiEntries.length >= 2){
+    notes.push('偏財多代表你對機會、人脈、專案與變現嗅覺敏銳，但也容易被新機會分散。適合用篩選條件管理機會，而不是靠臨場感硬接。');
+  }
+  if(shiShangEntries.length >= 2){
+    notes.push('食傷多代表才華輸出不是點綴，而是核心資產。你需要作品、表達、教學、內容或可被看見的成果，不能長期只做幕後消耗。');
+  }
+  if(guanEntries.length >= 2){
+    notes.push('官星多代表責任與外界標準不輕，容易被期待、制度或名聲推著走。適合建立自己的規則感，不適合什麼責任都接。');
+  }
+  if(yinEntries.length >= 2){
+    notes.push('印星多代表學習、資源、貴人與內在整理很明顯；好處是吸收力強，盲點是容易停在準備階段，需要設定輸出節點。');
+  }
+  if(biJieEntries.length >= 2){
+    notes.push('比劫多代表主見、人際競合與自我驅動強。合作時要先講清楚權責，避免因為太講義氣而讓資源被分散。');
+  }
+  return notes;
+}
+function comboPriorityNotes(){
+  const notes = [];
+  if(comboFlags.outputWealthDominant){
+    notes.push('傷官＋偏財＋身極旺：這不是適合被死板管理的盤，而是適合把創意、專案、人脈與商業嗅覺握在自己手上。你比較像規則制定者，不是只照規則執行的人。');
+  }
+  if(comboFlags.outputMakesWealth){
+    notes.push('食傷生財：想法、作品、技術或內容能轉成商業價值，適合靠作品、專案、教學、顧問、個人品牌或技術變現。');
+  }
+  if(comboFlags.officialWithResource){
+    notes.push('官印相生：具備建立體制、拿到背書、被看見或被信任的條件；適合把專業做成制度、課程、證照、品牌或可複製的方法。');
+  }
+  if(comboFlags.wealthHeavyWeak){
+    notes.push('財多身弱：機會與想做的事很多，但身體與心力可能跟不上。財運的關鍵不是抓更多，而是專注一個核心、學會拒絕與外包。');
+  }
+  if(comboFlags.resourceTooHeavy){
+    notes.push('印星偏旺：資源與思考很多，但容易卡在準備、查資料、想更完整。要刻意讓食傷接手，把想法變成作品或可交付成果。');
+  }
+  return notes;
+}
 const spousePalaceHidden = (() => {
   const cgRaw = ri['地支']?.['藏干'] || {};
   return ['余气','中气','主气'].map(key => {
@@ -2827,11 +3195,12 @@ const spousePalaceHidden = (() => {
 })();
 
 function relationTone(relation, strength){
+  const baseStrength = strength === '身弱' ? '身弱' : '身強';
   if(relation.includes('資源') || relation.includes('印') || relation.includes('自我') || relation.includes('比劫')){
-    return strength === '身強' ? '這會讓你更有底氣，也更容易把想法放大；好處是行動力強，提醒是不要太固執或把壓力悶住。' : '這是在補你的能量，適合先穩住身心、建立資源，再談擴張。';
+    return baseStrength === '身強' ? '這會讓你更有底氣，也更容易把想法放大；好處是行動力強，提醒是不要太固執或把壓力悶住。' : '這是在補你的能量，適合先穩住身心、建立資源，再談擴張。';
   }
   if(relation.includes('食傷')) return '會把能量往外帶，適合表達、作品、教學、輸出與建立個人風格。';
-  if(relation.includes('財')) return strength === '身強' ? '財星被帶出來，適合談資源、收入、客戶與可落地的成果。' : '財星會帶來機會，也會帶來消耗，財務和承諾要量力而為。';
+  if(relation.includes('財')) return baseStrength === '身強' ? '財星被帶出來，適合談資源、收入、客戶與可落地的成果。' : '財星會帶來機會，也會帶來消耗，財務和承諾要量力而為。';
   if(relation.includes('官星') || relation.includes('官殺')) return '責任、規則、主管與外界要求變明顯，適合建立紀律，但不要硬扛所有壓力。';
   return '需要合併大運、本命強弱與宮位一起看，不宜只用單一五行下結論。';
 }
@@ -2862,21 +3231,91 @@ function tenGodImpact(shen){
   return impacts[shen] || '此宮位的主題被加強';
 }
 
+function tenGodTheme(shen){
+  return tenGodImpact(shen).replace('被加強', '');
+}
+
+function tenGodFamily(shen){
+  if(['正印','偏印'].includes(shen)) return '印星';
+  if(['比肩','劫財'].includes(shen)) return '比劫';
+  if(['食神','傷官'].includes(shen)) return '食傷';
+  if(['正財','偏財'].includes(shen)) return '財星';
+  if(['正官','七殺'].includes(shen)) return '官星';
+  return shen || '其他';
+}
+
+function tenGodLifeExamples(shen){
+  const examples = {
+    正印:'正規學習、照顧支持、貴人資源、證照與安全感',
+    偏印:'研究、非典型學習、直覺整理、靈感、休息與方法沉澱',
+    正財:'穩定收入、固定客戶、價格制度、預算與現實資源',
+    偏財:'機會收入、人脈、專案、彈性資源、對外開拓與變現',
+    正官:'責任、制度、名聲、職場位置、承諾與可被信任',
+    七殺:'競爭、挑戰、速度、危機處理、壓力下的行動力',
+    食神:'穩定輸出、教學、作品、內容、享受與可持續累積',
+    傷官:'創意表達、突破框架、個人風格、快速反應與不喜被管',
+    比肩:'主見、自我意識、獨立決策、同輩競爭與自我品牌',
+    劫財:'朋友合作、資源分配、合夥規則、團隊競爭與財務流動'
+  };
+  return examples[shen] || tenGodTheme(shen);
+}
+
+function guidanceVariant(kind){
+  const variants = {
+    moneyRules:[
+      '金錢界線先說清楚，不是小氣，而是讓合作可以走得長久。',
+      '談錢先談規則，會比事後靠感情補破口更保護關係。',
+      '越親近的人越要把分帳、借貸、合夥條件寫清楚，這是在顧和氣。'
+    ],
+    output:[
+      '把腦中的素材整理成提案、作品或服務，能量才會真正落地。',
+      '不要只停在腦內整理，先做出一個可被看見的小成果，後面會比較順。',
+      '靈感要有出口，可以用文章、課程、提案或作品把它落地。'
+    ],
+    stress:[
+      '先把責任範圍切清楚，哪些是你的事、哪些只是別人的期待。',
+      '壓力來時先整理優先順序，不需要把所有要求一次扛完。',
+      '規則可以保護你，但不要讓規則變成自我壓迫。'
+    ]
+  };
+  const list = variants[kind] || variants.output;
+  const seed = (client.name || '').split('').reduce((sum, ch) => sum + ch.charCodeAt(0), 0) + (riTg || '').charCodeAt(0);
+  return list[seed % list.length];
+}
+
+function isExtremeStrength(){
+  return strengthTier === 'extreme' || strengthTier === 'dominant';
+}
+
 function dayunAppliedSummary(){
   const tgRelation = getRelation(riWx, WX_MAP[curDyTg]);
   const dzRelation = getRelation(riWx, WX_MAP[curDyDz]);
   const firstHalf = curDyAge && curDyEnd ? `${curDyAge}～${Math.min(Number(curDyAge) + 4, Number(curDyEnd))}歲` : '前五年';
   const secondHalf = curDyAge && curDyEnd ? `${Math.min(Number(curDyAge) + 5, Number(curDyEnd))}～${curDyEnd}歲` : '後五年';
+  const strengthTail = isExtremeStrength()
+    ? `因為這張盤已經不是普通【身強】，而是【${strongLabel}】，所以好處是主導力、續航力與自我驅動很強；盲點是容易不想被安排，或把所有事都照自己的節奏推。`
+    : isStrong
+      ? '因為你本來就是【身強】，所以好處是底氣變足，盲點是容易想太多、拖延或變得更固執。'
+      : '因為你本來是【身弱】，所以這一步運更像補能量與補資源；重點是先穩住節奏，不要一次承諾過多。';
   return [
     `這十年（${curDyAge}～${curDyEnd}歲）整體由【${curDyShen}】主導。其中前五年（${firstHalf}）外在環境與突發事件更容易顯現出【${curDyTg}${WX_MAP[curDyTg] || ''}】的訊號；後五年（${secondHalf}）則進入【${curDyDz}${WX_MAP[curDyDz] || ''}】內在心境與能量累積的深水區。`,
-    `【${curDyTg}】對你的日主【${riTg}】是【${curDyShen || getShishen(riTg, curDyTg)}】，所以這十年的主題偏向：${getDayunCareerNote(curDyShen)}。`,
-    `地支【${curDyDz}】五行屬【${WX_MAP[curDyDz] || '—'}】，會讓「${relationPlain(dzRelation)}」。因為你本來就是【${strongLabel}】，所以好處是底氣變足，盲點是容易想太多、拖延或變得更固執。`
+    `【${curDyTg}】對你的日主【${riTg}】是【${curDyShen || getShishen(riTg, curDyTg)}】，所以這十年的主題偏向：${tenGodLifeExamples(curDyShen)}。`,
+    `地支【${curDyDz}】五行屬【${WX_MAP[curDyDz] || '—'}】，會讓「${relationPlain(dzRelation)}」。${strengthTail}`
   ];
 }
 
 function advisoryGuideFor(shen){
   if(['偏印','正印'].includes(shen)){
-    return '諮商行動指南：把想到的東西「寫下來」或「做出作品」，讓能量流動起來；當想法有出口，固執就會比較容易轉成專念。';
+    return '諮商行動指南：'+guidanceVariant('output');
+  }
+  if(['食神','傷官'].includes(shen)){
+    return '諮商行動指南：今年的重點不是忍住才華，而是選一個具體出口，把表達變成作品、提案、課程或服務。';
+  }
+  if(['正財','偏財'].includes(shen)){
+    return '諮商行動指南：今年適合把價格、服務內容、收款節點與合作規則先整理清楚。';
+  }
+  if(['正官','七殺'].includes(shen)){
+    return '諮商行動指南：'+guidanceVariant('stress');
   }
   return '';
 }
@@ -2885,7 +3324,7 @@ function liunianAppliedSummary(){
   const tgRelation = getRelation(riWx, WX_MAP[lyTg]);
   const dzRelation = getRelation(riWx, WX_MAP[lyDz]);
   return [
-    `${lyYear}年的流年是【${lyGz}】。天干【${lyTg}】對你的日主【${riTg}】是【${lyStar}】，代表今年浮上檯面的主題是「${getLiunianCareerNote(lyStar)}」。`,
+    `${lyYear}年的流年是【${lyGz}】。天干【${lyTg}】對你的日主【${riTg}】是【${lyStar}】，代表今年浮上檯面的主題是「${tenGodLifeExamples(lyStar)}」。`,
     `地支【${lyDz}】五行屬【${WX_MAP[lyDz] || '—'}】，偏向今年的環境、人際與身體感受；它會讓「${relationPlain(dzRelation)}」。`,
     `套回你的盤來看：${tgRelation}。${relationTone(tgRelation, strongLabel)}`
   ];
@@ -2893,13 +3332,19 @@ function liunianAppliedSummary(){
 
 function careerDirectionSummary(){
   const directions = [];
+  if(comboFlags.outputWealthDominant){
+    directions.push('由你建立制度流程、幫團隊制定規範、主導獨立專案、資源整合，或是去規範別人而非被死板管束的職位');
+  }
+  if(comboFlags.outputMakesWealth){
+    directions.push('作品變現、專案接案、內容商業化、個人品牌、顧問服務、技術或創意商品化');
+  }
   if(curDyShen === '偏印' || curDyShen === '正印'){
     directions.push('研究分析、命理玄學、身心靈、宗教哲學、教學進修、顧問型工作');
   }
   if(shiShangEntries.length){
     directions.push('內容輸出、課程設計、寫作表達、作品型工作、講師或知識型產品');
   }
-  if(guanEntries.length || guanStar){
+  if(guanEntries.length && !comboFlags.outputWealthDominant){
     directions.push('制度流程、專案管理、專業證照、需要責任感與規範的職位');
   }
   if(caiEntries.length){
@@ -2915,18 +3360,25 @@ function wealthBigSummary(){
   const jie = jieCaiEntries.length;
   if(!total) return '財運總結：原局財星不明顯，賺錢要靠大運流年、專業輸出與後天經營，不適合只等機會。';
   const level = total >= 5 ? '財星很明顯' : total >= 3 ? '財星有根、有感' : '財星有出現';
-  const style = zheng > pian
+  const style = comboFlags.outputWealthDominant
+    ? '不是只靠穩定薪水，而是靠主導專案、作品變現、資源整合與對外開拓'
+    : comboFlags.outputMakesWealth
+      ? '適合把輸出、作品、技術、內容或教學變成可收費的成果'
+      : zheng > pian
     ? '偏向穩定收入、固定客戶、價格制度與現實安全感'
     : pian > zheng
       ? '偏向機會財、人脈財、專案收入與彈性收入'
       : '穩定收入與機會財都要看';
-  const caution = jie ? `但同時有${jie}個劫財訊號，合夥、借貸、分帳、朋友家人牽涉金錢時要先講規則。命盤中帶有劫財，代表你對朋友大方、不拘小節；「親兄弟明算帳」不是小氣，而是幫你守住財富、同時維持和氣的防火牆。` : '劫財訊號不重，財務上更適合靠制度穩定累積。';
+  const caution = jie ? `但同時有${jie}個劫財訊號，合夥、借貸、分帳、朋友家人牽涉金錢時要先講規則。${guidanceVariant('moneyRules')}` : '劫財訊號不重，財務上更適合靠制度穩定累積。';
   return `財運總結：原局共有${total}個財星訊號（正財${zheng}、偏財${pian}），屬於「${level}」。你的財運模式${style}。${caution}`;
 }
 
 function careerBigSummary(){
   const hasOutput = shiShangEntries.length > 0;
   const hasOfficial = guanEntries.length > 0;
+  if(comboFlags.outputWealthDominant){
+    return `事業總結：這張盤的重點不是「進到制度裡被管理」，而是「由你建立制度、主導專案、把創意和資源變成成果」。傷官讓你不喜歡被死板框住，偏財讓你對機會和市場有感，${strongLabel}讓你有很強的主導慣性；所以職涯要留彈性和主控權。`;
+  }
   const main = curDyShen === '偏印'
     ? '這十年的事業主軸是先累積專業、建立方法論，再用作品、課程或顧問服務被看見'
     : `這十年的事業主軸受【${curDyShen}】影響，需要搭配原局官星與食傷一起看`;
@@ -2936,6 +3388,82 @@ function careerBigSummary(){
     caiEntries.length ? `財星${caiEntries.length}個，代表成果最好能轉成明確價格、服務方案與收款規則` : ''
   ].filter(Boolean).join('；');
   return `事業總結：${main}。${evidence || '目前要以大運與流年補充判斷'}。`;
+}
+
+function wealthYearAdvice(){
+  if(lyStar === '正財') return '今年直接碰到正財，適合整理固定收入、穩定客戶、預算與收款節點。';
+  if(lyStar === '偏財') return '今年偏財被啟動，容易有專案、人脈、合作或臨時機會；先訂篩選條件，別什麼都接。';
+  if(['食神','傷官'].includes(lyStar)) return '今年不是直接財星年，但食傷能生財；只要把作品、表達、技術或內容做成可交付成果，就能替財運鋪路。';
+  if(['正印','偏印'].includes(lyStar)) return '今年先強化學習、資源與方法論；財運不是靠衝量，而是把專業整理成能被信任、能被購買的服務。';
+  if(['正官','七殺'].includes(lyStar)) return '今年責任與外界標準變明顯，財運多半從職位、承諾、制度或專業信任感裡長出來。';
+  return '今年財運要搭配大運與原局一起看，先抓住最能落地的一個收入方向。';
+}
+
+function usableEnergySentence(){
+  const outputWx = outputWxByTarget[riWx];
+  const wealthWx = wealthWxByTarget[riWx];
+  const officialWx = officialWxByTarget[riWx];
+  if(isStrong){
+    return `喜用方向仍可抓【${yongshen}】；對你來說，${outputWx}代表輸出與作品，${wealthWx}代表財與客戶，${officialWx}代表規則與職場位置，這幾類能量要被好好使用。`;
+  }
+  return `補能方向先抓【${yongshen}】；對你來說，先讓身心、資源與基本節奏站穩，再談財、責任與大量輸出，會比較不容易被機會消耗。`;
+}
+
+function healthStructureSummary(){
+  const sorted = Object.entries(visibleWxCounts).sort((a,b) => b[1] - a[1]);
+  const top = sorted.filter(([,count]) => count === sorted[0][1]).map(([wx]) => wx).join('、');
+  const low = sorted.filter(([,count]) => count === sorted[sorted.length - 1][1]).map(([wx]) => wx).join('、');
+  if(isExtremeStrength()){
+    return `健康總結：這張盤的五行重心明顯偏向【${riWx}】，不是單純「補更多${riWx}」就好。身體上要留意${WX_ORGAN[riWx]}相關壓力，也要用輸出、流動與規律作息把過旺能量疏出去。`;
+  }
+  if(!isStrong){
+    return `健康總結：這張盤不是硬撐型，身體需要先補底氣。五行裡相對弱的是【${low}】，日常要避免過度消耗，先把睡眠、飲食和固定節奏養起來。`;
+  }
+  return `健康總結：這張盤五行較明顯的是【${top}】，能量不弱，但容易累積成緊繃或慢性壓力。健康重點不是一直加碼，而是規律疏通、穩定消化與固定休息。`;
+}
+
+function healthDetailByStructure(){
+  const notes = [];
+  notes.push(`五行分布可先看：木${visibleWxCounts['木'] || 0}、火${visibleWxCounts['火'] || 0}、土${visibleWxCounts['土'] || 0}、金${visibleWxCounts['金'] || 0}、水${visibleWxCounts['水'] || 0}。`);
+  if(isExtremeStrength()){
+    notes.push(`【${riWx}】能量偏旺時，身體容易用「卡住、悶住、累積」的方式提醒你；保養不是再補同類，而是讓壓力有出口。`);
+  }
+  if(shiShangEntries.length){
+    notes.push(`盤裡有食傷，適合用規律運動、表達、作品輸出或教學分享來疏通壓力，不要只悶在身體裡。`);
+  }
+  if(yinEntries.length >= 2){
+    notes.push('印星偏明顯時，容易想很多、睡眠品質受思緒影響；睡前減少資訊輸入，比硬逼自己放空更實際。');
+  }
+  if(caiEntries.length >= 3 && !isStrong){
+    notes.push('財星多又身弱時，容易為了工作、收入或人情承諾過度耗能；健康管理要把「拒絕」也視為保養。');
+  }
+  return notes;
+}
+
+function childWorkAnalysis(){
+  const outputThroughPillars = pillarDataList.filter(({data}) => {
+    const tgShen = toTrad(data['天干']?.['十神'] || '');
+    const hidden = data['地支']?.['藏干'] || {};
+    const hiddenHasOutput = ['余气','中气','主气'].some(key => ['食神','傷官'].includes(toTrad(hidden[key]?.['十神'] || '')));
+    return ['食神','傷官'].includes(tgShen) && hiddenHasOutput;
+  }).map(({label}) => label);
+  const hasOutput = shiShangEntries.length > 0;
+  const isFemale = client.gender === '女';
+  const guarantee = isFemale && hasOutput && outputThroughPillars.length ? 1 : 0;
+  const upper = isFemale && isExtremeStrength() && hasOutput ? '1～2個舒適上限' : guarantee ? '1個較穩' : '需看流年引動';
+  const details = [
+    isFemale
+      ? '女命看子女與心血作品，可以先看副星【食神、傷官】。'
+      : '這一欄以「心血作品、長期成果與照顧緣分」來看；若是女命，也可延伸看子女星。',
+    hasOutput ? `你的盤裡有食傷訊號：${formatTenGodEntries(shiShangEntries)}。` : '原局食傷不明顯，子女或作品緣分更要看大運、流年與後天選擇。',
+    outputThroughPillars.length ? `天透地藏位置：${outputThroughPillars.join('、')}，可視為緣分或作品能量比較有根。` : '',
+    isFemale && hasOutput ? `緣分判斷：保證緣分約${guarantee || '未明顯'}；舒適上限可先抓【${upper}】，仍需搭配流年引動與現實身心狀態。` : '',
+    hasOutput ? '現代化轉譯：如果現實中只選擇生育一個孩子，多餘的食傷能量會轉成第二個心血作品，例如個人品牌、獨立接案公司、課程、作品集，或需要你照顧投入的生命陪伴。' : ''
+  ].filter(Boolean);
+  const summary = hasOutput
+    ? `${client.name}，你的盤裡有【食傷】能量，這不只代表子女緣，也代表作品、教學、內容輸出與心血成果。`
+    : `${client.name}，這張盤的子女與作品星不算明顯，重點會落在流年引動與後天選擇。`;
+  return {summary, details};
 }
 
 function spouseProfileSummary(){
@@ -3051,7 +3579,7 @@ function personalizeContent(text){
     身強:{木:'火、土、金',火:'土、金、水',土:'金、水、木',金:'水、木、火',水:'木、火、土'},
     身弱:{木:'水、木',火:'木、火',土:'火、土',金:'土、金',水:'金、水'}
   };
-  const yongshenText = yongshenMap[strongLabel]?.[riWx] || '喜用神';
+  const yongshenText = yongshenMap[strengthKey]?.[riWx] || '喜用神';
   return text
     .replaceAll('{{日主}}', riTg+riWx)
     .replaceAll('{{日主五行}}', riWx)
@@ -3062,7 +3590,7 @@ function personalizeContent(text){
     .replaceAll('{{喜用神}}', yongshenText)
     .replaceAll('{{喜用神五行}}', yongshenText)
     .replaceAll('{{喜神／忌神}}', isStrong ? '能量偏旺，需要用金、水、木來疏通和平衡' : '能量需要被補足，適合靠近能支持日主的五行')
-    .replaceAll('{{忌神}}', strongLabel === '身強' ? '印、比劫' : '財、官星、食傷')
+    .replaceAll('{{忌神}}', strengthKey === '身強' ? '印、比劫' : '財、官星、食傷')
     .replace(/平級聤/g, '平級聊')
     .replace(/官殺/g, '官星')
     .replace(/擺放馬虎狗羊蛇(?:駝)?陶土小物/g, '擺放【馬、虎、狗、羊、蛇】等陶土小物')
@@ -3491,9 +4019,9 @@ const new_youshi   = qContent(kbNew, '優勢',      {stem: riTg});
 const new_mangdian = qContent(kbNew, '盲點',      {stem: riTg});
 const new_xiangz   = qSmart(kbNew, ['象徵','象徵意義'], {stem: riTg});
 const new_wxTrait  = qSmart(kbNew, ['五行人格特質','五行特質','個人命主五行'], [{variant: riWx},{element: riWx}]);
-const new_strength = qSmart(kbNew, ['身強的影響','身弱的影響','強弱判斷結果'], [{strength: strongLabel},{ten_god: balanceTenGodKey(strongLabel, curDyShen), strength: strongLabel}]);
-const new_xiyong   = qSmart(kbNew, ['喜神是什麼','喜用神'], [{strength: strongLabel},{ten_god: balanceTenGodKey(strongLabel, '食神'), strength: strongLabel}]);
-const new_jishen   = qSmart(kbNew, ['忌神是什麼','忌神'], [{strength: strongLabel},{ten_god: balanceTenGodKey(strongLabel, '比肩'), strength: strongLabel}]);
+const new_strength = qSmart(kbNew, ['身強的影響','身弱的影響','強弱判斷結果'], [{strength: strengthKey},{ten_god: balanceTenGodKey(strengthKey, curDyShen), strength: strengthKey}]);
+const new_xiyong   = qSmart(kbNew, ['喜神是什麼','喜用神'], [{strength: strengthKey},{ten_god: balanceTenGodKey(strengthKey, '食神'), strength: strengthKey}]);
+const new_jishen   = qSmart(kbNew, ['忌神是什麼','忌神'], [{strength: strengthKey},{ten_god: balanceTenGodKey(strengthKey, '比肩'), strength: strengthKey}]);
 const new_buyun    = qSmart(kbNew, ['用神補運方法','五行補強建議','五行補強'], [{variant: riWx},{element: riWx}]);
 const new_wuxing   = qSmart(kbNew, ['五行補強建議','五行補強'], [{variant: riWx},{element: riWx}]);
 const new_kaiyun   = qSmart(kbNew, ['開運物建議','開運物'], [{variant: riWx},{element: riWx}]);
@@ -3501,8 +4029,8 @@ const teacher_inner = teacherPoint(teacherKB, '內在性格', {stem: riTg}, riTg
 const teacher_image = teacherPoint(teacherKB, '外在形象', {stem: riTg}, riTg+riWx);
 const teacher_youshi = teacherPoint(teacherKB, '優勢', {stem: riTg}, riTg+riWx);
 const teacher_mangdian = teacherPoint(teacherKB, '盲點', {stem: riTg}, riTg+riWx);
-const curDyBalanceKey = balanceTenGodKey(strongLabel, curDyShen);
-const lyBalanceKey = balanceTenGodKey(strongLabel, lyStar);
+const curDyBalanceKey = balanceTenGodKey(strengthKey, curDyShen);
+const lyBalanceKey = balanceTenGodKey(strengthKey, lyStar);
 const curDyFamily = tenGodFamily(curDyShen);
 const lyFamily = tenGodFamily(lyStar);
 const caiFamilyKey = client.gender === '男' ? '財星' : '官殺';
@@ -3511,20 +4039,20 @@ const dayunInsights = qSmartMany(kbNew, [
 ], 1);
 const liunianInsights = [];
 const wealthInsights = qSmartMany(kbNew, [
-  {subItems:['12-1 基本財運｜天生財運模式','天生財運模式'], query_keys:[{ten_god:'財星', strength:strongLabel},{ten_god:'財星'}], limit:1},
-  {subItems:['12-1 基本財運｜今年財運走勢','今年財運走勢'], query_keys:[{ten_god:lyBalanceKey, strength:strongLabel},{ten_god:'財星', strength:strongLabel},{scope:'general'}], limit:1},
+  {subItems:['12-1 基本財運｜天生財運模式','天生財運模式'], query_keys:[{ten_god:'財星', strength:strengthKey},{ten_god:'財星'}], limit:1},
+  {subItems:['12-1 基本財運｜今年財運走勢','今年財運走勢'], query_keys:[{ten_god:lyBalanceKey, strength:strengthKey},{ten_god:'財星', strength:strengthKey},{scope:'general'}], limit:1},
   {subItems:['12-1 基本財運｜得財方式','得財方式'], query_keys:[{ten_god:'財星'},{element:caiStar},{scope:'general'}], limit:1},
-  {subItems:['12-1 基本財運｜漏財原因分析','漏財原因分析'], query_keys:[{ten_god:'比劫', strength:strongLabel},{strength:strongLabel},{scope:'general'}], limit:1},
-  {subItems:['12-1 基本財運｜破財防範建議','破財防範建議'], query_keys:[{ten_god:'比劫', strength:strongLabel},{scope:'general'}], limit:1},
+  {subItems:['12-1 基本財運｜漏財原因分析','漏財原因分析'], query_keys:[{ten_god:'比劫', strength:strengthKey},{strength:strengthKey},{scope:'general'}], limit:1},
+  {subItems:['12-1 基本財運｜破財防範建議','破財防範建議'], query_keys:[{ten_god:'比劫', strength:strengthKey},{scope:'general'}], limit:1},
 ], 5);
 const careerInsights = qSmartMany(kbNew, [
   {subItems:['13-1 基本事業｜事業天賦','事業天賦'], query_keys:[{ten_god:curDyShen},{ten_god:curDyFamily},{scope:'general'}], limit:1},
-  {subItems:['13-1 基本事業｜今年事業走勢','今年事業走勢'], query_keys:[{ten_god:lyStar},{ten_god:lyFamily},{ten_god:lyBalanceKey, strength:strongLabel}], limit:1},
+  {subItems:['13-1 基本事業｜今年事業走勢','今年事業走勢'], query_keys:[{ten_god:lyStar},{ten_god:lyFamily},{ten_god:lyBalanceKey, strength:strengthKey}], limit:1},
   {subItems:['13-1 基本事業｜職場人際策略','職場人際策略'], query_keys:[{ten_god:curDyShen},{ten_god:curDyFamily},{scope:'general'}], limit:1},
 ], 3);
 const loveInsights = qSmartMany(kbNew, [
   {subItems:['14-1 感情基礎｜夫妻宮判斷（日支）','夫妻宮判斷（日支)','夫妻宮判斷（日支）','日柱（夫妻宮）'], query_keys:[{branch:riDz},{variant:'夫妻宮位置'},{variant:'日柱（花）'}], limit:1},
-  {subItems:['14-1 感情基礎｜夫妻星強弱','夫妻星強弱'], query_keys:[{ten_god:caiFamilyKey, strength:strongLabel}], limit:1},
+  {subItems:['14-1 感情基礎｜夫妻星強弱','夫妻星強弱'], query_keys:[{ten_god:caiFamilyKey, strength:strengthKey}], limit:1},
 ], 2);
 const healthInsights = qSmartMany(kbNew, [
   {subItems:['五行體質', riWx+' → '+(WX_ORGAN[riWx]||'').replace('、','/'),'先天弱項臟腑'], query_keys:[{variant:riWx},{element:riWx},{scope:'general'}], limit:2},
@@ -3533,7 +4061,7 @@ const healthInsights = qSmartMany(kbNew, [
 ], 5);
 const fengshuiInsights = qSmartMany(kbNew, [
   {subItems:['今年流年風水（2026丙午年）','住宅風水（各空間）'], query_keys:[{year:CURRENT_YEAR, stem:lyTg},{variant:riWx},{scope:'general'}], limit:2},
-  {subItems:['喜用方位','喜用顏色','財位佈局','健康位佈局','事業位佈局'], query_keys:[{variant:riWx},{element:riWx},{strength:strongLabel},{scope:'general'}], limit:4},
+  {subItems:['喜用方位','喜用顏色','財位佈局','健康位佈局','事業位佈局'], query_keys:[{variant:riWx},{element:riWx},{strength:strengthKey},{scope:'general'}], limit:4},
 ], 6);
 const XU_FS_LAYOUT = {
   金:{
@@ -3684,31 +4212,66 @@ function xuCombinedRemedyHtml(){
   const remedies = Object.values(xuRemedies || {});
   if(!remedies.length) return '';
   const overlap = xuOverlapSummary();
+  const best = bestFengshuiIntersections(overlap);
   return `
     <div class="summary-panel">
       <div class="summary-panel-title">徐玉蘭老師${riWx}命軟裝綜合版</div>
       ${compactList([
-        overlap.sharedDirections.length ? `重複方位：${overlap.sharedDirections.join('；')}` : '',
-        overlap.sharedColors.length ? `重複顏色：${overlap.sharedColors.join('、')}` : '',
-        overlap.sharedItems.length ? `重複添運物品：${overlap.sharedItems.slice(0, 18).join('、')}` : '',
-        overlap.sharedZodiac.length ? `重複生肖擺件：${overlap.sharedZodiac.join('、')}` : '',
-        overlap.sharedMaterials.length ? `重複材質：${overlap.sharedMaterials.join('、')}` : '',
+        best.length ? `最佳交集方位：${best.map(item => `${item.direction}（${item.themes}）`).join('；')}` : '',
+        overlap.sharedColors.length ? `優先顏色：${overlap.sharedColors.slice(0, 5).join('、')}` : '',
+        overlap.sharedItems.length ? `精準擺件：${overlap.sharedItems.slice(0, 8).join('、')}` : '',
+        overlap.sharedZodiac.length ? `生肖擺件先抓：${overlap.sharedZodiac.slice(0, 6).join('、')}` : '',
+        overlap.sharedMaterials.length ? `材質先抓：${overlap.sharedMaterials.slice(0, 3).join('、')}` : '',
         `使用方式：先選你真正要加強的主題；若同一方位同時出現在多個主題，就可以優先整理那個方位，再放少量、好維護的物品。`
       ])}
     </div>
   `;
 }
+function cleanDirectionTheme(text){
+  return String(text || '')
+    .replace(/財位/g, '財位')
+    .replace(/事業／貴人位/g, '事業、貴人')
+    .replace(/文昌／學習位/g, '文昌、學習')
+    .replace(/桃花／人緣位/g, '桃花、人緣')
+    .replace(/位牽動/g, '')
+    .replace(/[+＋／]/g, '、')
+    .replace(/、+/g, '、');
+}
+function bestFengshuiIntersections(overlap){
+  const annualGood = new Set(['正東','正北','東北','東南']);
+  return (overlap.sharedDirections || [])
+    .map(row => {
+      const [direction, theme = ''] = row.split('：');
+      const countMatch = theme.match(/(\d+)項重複/);
+      const count = countMatch ? Number(countMatch[1]) : (theme.match(/、/g) || []).length + 1;
+      const annualBonus = annualGood.has(direction) ? 2 : 0;
+      return {
+        direction,
+        themes: cleanDirectionTheme(theme),
+        score: count + annualBonus
+      };
+    })
+    .sort((a,b) => b.score - a.score || a.direction.localeCompare(b.direction, 'zh-Hant'))
+    .slice(0, 2);
+}
 function fengshuiIntegratedHtml(){
   const overlap = xuOverlapSummary();
-  const topDirections = overlap.sharedDirections.slice(0, 4).join('；') || '依四格明細選方位';
+  const best = bestFengshuiIntersections(overlap);
+  const bestText = best.length
+    ? best.map(item => `${item.direction}：${item.themes}`).join('；')
+    : '依四格明細選方位';
+  const precisionItems = [
+    ...(overlap.sharedItems || []).slice(0, 5),
+    ...(overlap.sharedMaterials || []).slice(0, 2)
+  ].slice(0, 7).join('、') || '少量、乾淨、好維護的物品';
   return `
     <div class="summary-panel">
-      <div class="summary-panel-title">三位老師統整版：先照這個做</div>
+      <div class="summary-panel-title">三位老師統整版：只先做最關鍵的 1～2 位</div>
       ${compactList([
-        `先定主題：求財或招財水缸，優先看徐玉蘭老師的土命財位【${xuFs.wealth || '需查表'}】；若要疊加${CURRENT_YEAR}流年，正東偏財置業、正北偏財貴人可以一起評估。`,
-        `重複方位優先整理：${topDirections}。同一方位同時出現在多個主題時，先整理那裡，不用四個主題全部擺滿。`,
+        `最佳交集方位：${bestText}。先處理這 1～2 個位置，不要把所有方位一次擺滿。`,
+        `精準擺件先抓：${precisionItems}。擺件少量、乾淨、方便維護，比堆滿更有效。`,
+        `求財或招財水缸，仍優先回到徐玉蘭老師的${riWx}命財位【${xuFs.wealth || '需查表'}】；若要疊加${CURRENT_YEAR}流年，再看正東、正北是否剛好落在你家可用位置。`,
         `擺放規則用湯鎮瑋老師：財位要乾淨、明亮、不受壓，擺件控制在3～5樣內；不把招財物一次堆滿。`,
-        `主題分類用尹森老師：正財看穩定收入與事業資源，次財看貴人、投資與偏財機會，桃花位看人緣魅力與互動。`,
         `水缸只優先放財位或可動水的流年吉位；正南五黃、西北二黑、正西三碧、西南七赤今年先安靜，不放大型動水。`
       ])}
     </div>
@@ -3927,17 +4490,23 @@ const YONGSHEN = {
   身強:{木:'火、土、金（洩耗剋制）',火:'土、金、水（洩耗剋制）',土:'金、水、木（洩耗剋制）',金:'水、木、火（洩耗剋制）',水:'木、火、土（洩耗剋制）'},
   身弱:{木:'水、木（生助）',火:'木、火（生助）',土:'火、土（生助）',金:'土、金（生助）',水:'金、水（生助）'}
 };
-const yongshen = YONGSHEN[strongLabel]?.[riWx]||'需綜合判斷';
+const yongshen = YONGSHEN[strengthKey]?.[riWx]||'需綜合判斷';
+const strengthSummary = isExtremeStrength()
+  ? `你的地支同類五行達${sameBranchCount}個，且財星、官星在地支根氣不明顯，所以不是普通身強，而是先升級看作【${strongLabel}】。`
+  : isStrong
+    ? `月支【${yueDz}】對你的日主【${riWx}】有支撐，所以這張盤先判定為【身強】。`
+    : `月支【${yueDz}】對你的日主【${riWx}】支撐較少，所以這張盤先判定為【身弱】。`;
 const sec4Html = personalCard({
   icon:'⚖️', title:'命盤格局：你是【'+strongLabel+'】的'+riTg, id:'BAZI_017',
-  personalSummary:client.name+'，你的月支是【'+yueDz+'】，五行屬【'+yueDzWx+'】。'+(isStrong
-    ?'它對你的日主【'+riWx+'】有支撐，所以這張盤先判定為【身強】。'
-    :'它對你的日主【'+riWx+'】支撐較少，所以這張盤先判定為【身弱】。'),
+  personalSummary:client.name+'，你的月支是【'+yueDz+'】，五行屬【'+yueDzWx+'】。'+strengthSummary,
   details:[
     '用神方向可以先抓【'+yongshen+'】，也就是讓命盤能量更平衡的方向。',
+    isExtremeStrength() ? '專旺／從強不是「更普通的身強」，而是能量已經形成主流。解讀時要看能不能順著主勢輸出、變現、建立作品，而不是硬把你壓回一般平衡盤。' : '',
     new_strength ? new_strength : '',
-    new_xiyong   ? '適合多靠近的能量：'+new_xiyong+'；白話說，是幫助你順暢洩秀，把能力轉化為作品、成果與財富。' : '',
-    new_jishen   ? '比較需要節制的能量：'+new_jishen+'；白話說，是避免能量過滿，導致固執、想太多或壓力累積。' : '',
+    new_xiyong   ? '適合多靠近的能量：'+new_xiyong+'；白話說，'+(isStrong ? '是幫助你順暢洩秀，把能力轉化為作品、成果與財富。' : '是先把底氣補起來，讓身心有力氣承接財、責任與輸出。') : '',
+    new_jishen   ? '比較需要節制的能量：'+new_jishen+'；白話說，'+(isStrong ? '是避免能量過滿，導致固執、想太多或壓力累積。' : '是避免還沒站穩就被機會、壓力或過度輸出消耗。') : '',
+    ...comboPriorityNotes(),
+    ...transformedTenGodNotes().slice(0, 2)
   ].filter(Boolean),
   tags:[strongLabel,'用神：'+yongshen.split('（')[0],'月支'+yueDz]
 });
@@ -3946,12 +4515,12 @@ const sec4Html = personalCard({
 const dyRelation = getRelation(riWx, curDyWx);
 const sec5Html = personalCard({
   icon:'🌀', title:'當前大運【'+curDyGz+'】'+curDyShen+'（'+curDyAge+'～'+curDyEnd+'歲）', id:'BAZI_021',
-  personalSummary:client.name+'，你目前走到【'+curDyGz+'】大運，主題是【'+curDyShen+'】。白話說，這十年不是單純好或壞，而是會把「'+relationPlain(dyRelation)+'」這件事推到你面前。',
+  personalSummary:client.name+'，你目前走到【'+curDyGz+'】大運，主題是【'+curDyShen+'】。白話說，這十年不是單純好或壞，而是會把「'+tenGodLifeExamples(curDyShen)+'」這件事推到你面前。',
   details:[
-    '所謂【'+curDyShen+'】課題，白話就是：'+relationPlain(dyRelation)+'。對你來說會表現在進修、研究、信念整理、貴人資源、休息節奏，以及把專業沉澱成方法。',
+    '所謂【'+curDyShen+'】課題，白話就是：'+tenGodLifeExamples(curDyShen)+'。',
     '這段時間大約落在 '+curDyAge+' 到 '+curDyEnd+' 歲，會比較明顯地把這些課題帶到你生活裡。',
     ...dayunAppliedSummary(),
-    curDyShen.includes('印') ? '老師的溫馨提醒：這幾年想得多、做得少是很正常的。這不是拖延，而是你的大腦正在做深度整理；最適合你的破局方式，是把想到的東西寫下來，或做成作品、課程、文章，讓食傷能量把內在想法帶出去。' : '',
+    advisoryGuideFor(curDyShen) ? '老師的溫馨提醒：'+advisoryGuideFor(curDyShen).replace('諮商行動指南：','') : '',
   ].filter(Boolean),
   tags:['大運'+curDyGz, curDyShen, '五行'+curDyWx]
 });
@@ -3981,10 +4550,12 @@ const sec7Html = personalCard({
     zhengCaiEntries.length ? '正財重點：'+formatTenGodEntries(zhengCaiEntries)+'，代表你其實有務實理財、穩定累積與看重安全感的一面。' : '',
     pianCaiEntries.length ? '偏財重點：'+formatTenGodEntries(pianCaiEntries)+'，代表你也有靠機會、人脈、專案或非固定收入打開財路的可能。' : '',
     jieCaiEntries.length ? '劫財提醒：'+formatTenGodEntries(jieCaiEntries)+'，錢容易牽涉朋友、家人、分帳或共同資源；合夥和借貸要規則清楚。' : '',
-    jieCaiEntries.length ? '防禦型提醒：「親兄弟明算帳」並不是小氣，而是幫你守住財富、維持和氣的防火牆。' : '',
-    lyYear+'年流年是【'+lyStar+'】，不是直接的財星年；它比較像先加強學習、資源、貴人與內在整理。財運要靠你把專業整理成可收費、可成交的成果。',
-    isStrong?'你屬於身強格局，原局又有財星，適合主動整理客戶、價格、服務方案與收款規則。':'你屬於身弱格局，財星出現時要記得量力而為，先穩住節奏再擴張。',
-    '喜用方向仍可抓【'+yongshen+'】；對你來說，金代表輸出與作品，水代表財與客戶，木代表規則與職場位置，這三類能量要被好好使用。'
+    jieCaiEntries.length ? '防禦型提醒：'+guidanceVariant('moneyRules') : '',
+    wealthYearAdvice(),
+    isExtremeStrength() ? '你屬於能量極旺的格局，財運不適合只靠等別人給機會；比較適合自己定義產品、服務、案型與價格。' : (isStrong?'你屬於身強格局，原局又有財星，適合主動整理客戶、價格、服務方案與收款規則。':'你屬於身弱格局，財星出現時要記得量力而為，先穩住節奏再擴張。'),
+    ...comboPriorityNotes().filter(note => note.includes('財') || note.includes('變現') || note.includes('機會')).slice(0, 2),
+    ...transformedTenGodNotes().filter(note => note.includes('財') || note.includes('機會') || note.includes('資源')).slice(0, 2),
+    usableEnergySentence()
   ].filter(Boolean),
   tags:['財星'+caiStar, strongLabel, '流年'+lyGz]
 });
@@ -3999,6 +4570,8 @@ const sec8Html = personalCard({
     lyYear+'年流年是【'+lyStar+'】：'+getLiunianCareerNote(lyStar)+'。',
     '用這張盤來看，事業不是只看正官星【'+guanStar+'】，還要看目前大運【'+curDyShen+'】怎麼讓你做事：它比較偏向先累積專業、建立方法，再用作品或成果被看見。',
     '適合職業／職涯方向：'+careerDirectionSummary()+'。這些方向不是硬性職業名稱，而是你比較容易發揮的工作型態。',
+    ...comboPriorityNotes().filter(note => note.includes('事業') || note.includes('制度') || note.includes('作品') || note.includes('體制') || note.includes('規則')).slice(0, 3),
+    ...transformedTenGodNotes().filter(note => note.includes('食傷') || note.includes('官星') || note.includes('印星')).slice(0, 3),
     guanEntries.length ? '官星落點：'+formatTenGodEntries(guanEntries)+'，表示責任、制度、名聲與被看見的位置會在這些宮位被啟動。' : '',
     shiShangEntries.length ? '食傷落點：'+formatTenGodEntries(shiShangEntries)+'，代表你可以靠表達、作品、教學、內容輸出或方法整理來累積職涯能見度。' : '',
     ...careerInsights,
@@ -4029,17 +4602,28 @@ const sec9Html = personalCard({
 // ⑩ 健康
 const sec10Html = personalCard({
   icon:'🏥', title:'你的健康體質分析', id:'BAZI_042',
-  personalSummary:client.name+'，你的日主【'+riTg+riWx+'】對應到身體上，主要會看【'+(WX_ORGAN[riWx]||'')+'】。'+(isStrong?'你的底氣不算弱，但能量太滿時也容易累積成壓力。':'你的能量比較需要被照顧，越忙越要把休息排進生活裡。'),
+  personalSummary:healthStructureSummary(),
   details:[
+    client.name+'，你的日主【'+riTg+riWx+'】對應到身體上，主要會看【'+(WX_ORGAN[riWx]||'')+'】。',
     '主要保養方向可以先放在【'+(WX_ORGAN[riWx]||'—')+'】。',
     '命盤裡相對需要補足的地方，也可以留意【'+(WX_ORGAN[weakWx]||'—')+'】。',
     lyYear+'年流年【'+lyGz+'】五行屬【'+lyWx+'】，'+getHealthNote(lyWx,riWx)+'。',
+    ...healthDetailByStructure(),
     ...healthInsights,
   ].filter(Boolean),
   tags:['注意'+(WX_ORGAN[riWx]?.split('、')[0]||''), strongLabel, '流年'+lyGz]
 });
 
-// ⑪ 流日日曆
+// ⑪ 子女與心血作品
+const childWork = childWorkAnalysis();
+const secChildHtml = personalCard({
+  icon:'👶', title:'子女與心血作品緣分', id:'BAZI_CHILD_WORK',
+  personalSummary:childWork.summary,
+  details:childWork.details,
+  tags:['食傷','子女','心血作品']
+});
+
+// ⑫ 流日日曆
 const HEALTH_KE_MAP = {木:'土',火:'金',土:'水',金:'木',水:'火'};
 const healthCautionWx = Object.entries(HEALTH_KE_MAP).find(([,target]) => target === riWx)?.[0] || riWx;
 const sec11Html = `
@@ -4071,7 +4655,7 @@ const sec11Html = `
 </div>
 `;
 
-// ⑫ 八字×風水整合
+// ⑬ 八字×風水整合
 const supportMethod = new_wuxing || new_buyun || '';
 const fengshuiTeacherEvidence = fengshuiEvidenceHtml();
 const sec12Html = `
@@ -4146,9 +4730,10 @@ ${section('📅','⑥ '+lyYear+'年流年分析',sec6Html,true)}
 ${section('💰','⑦ 財運分析',sec7Html)}
 ${section('💼','⑧ 事業職涯分析',sec8Html)}
 ${section('💕','⑨ 感情婚姻分析',sec9Html)}
-${section('🏥','⑩ 健康體質分析',sec10Html)}
-${section('📆','⑪ 每月流日日曆',sec11Html)}
-${section('🏠','⑫ 八字×風水整合佈局',sec12Html)}
+${section('👶','⑩ 子女與心血作品緣分',secChildHtml)}
+${section('🏥','⑪ 健康體質分析',sec10Html)}
+${section('📆','⑫ 每月流日日曆',sec11Html)}
+${section('🏠','⑬ 八字×風水整合佈局',sec12Html)}
 <div class="doris-quote">
   <p>每一個命盤都是獨一無二的生命藍圖，<br>
   數字背後是你走過的每一步。<br>
