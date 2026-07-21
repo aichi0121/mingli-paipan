@@ -314,6 +314,33 @@ margin-bottom:24px;
 flex-wrap:wrap;
 gap:10px;
 }
+.ai-report-shell{
+margin-bottom:22px;
+padding:22px;
+border:1px solid #E6D7C5;
+border-left:4px solid #B98B42;
+background:#FFFCF7;
+}
+.ai-report-heading{font-size:1.15rem;color:#8B6914;font-weight:700;margin-bottom:10px;}
+.ai-report-summary{font-size:1rem;line-height:1.9;color:#4A3728;margin:0;}
+.ai-keyword-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:16px 0;}
+.ai-keyword-item{min-width:0;padding:13px 14px;border:1px solid #E8DDD0;background:#fff;}
+.ai-keyword-label{display:block;font-size:.76rem;color:#8A7865;margin-bottom:5px;}
+.ai-keyword-value{display:block;font-weight:700;line-height:1.45;overflow-wrap:anywhere;}
+.ai-keyword-item[data-tone="career"] .ai-keyword-value{color:#2563C9;}
+.ai-keyword-item[data-tone="wealth"] .ai-keyword-value{color:#B95616;}
+.ai-keyword-item[data-tone="relationship"] .ai-keyword-value{color:#C72F6C;}
+.ai-keyword-item[data-tone="health"] .ai-keyword-value{color:#21834A;}
+.ai-keyword-item[data-tone="annual"] .ai-keyword-value{color:#7950C7;}
+.ai-keyword-item[data-tone="identity"] .ai-keyword-value{color:#8B6914;}
+.ai-analysis-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px;}
+.ai-analysis-item{padding:16px;border-top:2px solid #D9BE98;background:#FFF;}
+.ai-analysis-item h4{font-size:.94rem;color:#8B6914;margin:0 0 7px;}
+.ai-analysis-item p{margin:0 0 8px;line-height:1.75;}
+.ai-analysis-action{font-weight:700;color:#7B4B2A;}
+.ai-report-note{font-size:.78rem;color:#9A826A;margin-top:14px;}
+.ai-report-error{padding:12px 0;color:#9A826A;font-size:.88rem;}
+.pdf-report-header{display:none;}
 .gemini-launcher{
 position:fixed;
 right:22px;
@@ -1378,6 +1405,9 @@ height:min(640px,calc(100vh - 190px));
 max-height:calc(100vh - 190px);
 padding:14px;
 }
+.ai-keyword-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+.ai-analysis-grid{grid-template-columns:1fr;}
+.ai-report-shell{padding:16px;}
 .date-row{flex-wrap:wrap;}
 }
 
@@ -1390,6 +1420,11 @@ body{background:#fff;}
 .site-header{border-bottom:2px solid #D4B896;}
 details.kb-section{display:block;}
 details.kb-section summary::after{display:none;}
+.pdf-report-header{display:block;border-bottom:2px solid #D4B896;margin-bottom:18px;padding-bottom:12px;}
+.pdf-report-header h1{font-size:20pt;margin:0 0 5px;color:#8B6914;}
+.pdf-report-header p{margin:0;color:#7A6652;}
+.ai-report-shell{break-inside:avoid;box-shadow:none;}
+.ai-analysis-item,.ai-keyword-item{break-inside:avoid;}
 }
 
 .wx-small{font-size:0.65rem;color:#aaa;margin-left:3px;vertical-align:middle;}
@@ -1492,7 +1527,7 @@ details.kb-section summary::after{display:none;}
 <div class="report-topbar no-print">
 <button class="btn btn-ghost" onclick="showScreen('screen-list')">← 返回客戶列表</button>
 <div style="display:flex;gap:8px;">
-<button class="btn btn-primary" onclick="window.print()">🖨 下載 PDF</button>
+<button id="btn-export-pdf" class="btn btn-primary" onclick="exportReportPdf()">🖨 匯出 PDF</button>
 </div>
 </div>
 
@@ -1604,6 +1639,7 @@ details.kb-section summary::after{display:none;}
 
 <!-- 命理分析報告 -->
 <div class="card">
+<div id="pdf-report-header" class="pdf-report-header"></div>
 <div class="section-title">命理分析報告</div>
 <div class="tab-bar no-print">
 <button id="tab-btn-full" class="tab-btn active" onclick="switchTab('full',this)">📋 完整版</button>
@@ -2413,9 +2449,124 @@ if(!res.ok || !data?.ok){
 }
 return {
   text:sanitizeGeminiOutput(data.text||''),
+  json:data.json||null,
   finishReason:data.finishReason||'',
   model:data.model||''
 };
+}
+
+let aiReportRequestId=0;
+let aiReportPending=false;
+const AI_REPORT_CACHE_VERSION='2026-07-21-v1';
+function aiEscape(value){
+return String(value??'').replace(/[&<>"']/g,ch=>({
+  '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+}[ch]));
+}
+function normalizeAiSection(value){
+if(typeof value==='string') return {headline:'',analysis:value,action:''};
+return {
+  headline:String(value?.headline||''),
+  analysis:String(value?.analysis||''),
+  action:String(value?.action||'')
+};
+}
+function isValidAiReport(data){
+return !!(data && typeof data==='object' && String(data.summary||'').trim() && Array.isArray(data.keywords));
+}
+function aiKeywordHtml(keywords){
+const allowed=new Set(['identity','career','wealth','relationship','health','annual']);
+return (keywords||[]).slice(0,7).map(item=>{
+  const tone=allowed.has(item?.tone)?item.tone:'identity';
+  return `<div class="ai-keyword-item" data-tone="${tone}"><span class="ai-keyword-label">${aiEscape(item?.label||'命盤重點')}</span><span class="ai-keyword-value">${aiEscape(item?.value||'')}</span></div>`;
+}).join('');
+}
+function aiAnalysisHtml(data){
+const sections=[
+  ['事業',data.career],['財運',data.wealth],['感情',data.relationship],
+  ['健康',data.health],['年度',data.annual],['空間',data.fengShui]
+];
+return sections.map(([label,value])=>{
+  const item=normalizeAiSection(value);
+  if(!item.headline&&!item.analysis&&!item.action) return '';
+  return `<div class="ai-analysis-item"><h4>${aiEscape(label)}${item.headline?'｜'+aiEscape(item.headline):''}</h4>${item.analysis?`<p>${aiEscape(item.analysis)}</p>`:''}${item.action?`<p class="ai-analysis-action">行動建議：${aiEscape(item.action)}</p>`:''}</div>`;
+}).join('');
+}
+function renderAiReport(data,model){
+const keywordHtml=aiKeywordHtml(data.keywords);
+const full=document.getElementById('ai-full-report');
+const quick=document.getElementById('ai-quick-report');
+if(full){
+  full.innerHTML=`<div class="ai-report-heading">全盤情境化串聯</div><p class="ai-report-summary">${aiEscape(data.summary)}</p>${keywordHtml?`<div class="ai-keyword-grid">${keywordHtml}</div>`:''}<div class="ai-analysis-grid">${aiAnalysisHtml(data)}</div>${data.teacherFriendlyScript?`<div class="ai-analysis-item"><h4>諮詢講稿</h4><p>${aiEscape(data.teacherFriendlyScript)}</p></div>`:''}<div class="ai-report-note">AI 僅負責串聯已計算的命盤標籤；排盤數據與老師原始觀點仍以本頁本機知識庫為準。${model?' 模型：'+aiEscape(model):''}</div>`;
+  full.classList.remove('ai-report-loading');
+}
+if(quick){
+  quick.innerHTML=`<div class="ai-report-heading">這份命盤先看六個重點</div>${keywordHtml?`<div class="ai-keyword-grid">${keywordHtml}</div>`:''}<p class="ai-report-summary">${aiEscape(data.summary)}</p>`;
+  quick.classList.remove('ai-report-loading');
+}
+}
+function setAiReportFailure(message){
+['ai-full-report','ai-quick-report'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(!el) return;
+  el.querySelector('.kb-loading')?.remove();
+  el.insertAdjacentHTML('beforeend',`<div class="ai-report-error">情境化串聯暫時無法生成，本頁仍保留完整的本機精算報告。${canViewTeacherReport()?' '+aiEscape(message):''}</div>`);
+});
+}
+function aiReportCacheKey(tags){
+const source=AI_REPORT_CACHE_VERSION+'|'+JSON.stringify(tags);
+let hash=2166136261;
+for(let i=0;i<source.length;i++){
+  hash^=source.charCodeAt(i);
+  hash=Math.imul(hash,16777619);
+}
+return `doris_ai_report_${(hash>>>0).toString(36)}`;
+}
+async function enhanceReportWithGemini(tags){
+const requestId=++aiReportRequestId;
+aiReportPending=true;
+const exportBtn=document.getElementById('btn-export-pdf');
+if(exportBtn) exportBtn.disabled=true;
+try{
+  const cacheKey=aiReportCacheKey(tags);
+  let cached=null;
+  try{cached=JSON.parse(localStorage.getItem(cacheKey)||'null');}catch(_){localStorage.removeItem(cacheKey);}
+  if(isValidAiReport(cached?.data)){
+    renderAiReport(cached.data,cached.model||'快取');
+    return;
+  }
+  const result=await callGeminiRoute({mode:'polish',outputType:'json',tags,maxOutputTokens:4000,temperature:.35});
+  if(requestId!==aiReportRequestId) return;
+  const data=result.json || (()=>{try{return JSON.parse(result.text);}catch(_){return null;}})();
+  if(!isValidAiReport(data)) throw new Error('API 未回傳完整的報告 JSON。');
+  renderAiReport(data,result.model);
+  localStorage.setItem(cacheKey,JSON.stringify({data,model:result.model||'',savedAt:Date.now()}));
+}catch(error){
+  if(requestId===aiReportRequestId){
+    console.warn('AI report enhancement failed:',error);
+    setAiReportFailure(error.message);
+  }
+}finally{
+  if(requestId===aiReportRequestId){
+    aiReportPending=false;
+    if(exportBtn) exportBtn.disabled=false;
+  }
+}
+}
+function exportReportPdf(){
+if(aiReportPending && !confirm('情境化分析仍在生成中。要先匯出目前的本機精算版本嗎？')) return;
+const client=currentReportClient||{};
+const header=document.getElementById('pdf-report-header');
+if(header) header.innerHTML=`<h1>${aiEscape(client.name||'客戶')}的命理分析報告</h1><p>源澄潤設計事務所｜Doris 的八字路口相談室｜${new Date().toLocaleDateString('zh-TW')}</p>`;
+const opened=[...document.querySelectorAll('#screen-report details.kb-section:not([open])')];
+opened.forEach(el=>el.open=true);
+const oldTitle=document.title;
+document.title=`${client.name||'客戶'}_命理分析報告`;
+window.print();
+setTimeout(()=>{
+  opened.forEach(el=>el.open=false);
+  document.title=oldTitle;
+},300);
 }
 
 async function callGeminiAssistant({question,maxOutputTokens=2200}){
@@ -4538,7 +4689,50 @@ const quickSec6Html = personalCard({
 });
 
 // ── 組合完整版 ──
+const aiReportTags={
+  clientContext:{gender:client.gender},
+  chart:{
+    dayMaster:`${riTg}${riWx}`,
+    yinYang,
+    pillars:pillarList.map(item=>({label:item.label,role:item.role,ganzhi:`${item.tg}${item.dz}`})),
+    strength:{label:strongLabel,tier:strengthTier,isStrong,monthBranch:yueDz,monthElement:yueDzWx,sameElementBranches:sameBranchCount},
+    usefulElements:yongshen,
+    tenGodCounts,
+    tenGodFamilyCounts,
+    tenGodPositions:tenGodEntries.map(entry=>({...entry,element:WX_MAP[entry.stem]||''})),
+    transformedTags:transformedTenGodNotes(),
+    combinationTags:comboPriorityNotes(),
+    stemBranchInteractions:combinationRows.map(row=>String(row).replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim())
+  },
+  timing:{
+    currentLuck:{ganzhi:curDyGz,tenGod:curDyShen,element:curDyWx,ageRange:`${curDyAge}～${curDyEnd}`},
+    annual:{year:Number(lyYear),ganzhi:lyGz,stem:lyTg,branch:lyDz,element:lyWx,tenGod:lyStar,relation:lyRelation}
+  },
+  domains:{
+    wealth:{element:caiStar,count:caiEntries.length,positiveWealth:zhengCaiEntries.length,indirectWealth:pianCaiEntries.length,robWealth:jieCaiEntries.length},
+    career:{officialElement:guanStar,officialCount:guanEntries.length,outputCount:shiShangEntries.length},
+    relationship:{spouseElement:peiouStar,spousePalace:riDz,hiddenTenGods:spousePalaceHidden},
+    health:{dayMasterOrgans:WX_ORGAN[riWx]||'',weakerElement:weakWx,weakerOrgans:WX_ORGAN[weakWx]||''},
+    fengShui:{topIntersections:bestFengshuiIntersections(xuOverlapSummary()),wealthDirections:xuFs.wealth||'',year:CURRENT_YEAR}
+  },
+  generationPolicy:{
+    deterministicCalculationIsSourceOfTruth:true,
+    teacherEvidenceRenderedSeparately:true,
+    audience:canViewTeacherReport()?'consultant_full':'client_quick',
+    style:'情境化串聯、繁體中文、口語專業、避免罐頭與恐嚇'
+  }
+};
+const localAiKeywords=[
+  {label:'核心命格',value:`${riTg}${riWx}・${strongLabel}`,tone:'identity'},
+  {label:'事業結構',value:`${guanEntries.length}官星・${shiShangEntries.length}食傷`,tone:'career'},
+  {label:'財運結構',value:`${caiEntries.length}財星・${jieCaiEntries.length}劫財`,tone:'wealth'},
+  {label:'關係模式',value:`${riDz}夫妻宮・配偶星${peiouStar}`,tone:'relationship'},
+  {label:'健康重點',value:WX_ORGAN[riWx]||'依五行調養',tone:'health'},
+  {label:`${lyYear}主題`,value:`${lyGz}${lyStar}・${curDyGz}${curDyShen}`,tone:'annual'}
+];
+const localAiSummary=`這張盤以【${riTg}${riWx}】與【${strongLabel}】為核心；原局有${caiEntries.length}個財星、${guanEntries.length}個官星、${shiShangEntries.length}個食傷訊號。目前【${curDyGz}${curDyShen}】大運遇上【${lyGz}${lyStar}】流年，解讀時要把原局能力、十年環境與今年事件一起看。`;
 const fullHtml=`
+<div id="ai-full-report" class="ai-report-shell ai-report-loading"><div class="ai-report-heading">全盤情境化串聯</div><p class="ai-report-summary">${localAiSummary}</p><div class="ai-keyword-grid">${aiKeywordHtml(localAiKeywords)}</div><div class="kb-loading">正在比對十神數量、組合質變與流年交集⋯</div></div>
 ${section('🌟','① 日主與五行特質分析',sec1Html,true)}
 ${section('🏛','② 四柱宮位解析',sec3Html,true)}
 ${section('🔗','③ 合化／刑沖另欄檢查',secComboHtml,true)}
@@ -4561,6 +4755,7 @@ ${section('🏠','⑬ 八字×風水整合佈局',sec12Html)}
 
 // ── 組合快速版 ──
 const quickHtml=`
+<div id="ai-quick-report" class="ai-report-shell ai-report-loading"><div class="ai-report-heading">客戶關鍵字摘要</div><div class="ai-keyword-grid">${aiKeywordHtml(localAiKeywords)}</div><p class="ai-report-summary">${localAiSummary}</p><div class="kb-loading">正在整理情境化說明⋯</div></div>
 ${section('🌟','① 你是誰：日主與五行',quickSec1Html,true)}
 ${section('⚖️','② 命盤能量：身強或身弱',quickSec4Html,true)}
 ${section('🌀','③ 現在的你：當前大運',quickSec5Html,true)}
@@ -4591,6 +4786,7 @@ if(canViewTeacherReport()){
   fullBtn?.classList.add('hidden');
   switchTab('quick', quickBtn);
 }
+void enhanceReportWithGemini(aiReportTags);
 }
 
 

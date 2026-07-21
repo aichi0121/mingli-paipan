@@ -8,10 +8,13 @@ POST /api/gemini-polish
 
 用途：
 
-- 接收前端傳來的八字 Tag
+- 主報告完成本機排盤後，自動接收十神數量、質變標籤、合沖、大運流年與風水交集
+- 回傳完整版的情境化串聯分析，以及快速版的客戶關鍵字摘要
 - 接收報告草稿或客戶提問
 - 用 Gemini 1.5 Flash 潤飾後回傳 JSON 或文章
 - API Key 放在後端環境變數，不放在 `index.html`
+
+主報告不把姓名與出生日期送給 Gemini；本機精算結果與老師原始觀點仍是判斷依據。若 API 暫時失敗，網頁會保留本機完整版與快速版，不會卡在載入畫面。同一命盤同一年度會使用版本化快取，避免重複消耗免費額度。
 
 ## 需要設定的環境變數
 
@@ -72,14 +75,14 @@ location.reload();
   "mode": "polish",
   "outputType": "json",
   "tags": {
-    "dayMaster": "戊",
-    "dayMasterElement": "土",
-    "tenGodCounts": {
-      "正財": 2,
-      "食神": 1
+    "chart": {
+      "dayMaster": "戊土",
+      "strength": {"label": "身強"},
+      "tenGodCounts": {"正財": 2, "食神": 1},
+      "transformedTags": [],
+      "combinationTags": []
     }
   },
-  "reportDraft": "原本報告文字",
   "tone": "專業、口語、清楚"
 }
 ```
@@ -102,9 +105,19 @@ location.reload();
 {
   "ok": true,
   "model": "gemini-1.5-flash-latest",
-  "outputType": "article",
-  "text": "潤飾後文字",
-  "json": null,
+  "outputType": "json",
+  "text": "{...}",
+  "json": {
+    "summary": "全盤串聯總結",
+    "keywords": [],
+    "career": {},
+    "wealth": {},
+    "health": {},
+    "relationship": {},
+    "annual": {},
+    "fengShui": {},
+    "teacherFriendlyScript": ""
+  },
   "finishReason": "STOP"
 }
 ```
