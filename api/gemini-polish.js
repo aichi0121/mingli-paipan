@@ -82,7 +82,23 @@ function buildPrompt(body) {
     '5. 避免重複罐頭警語，請換成具體行動建議。',
     `6. 語氣：${tone}。`,
     outputType === 'json'
-      ? '請只回傳合法 JSON，不要 Markdown。欄位建議：summary、highlights、career、wealth、health、relationship、fengShui、teacherFriendlyScript。'
+      ? [
+          '請只回傳合法 JSON，不要 Markdown、不要 code fence、不要額外解說。',
+          '必須完全符合這個結構：',
+          '{',
+          '  "summary": "2到4句的全盤串聯總結",',
+          '  "keywords": [{"label":"面向名稱","value":"8到18字的關鍵結論","tone":"identity|career|wealth|relationship|health|annual"}],',
+          '  "career": {"headline":"一句結論","analysis":"2到4句串聯分析","action":"一項具體行動"},',
+          '  "wealth": {"headline":"一句結論","analysis":"2到4句串聯分析","action":"一項具體行動"},',
+          '  "health": {"headline":"一句結論","analysis":"2到4句串聯分析","action":"一項日常保養提醒，不做醫療診斷"},',
+          '  "relationship": {"headline":"一句結論","analysis":"2到4句串聯分析","action":"一項溝通行動"},',
+          '  "annual": {"headline":"一句年度主題","analysis":"2到4句大運與流年串聯分析","action":"一項年度行動"},',
+          '  "fengShui": {"headline":"一句空間重點","analysis":"只取1到2個交集方位的2到3句分析","action":"一項可執行佈置"},',
+          '  "teacherFriendlyScript": "命理師可直接口頭說明的3到6句連貫講稿"',
+          '}',
+          'keywords 請提供 5 到 7 個，tone 只能使用指定值。各 analysis 必須是連貫文章，不得用條列符號。',
+          '不得虛構老師姓名、引言、課程內容或未提供的命盤事實；老師原始觀點由前端既有知識庫另外呈現。'
+        ].join('\n')
       : '請回傳可直接放進網頁的文章內容，分段清楚，每段 2 到 4 句。',
     '',
     '【八字 Tag】',
@@ -109,7 +125,8 @@ async function callGemini(prompt, body) {
       generationConfig: {
         temperature: Number(body.temperature ?? 0.45),
         topP: Number(body.topP ?? 0.9),
-        maxOutputTokens: Number(body.maxOutputTokens ?? 2600)
+        maxOutputTokens: Number(body.maxOutputTokens ?? 2600),
+        ...((body.outputType || body.format) === 'json' ? { responseMimeType: 'application/json' } : {})
       }
     })
   });
