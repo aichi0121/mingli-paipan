@@ -2722,8 +2722,8 @@ try{localStorage.removeItem(aiReportCacheKey(lastAiReportTags));}catch(_){}
 });
 void enhanceReportWithGemini(lastAiReportTags);
 }
-function aiReportCacheKey(tags){
-const source=AI_REPORT_CACHE_VERSION+'|'+JSON.stringify(tags);
+function aiReportCacheKey(tags,version=AI_REPORT_CACHE_VERSION){
+const source=version+'|'+JSON.stringify(tags);
 let hash=2166136261;
 for(let i=0;i<source.length;i++){
   hash^=source.charCodeAt(i);
@@ -2741,6 +2741,16 @@ try{
   const cacheKey=aiReportCacheKey(tags);
   let cached=null;
   try{cached=JSON.parse(localStorage.getItem(cacheKey)||'null');}catch(_){localStorage.removeItem(cacheKey);}
+  if(!isValidAiReport(cached?.data)){
+    const legacyKey=aiReportCacheKey(tags,'2026-07-21-v1');
+    try{
+      const legacy=JSON.parse(localStorage.getItem(legacyKey)||'null');
+      if(isValidAiReport(legacy?.data)){
+        cached=legacy;
+        localStorage.setItem(cacheKey,JSON.stringify({...legacy,migratedAt:Date.now()}));
+      }
+    }catch(_){localStorage.removeItem(legacyKey);}
+  }
   if(isValidAiReport(cached?.data)){
     renderAiReport(cached.data,cached.model||'快取',tags);
     return;
