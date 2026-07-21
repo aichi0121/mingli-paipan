@@ -2690,13 +2690,28 @@ normalizedAiChapterSummaries(chapters).forEach(chapter=>{
   body.insertAdjacentHTML('beforeend',`<aside class="ai-inline-summary"><h4>Gemini 本章總結</h4><ul>${chapter.bullets.map(item=>`<li><strong>${aiEscape(item?.label||'重點')}：</strong>${aiEscape(item?.value||'')}</li>`).join('')}</ul></aside>`);
 });
 }
-function renderAiReport(data,tags){
+function aiDomainAnalysisHtml(data){
+const domains=[
+  ['事業',data?.career],
+  ['財運',data?.wealth],
+  ['感情',data?.relationship],
+  ['健康',data?.health],
+  ['年度',data?.annual],
+  ['空間',data?.fengShui]
+];
+return domains.map(([label,item])=>{
+  if(!item || (!item.headline && !item.analysis && !item.action)) return '';
+  return `<div class="ai-analysis-item"><h4>${aiEscape(label)}｜${aiEscape(item.headline||'重點解讀')}</h4>${item.analysis?`<p>${aiEscape(item.analysis)}</p>`:''}${item.action?`<p class="ai-analysis-action">行動建議：${aiEscape(item.action)}</p>`:''}</div>`;
+}).join('');
+}
+function renderAiReport(data,tags,model=''){
 const keywordHtml=aiKeywordHtml(deterministicAiKeywords(tags));
 const calculatedSummary=deterministicAiSummary(tags);
+const domainHtml=aiDomainAnalysisHtml(data);
 const full=document.getElementById('ai-full-report');
 const quick=document.getElementById('ai-quick-report');
 if(full){
-  full.innerHTML=`<div class="ai-report-heading">全盤情境化串聯</div>${keywordHtml?`<div class="ai-keyword-grid">${keywordHtml}</div>`:''}<div class="ai-analysis-item"><h4>命盤計算摘要</h4><p>${aiEscape(calculatedSummary)}</p></div><div class="ai-analysis-item"><h4>Gemini 情境解讀</h4><p>${aiEscape(data.summary)}</p></div>${data.teacherFriendlyScript?`<div class="ai-analysis-item"><h4>諮詢講稿</h4><p>${aiEscape(data.teacherFriendlyScript)}</p></div>`:''}<div class="ai-report-note">命盤數據以排盤結果為準；老師原始觀點仍以本頁知識庫為依據。</div>`;
+  full.innerHTML=`<div class="ai-report-heading">全盤情境化串聯</div>${keywordHtml?`<div class="ai-keyword-grid">${keywordHtml}</div>`:''}<div class="ai-analysis-item"><h4>命盤計算摘要</h4><p>${aiEscape(calculatedSummary)}</p></div><div class="ai-analysis-item"><h4>Gemini 情境解讀</h4><p>${aiEscape(data.summary)}</p></div>${domainHtml?`<div class="ai-analysis-grid">${domainHtml}</div>`:''}${data.teacherFriendlyScript?`<div class="ai-analysis-item"><h4>諮詢講稿</h4><p>${aiEscape(data.teacherFriendlyScript)}</p></div>`:''}<div class="ai-report-note">統計與計算摘要由本機排盤固定產生；Gemini 只負責串聯解讀，不會改寫統計數字。老師原始觀點仍以本頁知識庫為準。${model?` 模型：${aiEscape(model)}`:''}</div>`;
   full.classList.remove('ai-report-loading');
   renderChapterSummariesIntoReport(data.chapterSummaries);
 }
@@ -2760,14 +2775,14 @@ try{
   let cached=null;
   try{cached=JSON.parse(localStorage.getItem(cacheKey)||'null');}catch(_){localStorage.removeItem(cacheKey);}
   if(isValidAiReport(cached?.data)){
-    renderAiReport(cached.data,tags);
+    renderAiReport(cached.data,tags,cached.model||'');
     return;
   }
   const result=await callGeminiRoute({mode:'polish',outputType:'json',tags,maxOutputTokens:7000,temperature:.25});
   if(requestId!==aiReportRequestId) return;
   const data=result.json || (()=>{try{return JSON.parse(result.text);}catch(_){return null;}})();
   if(!isValidAiReport(data)) throw new Error('API 未回傳完整的報告 JSON。');
-  renderAiReport(data,tags);
+  renderAiReport(data,tags,result.model||'');
   localStorage.setItem(cacheKey,JSON.stringify({data,model:result.model||'',savedAt:Date.now()}));
 }catch(error){
   if(requestId===aiReportRequestId){
