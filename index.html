@@ -1707,7 +1707,8 @@ details.kb-section summary::after{display:none;}
 const CURRENT_YEAR = new Date().getFullYear();
 const LS_KEY = 'doris_clients';
 const GEMINI_KEY = 'doris_gemini_api_key';
-const GEMINI_MODELS = ['gemini-3.5-flash','gemini-2.5-flash-lite'];
+const GEMINI_API_ROUTE = window.DORIS_GEMINI_API_ROUTE || localStorage.getItem('doris_gemini_api_route') || '/api/gemini-polish';
+const GEMINI_MODELS = ['gemini-1.5-flash-latest','gemini-1.5-flash'];
 const GITHUB_RAW = 'https://raw.githubusercontent.com/aichi0121/mingli-paipan/main/data/';
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyBHUerxO5VyQA_taGIJxD0vYv1-scdgfM0",
@@ -2473,6 +2474,63 @@ return [header,'基本訊息：'+info,'四柱排盤：'+bazi,'大運流年：'+d
   .slice(0,18000);
 }
 
+function getBaziTagsForGemini(){
+const client=currentReportClient;
+const bazi=client?.baziData||{};
+const pillarKeys=[
+  ['year','年柱'],
+  ['month','月柱'],
+  ['day','日柱'],
+  ['hour','时柱']
+];
+const pillars={};
+pillarKeys.forEach(([key,label])=>{
+  const p=bazi[label]||{};
+  const tg=p['天干']||{};
+  const dz=p['地支']||{};
+  const hidden=dz['藏干']||{};
+  pillars[key]={
+    ganzhi:(tg['天干']||'')+(dz['地支']||''),
+    stem:tg['天干']||'',
+    stemElement:tg['五行']||WX_MAP[tg['天干']]||'',
+    stemTenGod:toTrad(tg['十神']||''),
+    branch:dz['地支']||'',
+    branchElement:dz['五行']||WX_MAP[dz['地支']]||'',
+    hiddenStems:['余气','中气','主气'].map(k=>{
+      const h=hidden[k]||{};
+      return {
+        stem:h['天干']||'',
+        element:h['五行']||WX_MAP[h['天干']]||'',
+        tenGod:toTrad(h['十神']||'')
+      };
+    }).filter(h=>h.stem)
+  };
+});
+const dayMaster=pillars.day?.stem||'';
+return {
+  client: client ? {
+    name: client.name,
+    gender: client.gender,
+    solar: `${client.year}-${client.month}-${client.day} ${client.hour}:${client.minute}`,
+    zodiac: bazi['生肖']||''
+  } : null,
+  dayMaster,
+  dayMasterElement: WX_MAP[dayMaster]||'',
+  pillars,
+  luck: {
+    startDate: bazi['大运']?.['起运日期']||'',
+    startAge: bazi['大运']?.['起运年龄']||'',
+    dayun: (bazi['大运']?.['大运']||[]).map(d=>({
+      age:d['年龄范围']||'',
+      years:d['年份范围']||'',
+      ganzhi:d['干支']||'',
+      tenGod:toTrad(d['十神']||'')
+    }))
+  },
+  visibleMode: canViewTeacherReport() ? 'full_teacher_report' : 'quick_client_report'
+};
+}
+
 function looksGeminiIncomplete(text, finishReason){
 const trimmed=(text||'').trim();
 if(!trimmed) return true;
@@ -2536,18 +2594,51 @@ for(let i=0;i<=continueLimit;i++){
 return finalText;
 }
 
+async function callGeminiRoute(payload){
+if(!GEMINI_API_ROUTE) throw new Error('尚未設定後端 Gemini API Route。');
+const res=await fetch(GEMINI_API_ROUTE,{
+  method:'POST',
+  headers:{'Content-Type':'application/json'},
+  body:JSON.stringify(payload)
+});
+let data=null;
+try{ data=await res.json(); }catch(_){ data=null; }
+if(!res.ok || !data?.ok){
+  throw new Error(data?.error || `後端 Gemini route 錯誤：${res.status}`);
+}
+return {
+  text:sanitizeGeminiOutput(data.text||''),
+  finishReason:data.finishReason||'',
+  model:data.model||''
+};
+}
+
+async function callGeminiAssistant({question,prompt,maxOutputTokens=2200,continueLimit=2}){
+try{
+  const result=await callGeminiRoute({
+    mode:'chat',
+    outputType:'article',
+    tags:getBaziTagsForGemini(),
+    reportDraft:getReportContextForGemini(),
+    history:geminiChatHistory,
+    question,
+    maxOutputTokens
+  });
+  if(result.text) return result.text;
+}catch(routeErr){
+  console.warn('Gemini backend route unavailable, fallback to local key:', routeErr);
+  const key=getGeminiKey();
+  if(!key){
+    throw new Error(routeErr.message+'。若網站仍放在 GitHub Pages，請先把 /api/gemini-polish 部署到 Vercel，或暫時在帳號選單貼上自己的 Gemini API Key 作為備援。');
+  }
+}
+return callGeminiText(getGeminiKey(),prompt,maxOutputTokens,continueLimit);
+}
+
 async function askGeminiAboutReport(){
-const key=getGeminiKey();
 const q=document.getElementById('gemini-question');
 const question=q?.value.trim()||'';
 const btn=document.getElementById('btn-ask-gemini');
-if(!key){
-  toggleAuthMenu(true);
-  document.getElementById('gemini-key-box')?.setAttribute('open','');
-  setTimeout(()=>document.getElementById('gemini-api-key')?.focus(),50);
-  alert('請先在右上角帳號選單貼上 Gemini API Key。');
-  return;
-}
 if(!question){
   alert('請先輸入想問的問題。');
   return;
@@ -2579,9 +2670,9 @@ try{
     '【使用者問題】',
     question
   ].join('\n');
-  let text=await callGeminiText(key,prompt,1800);
+  let text=await callGeminiAssistant({question,prompt,maxOutputTokens:1800});
   if(text.replace(/\s/g,'').length<160 || !/一、|二、|三、/.test(text) || /[，、；：]$/.test(text.trim())){
-    text=await callGeminiText(key,[
+    const rewritePrompt=[
       '請把下方回答重寫成完整的繁體中文命理師話術。',
       '不可只回一句。請固定三段：一、結論；二、命盤依據；三、可以對客戶這樣說。',
       '總長度 300 到 700 個中文字，語氣溫和、口語、可直接對客戶說，最後一句必須完整收尾。',
@@ -2599,7 +2690,8 @@ try{
       '',
       '【目前報告內容】',
       getReportContextForGemini()
-    ].join('\n'),2200);
+    ].join('\n');
+    text=await callGeminiAssistant({question,prompt:rewritePrompt,maxOutputTokens:2200});
   }
   const finalText=text || 'Gemini 沒有回傳文字，請稍後再試。';
   setGeminiMessage(pending,finalText);
@@ -2614,16 +2706,8 @@ try{
 }
 
 async function continueGeminiAnswer(){
-const key=getGeminiKey();
 const lastAnswer=getLastGeminiAnswer();
 const btn=document.getElementById('btn-gemini-continue');
-if(!key){
-  toggleAuthMenu(true);
-  document.getElementById('gemini-key-box')?.setAttribute('open','');
-  setTimeout(()=>document.getElementById('gemini-api-key')?.focus(),50);
-  alert('請先在右上角帳號選單貼上 Gemini API Key。');
-  return;
-}
 if(!lastAnswer){
   alert('目前還沒有可以接續的 Gemini 回答。');
   return;
@@ -2649,7 +2733,7 @@ try{
     '【目前報告內容】',
     getReportContextForGemini()
   ].join('\n');
-  const text=await callGeminiText(key,prompt,1800,2);
+  const text=await callGeminiAssistant({question:userText,prompt,maxOutputTokens:1800,continueLimit:2});
   const finalText=text || 'Gemini 沒有回傳補充內容，請稍後再試。';
   setGeminiMessage(pending,finalText);
   geminiChatHistory.push({role:'assistant',text:finalText});

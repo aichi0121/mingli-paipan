@@ -1,0 +1,15 @@
+{
+  "name": "mingli-paipan",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "vercel dev"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "vercel": "^35.0.0"
+  }
+}
