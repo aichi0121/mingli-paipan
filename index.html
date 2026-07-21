@@ -3575,30 +3575,46 @@ function childWorkAnalysis(){
     const hiddenHasOutput = ['余气','中气','主气'].some(key => ['食神','傷官'].includes(toTrad(hidden[key]?.['十神'] || '')));
     return ['食神','傷官'].includes(tgShen) && hiddenHasOutput;
   }).map(({label}) => label);
-  const hasOutput = shiShangEntries.length > 0;
   const isFemale = client.gender === '女';
-  const guarantee = isFemale && hasOutput && outputThroughPillars.length ? 1 : 0;
-  const upper = isFemale && isExtremeStrength() && hasOutput ? '1～2個舒適上限' : guarantee ? '1個較穩' : '需看流年引動';
+  const childEntries = isFemale ? shiShangEntries : guanEntries;
+  const childLabel = isFemale ? '食神、傷官' : '正官、七殺';
+  const hasChildStar = childEntries.length > 0;
+  const rootedPillars = isFemale
+    ? outputThroughPillars
+    : pillarDataList.filter(({data}) => {
+        const tgShen = toTrad(data['天干']?.['十神'] || '');
+        const hidden = data['地支']?.['藏干'] || {};
+        const hiddenHasOfficial = ['余气','中气','主气'].some(key => ['正官','七殺'].includes(toTrad(hidden[key]?.['十神'] || '')));
+        return ['正官','七殺'].includes(tgShen) && hiddenHasOfficial;
+      }).map(({label}) => label);
+  const guarantee = hasChildStar && rootedPillars.length ? 1 : 0;
+  const upper = isFemale && isExtremeStrength() && hasChildStar ? '1～2個舒適上限' : guarantee ? '1個較穩' : '需看流年引動';
   const details = [
     isFemale
       ? '女命看子女與心血作品，可以先看副星【食神、傷官】。'
-      : '這一欄以「心血作品、長期成果與照顧緣分」來看；若是女命，也可延伸看子女星。',
-    hasOutput ? `你的盤裡有食傷訊號：${formatTenGodEntries(shiShangEntries)}。` : '原局食傷不明顯，子女或作品緣分更要看大運、流年與後天選擇。',
-    outputThroughPillars.length ? `天透地藏位置：${outputThroughPillars.join('、')}，可視為緣分或作品能量比較有根。` : '',
-    isFemale && hasOutput ? `緣分判斷：保證緣分約${guarantee || '未明顯'}；舒適上限可先抓【${upper}】，仍需搭配流年引動與現實身心狀態。` : '',
-    hasOutput ? '現代化轉譯：如果現實中只選擇生育一個孩子，多餘的食傷能量會轉成第二個心血作品，例如個人品牌、獨立接案公司、課程、作品集，或需要你照顧投入的生命陪伴。' : ''
+      : '男命看子女緣，先看【正官、七殺】；作品與專業輸出則另外看【食神、傷官】，兩者不能混成同一個判斷。',
+    hasChildStar ? `你的子女星有${childEntries.length}個訊號：${formatTenGodEntries(childEntries)}。` : `原局【${childLabel}】子女星不明顯，緣分與時機要再看大運、流年及後天選擇。`,
+    rootedPillars.length ? `子女星天透地藏位置：${rootedPillars.join('、')}，代表這股緣分在原局較有根。` : '',
+    hasChildStar ? `緣分判斷：原局可見的穩定訊號約${guarantee || '未形成天透地藏'}；數量與時機仍需搭配流年引動及現實身心狀態，不直接斷定實際子女數。` : '',
+    shiShangEntries.length ? `心血作品訊號：盤裡有${shiShangEntries.length}個食傷訊號，適合把表達、教學、內容或專業方法累積成長期成果。` : '作品輸出訊號較弱，適合先建立固定產出節奏，再等待大運或流年引動。',
+    isFemale && shiShangEntries.length ? '現代化轉譯：若現實中選擇少生或不生，多餘的食傷能量也可能轉成個人品牌、公司、課程、作品集或其他長期照顧投入。' : ''
   ].filter(Boolean);
-  const summary = hasOutput
-    ? `${client.name}，你的盤裡有【食傷】能量，這不只代表子女緣，也代表作品、教學、內容輸出與心血成果。`
-    : `${client.name}，這張盤的子女與作品星不算明顯，重點會落在流年引動與後天選擇。`;
+  const summary = hasChildStar
+    ? `${client.name}，你是${isFemale ? '女命' : '男命'}，子女星以【${childLabel}】判讀；原局共有${childEntries.length}個相關訊號。作品成果則另外參考食傷，不把兩套規則混在一起。`
+    : `${client.name}，你是${isFemale ? '女命' : '男命'}，原局【${childLabel}】子女星不明顯，重點會落在大運、流年引動與後天選擇。`;
   return {summary, details};
 }
 
 function spouseProfileSummary(){
   const parts = [];
-  parts.push(`配偶星五行是【${peiouStar}】，外型氣質多偏「${peiouStar === '木' ? '憨厚老實、不高不矮、身形偏結實或偏壯，給人樸實可靠感' : peiouStar === '火' ? '明亮、有精神、表情感強' : peiouStar === '土' ? '穩重、樸實、有安全感' : peiouStar === '金' ? '乾淨俐落、有輪廓或質感' : '柔和、聰明、流動感強'}」。`);
-  if(guanEntries.length){
-    parts.push(`原局有官星訊號：${formatTenGodEntries(guanEntries)}，所以你容易被有責任感、守規矩、願意承擔的人吸引。`);
+  const isMale = client.gender === '男';
+  const spouseEntries = isMale ? caiEntries : guanEntries;
+  const spouseLabel = isMale ? '妻星／財星' : '夫星／官星';
+  parts.push(`${spouseLabel}五行是【${peiouStar}】，外型氣質多偏「${peiouStar === '木' ? '憨厚老實、不高不矮、身形偏結實或偏壯，給人樸實可靠感' : peiouStar === '火' ? '明亮、有精神、表情感強' : peiouStar === '土' ? '穩重、樸實、有安全感' : peiouStar === '金' ? '乾淨俐落、有輪廓或質感' : '柔和、聰明、流動感強'}」。`);
+  if(spouseEntries.length){
+    parts.push(`原局有${spouseLabel}訊號：${formatTenGodEntries(spouseEntries)}。${isMale ? '你較容易注意務實、能一起經營生活，也重視相處品質與現實默契的對象。' : '你較容易被有責任感、守規矩、願意承擔的對象吸引。'}`);
+  }else{
+    parts.push(`原局${spouseLabel}不明顯，不代表沒有婚姻；需要把夫妻宮、大運與流年一起看。`);
   }
   if(spousePalaceHidden.length){
     parts.push(`夫妻宮【${riDz}】藏干是${spousePalaceHidden.join('、')}，代表你在關係裡同時在意現實安全感、責任承諾與同伴感。`);
@@ -4707,7 +4723,7 @@ const sec8Html = personalCard({
 // ⑨ 感情
 const sec9Html = personalCard({
   icon:'💕', title:'你的感情婚姻分析', id:'BAZI_034',
-  personalSummary:client.name+'，以傳統八字來看，你的配偶星是【'+peiouStar+'】。'+lyYear+'年流年【'+lyGz+'】，'+(lyWx===peiouStar?'剛好碰到配偶星，感情機緣會比較容易浮上檯面。':'感情的重點不一定是突然出現大事件，而是你怎麼回應關係裡的靠近與距離。'),
+  personalSummary:client.name+'，你是【'+client.gender+'命】；以傳統八字來看，'+(client.gender==='男'?'妻星看財星':'夫星看官星')+'，你的配偶星五行是【'+peiouStar+'】。'+lyYear+'年流年【'+lyGz+'】，'+(lyWx===peiouStar?'剛好碰到配偶星，感情機緣會比較容易浮上檯面。':'感情的重點不一定是突然出現大事件，而是你怎麼回應關係裡的靠近與距離。'),
   details:[
     '你的日支是【'+riDz+'】，也就是婚姻宮；它透露的是你在親密關係裡容易期待什麼、在意什麼。'+getRizhiMarriageNote(riDz)+'。',
     ...spouseProfileSummary(),
@@ -4844,7 +4860,12 @@ const quickSec6Html = personalCard({
 
 // ── 組合完整版 ──
 const aiReportTags={
-  clientContext:{gender:client.gender},
+  clientContext:{
+    gender:client.gender,
+    genderRule:client.gender==='男'
+      ? '男命：配偶／妻星看正財、偏財；子女星看正官、七殺；作品輸出另看食神、傷官。'
+      : '女命：配偶／夫星看正官、七殺；子女與作品星看食神、傷官。'
+  },
   chart:{
     dayMaster:`${riTg}${riWx}`,
     yinYang,
@@ -4865,7 +4886,8 @@ const aiReportTags={
   domains:{
     wealth:{element:caiStar,count:caiEntries.length,positiveWealth:zhengCaiEntries.length,indirectWealth:pianCaiEntries.length,robWealth:jieCaiEntries.length},
     career:{officialElement:guanStar,officialCount:guanEntries.length,outputCount:shiShangEntries.length},
-    relationship:{spouseElement:peiouStar,spousePalace:riDz,hiddenTenGods:spousePalaceHidden},
+    relationship:{gender:client.gender,spouseRule:client.gender==='男'?'妻星看財星':'夫星看官星',spouseElement:peiouStar,spousePalace:riDz,hiddenTenGods:spousePalaceHidden},
+    children:{gender:client.gender,childStarRule:client.gender==='男'?'子女星看正官、七殺':'子女星看食神、傷官',childStarCount:(client.gender==='男'?guanEntries:shiShangEntries).length,outputCount:shiShangEntries.length},
     health:{dayMasterOrgans:WX_ORGAN[riWx]||'',weakerElement:weakWx,weakerOrgans:WX_ORGAN[weakWx]||''},
     fengShui:{topIntersections:bestFengshuiIntersections(xuOverlapSummary()),wealthDirections:xuFs.wealth||'',year:CURRENT_YEAR}
   },
@@ -4880,7 +4902,7 @@ const localAiKeywords=[
   {label:'核心命格',value:`${riTg}${riWx}・${strongLabel}`,tone:'identity'},
   {label:'事業結構',value:`${guanEntries.length}官星・${shiShangEntries.length}食傷`,tone:'career'},
   {label:'財運結構',value:`${caiEntries.length}財星・${jieCaiEntries.length}劫財`,tone:'wealth'},
-  {label:'關係模式',value:`${riDz}夫妻宮・配偶星${peiouStar}`,tone:'relationship'},
+  {label:'關係模式',value:`${riDz}夫妻宮・${client.gender==='男'?'妻星':'夫星'}${peiouStar}`,tone:'relationship'},
   {label:'健康重點',value:WX_ORGAN[riWx]||'依五行調養',tone:'health'},
   {label:`${lyYear}主題`,value:`${lyGz}${lyStar}・${curDyGz}${curDyShen}`,tone:'annual'}
 ];
