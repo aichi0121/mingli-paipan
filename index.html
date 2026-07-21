@@ -3368,7 +3368,7 @@ function comboPriorityNotes(){
     notes.push('食傷生財：想法、作品、技術或內容能轉成商業價值，適合靠作品、專案、教學、顧問、個人品牌或技術變現。');
   }
   if(comboFlags.officialWithResource){
-    notes.push('官印相生：具備建立體制、拿到背書、被看見或被信任的條件；適合把專業做成制度、課程、證照、品牌或可複製的方法。');
+    notes.push('原局同見官星與印星：具備建立體制、取得背書、被看見或被信任的條件；是否形成有力的官印相生，仍要分辨兩者的位置、強弱與行運是否接續。');
   }
   if(comboFlags.wealthHeavyWeak){
     notes.push('財多身弱：機會與想做的事很多，但身體與心力可能跟不上。財運的關鍵不是抓更多，而是專注一個核心、學會拒絕與外包。');
@@ -3654,14 +3654,18 @@ function childWorkAnalysis(){
         return ['正官','七殺'].includes(tgShen) && hiddenHasOfficial;
       }).map(({label}) => label);
   const guarantee = hasChildStar && rootedPillars.length ? 1 : 0;
-  const upper = isFemale && isExtremeStrength() && hasChildStar ? '1～2個舒適上限' : guarantee ? '1個較穩' : '需看流年引動';
+  const hiddenChildEntries = childEntries.filter(entry => entry.place === '藏干');
   const details = [
     isFemale
       ? '女命看子女與心血作品，可以先看副星【食神、傷官】。'
       : '男命看子女緣，先看【正官、七殺】；作品與專業輸出則另外看【食神、傷官】，兩者不能混成同一個判斷。',
     hasChildStar ? `你的子女星有${childEntries.length}個訊號：${formatTenGodEntries(childEntries)}。` : `原局【${childLabel}】子女星不明顯，緣分與時機要再看大運、流年及後天選擇。`,
     rootedPillars.length ? `子女星天透地藏位置：${rootedPillars.join('、')}，代表這股緣分在原局較有根。` : '',
-    hasChildStar ? `緣分判斷：原局可見的穩定訊號約${guarantee || '未形成天透地藏'}；數量與時機仍需搭配流年引動及現實身心狀態，不直接斷定實際子女數。` : '',
+    hasChildStar && rootedPillars.length
+      ? `緣分判斷：原局在${rootedPillars.join('、')}形成天透地藏，子女星的根氣較清楚；實際數量與時機仍需搭配流年引動及現實身心狀態。`
+      : hasChildStar
+        ? `緣分判斷：原局【${childLabel}】訊號明確（共${childEntries.length}個）${hiddenChildEntries.length ? `，其中${hiddenChildEntries.length}個落在地支藏干，代表有根但未必透到天干` : ''}；實質子女緣分與數量仍建議搭配大運、流年引動判定。`
+        : '',
     shiShangEntries.length ? `心血作品訊號：盤裡有${shiShangEntries.length}個食傷訊號，適合把表達、教學、內容或專業方法累積成長期成果。` : '作品輸出訊號較弱，適合先建立固定產出節奏，再等待大運或流年引動。',
     isFemale && shiShangEntries.length ? '現代化轉譯：若現實中選擇少生或不生，多餘的食傷能量也可能轉成個人品牌、公司、課程、作品集或其他長期照顧投入。' : ''
   ].filter(Boolean);
@@ -4019,7 +4023,13 @@ function teacherCombinedBlock(kb, items, options = {}){
 
 function actionList(text){
   if(!text) return '';
-  const cleaned = personalizeContent(text);
+  const protectedPhrases = [];
+  const cleaned = personalizeContent(text).replace(/【[^】]+】/g, phrase => {
+    const token = `@@ACTION_PHRASE_${protectedPhrases.length}@@`;
+    protectedPhrases.push(phrase);
+    return token;
+  });
+  const restorePhrase = value => String(value).replace(/@@ACTION_PHRASE_(\d+)@@/g, (_, index) => protectedPhrases[Number(index)] || '');
   const colonIndex = Math.max(cleaned.indexOf('：'), cleaned.indexOf(':'));
   const prefix = colonIndex > -1 ? cleaned.slice(0, colonIndex + 1) : '';
   const body = colonIndex > -1 ? cleaned.slice(colonIndex + 1) : cleaned;
@@ -4036,8 +4046,8 @@ function actionList(text){
       return true;
     })
     .slice(0, 8);
-  if(parts.length < 3) return cleaned;
-  return `${prefix}<ul class="action-list">${parts.map(item => `<li>${item}</li>`).join('')}</ul>`;
+  if(parts.length < 3) return restorePhrase(cleaned);
+  return `${restorePhrase(prefix)}<ul class="action-list">${parts.map(item => `<li>${restorePhrase(item)}</li>`).join('')}</ul>`;
 }
 
 function compactList(items){
@@ -4941,13 +4951,21 @@ const aiReportTags={
     tenGodCounts,
     tenGodFamilyCounts,
     tenGodPositions:tenGodEntries.map(entry=>({...entry,element:WX_MAP[entry.stem]||''})),
+    originStructure:{
+      officialCount:guanEntries.length,
+      resourceCount:yinEntries.length,
+      officialResourceBothPresent:guanEntries.length>=1 && yinEntries.length>=1,
+      officialHeavyWithoutResource:guanEntries.length>=2 && yinEntries.length===0,
+      rule:'本欄只描述原局；不得把大運或流年的印星倒寫成原局印星。'
+    },
     transformedTags:transformedTenGodNotes(),
     combinationTags:comboPriorityNotes(),
     stemBranchInteractions:combinationRows.map(row=>String(row).replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim())
   },
   timing:{
-    currentLuck:{ganzhi:curDyGz,tenGod:curDyShen,element:curDyWx,ageRange:`${curDyAge}～${curDyEnd}`},
-    annual:{year:Number(lyYear),ganzhi:lyGz,stem:lyTg,branch:lyDz,element:lyWx,tenGod:lyStar,relation:lyRelation}
+    currentLuck:{ganzhi:curDyGz,tenGod:curDyShen,element:curDyWx,ageRange:`${curDyAge}～${curDyEnd}`,isResource:['正印','偏印'].includes(curDyShen)},
+    annual:{year:Number(lyYear),ganzhi:lyGz,stem:lyTg,branch:lyDz,element:lyWx,tenGod:lyStar,relation:lyRelation,isResource:['正印','偏印'].includes(lyStar)},
+    interpretationRule:'大運與流年是階段性作用，只能寫成目前形成、補入或引動，不得宣稱為原局既有。'
   },
   domains:{
     wealth:{element:caiStar,count:caiEntries.length,positiveWealth:zhengCaiEntries.length,indirectWealth:pianCaiEntries.length,robWealth:jieCaiEntries.length},
