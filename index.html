@@ -2598,7 +2598,10 @@ const res=await fetch(GEMINI_API_ROUTE,{
 let data=null;
 try{ data=await res.json(); }catch(_){ data=null; }
 if(!res.ok || !data?.ok){
-  throw new Error(data?.error || `後端 Gemini route 錯誤：${res.status}`);
+  const error=new Error(data?.error || `後端 Gemini route 錯誤：${res.status}`);
+  error.status=res.status;
+  error.code=data?.code||'';
+  throw error;
 }
 return {
   text:sanitizeGeminiOutput(data.text||''),
@@ -2610,7 +2613,8 @@ return {
 
 let aiReportRequestId=0;
 let aiReportPending=false;
-const AI_REPORT_CACHE_VERSION='2026-07-21-v1';
+const AI_REPORT_CACHE_VERSION='2026-07-21-v2';
+let lastAiReportTags=null;
 function aiEscape(value){
 return String(value??'').replace(/[&<>"']/g,ch=>({
   '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
@@ -2634,6 +2638,30 @@ return (keywords||[]).slice(0,7).map(item=>{
   return `<div class="ai-keyword-item" data-tone="${tone}"><span class="ai-keyword-label">${aiEscape(item?.label||'命盤重點')}</span><span class="ai-keyword-value">${aiEscape(item?.value||'')}</span></div>`;
 }).join('');
 }
+function deterministicAiKeywords(tags){
+const chart=tags?.chart||{};
+const domains=tags?.domains||{};
+const timing=tags?.timing||{};
+const relationship=domains.relationship||{};
+const currentLuck=timing.currentLuck||{};
+const annual=timing.annual||{};
+return [
+  {label:'核心命格',value:`${chart.dayMaster||'日主'}・${chart.strength?.label||'格局待判'}`,tone:'identity'},
+  {label:'事業結構',value:`${domains.career?.officialCount??0}官星・${domains.career?.outputCount??0}食傷`,tone:'career'},
+  {label:'財運結構',value:`${domains.wealth?.count??0}財星・${domains.wealth?.robWealth??0}劫財`,tone:'wealth'},
+  {label:'關係模式',value:`${relationship.spousePalace||'日支'}夫妻宮・${relationship.gender==='男'?'妻星':'夫星'}${relationship.spouseElement||''}`,tone:'relationship'},
+  {label:'健康重點',value:domains.health?.dayMasterOrgans||'依五行調養',tone:'health'},
+  {label:`${annual.year||'流年'}主題`,value:`${annual.ganzhi||''}${annual.tenGod||''}・${currentLuck.ganzhi||''}${currentLuck.tenGod||''}`,tone:'annual'}
+];
+}
+function deterministicAiSummary(tags){
+const chart=tags?.chart||{};
+const domains=tags?.domains||{};
+const timing=tags?.timing||{};
+const luck=timing.currentLuck||{};
+const annual=timing.annual||{};
+return `這張盤以【${chart.dayMaster||'日主'}】與【${chart.strength?.label||'格局待判'}】為核心；原局有${domains.wealth?.count??0}個財星、${domains.career?.officialCount??0}個官星、${domains.career?.outputCount??0}個食傷訊號。目前【${luck.ganzhi||''}${luck.tenGod||''}】大運遇上【${annual.ganzhi||''}${annual.tenGod||''}】流年，解讀時要把原局能力、十年環境與今年事件一起看。`;
+}
 function aiAnalysisHtml(data){
 const sections=[
   ['事業',data.career],['財運',data.wealth],['感情',data.relationship],
@@ -2645,27 +2673,54 @@ return sections.map(([label,value])=>{
   return `<div class="ai-analysis-item"><h4>${aiEscape(label)}${item.headline?'｜'+aiEscape(item.headline):''}</h4>${item.analysis?`<p>${aiEscape(item.analysis)}</p>`:''}${item.action?`<p class="ai-analysis-action">行動建議：${aiEscape(item.action)}</p>`:''}</div>`;
 }).join('');
 }
-function renderAiReport(data,model){
-const keywordHtml=aiKeywordHtml(data.keywords);
+function renderAiReport(data,model,tags){
+const keywordHtml=aiKeywordHtml(deterministicAiKeywords(tags));
+const calculatedSummary=deterministicAiSummary(tags);
 const full=document.getElementById('ai-full-report');
 const quick=document.getElementById('ai-quick-report');
 if(full){
-  full.innerHTML=`<div class="ai-report-heading">全盤情境化串聯</div><p class="ai-report-summary">${aiEscape(data.summary)}</p>${keywordHtml?`<div class="ai-keyword-grid">${keywordHtml}</div>`:''}<div class="ai-analysis-grid">${aiAnalysisHtml(data)}</div>${data.teacherFriendlyScript?`<div class="ai-analysis-item"><h4>諮詢講稿</h4><p>${aiEscape(data.teacherFriendlyScript)}</p></div>`:''}<div class="ai-report-note">AI 僅負責串聯已計算的命盤標籤；排盤數據與老師原始觀點仍以本頁本機知識庫為準。${model?' 模型：'+aiEscape(model):''}</div>`;
+  full.innerHTML=`<div class="ai-report-heading">全盤情境化串聯</div>${keywordHtml?`<div class="ai-keyword-grid">${keywordHtml}</div>`:''}<div class="ai-analysis-item"><h4>命盤計算摘要</h4><p>${aiEscape(calculatedSummary)}</p></div><div class="ai-analysis-item"><h4>Gemini 情境解讀</h4><p>${aiEscape(data.summary)}</p></div><div class="ai-analysis-grid">${aiAnalysisHtml(data)}</div>${data.teacherFriendlyScript?`<div class="ai-analysis-item"><h4>諮詢講稿</h4><p>${aiEscape(data.teacherFriendlyScript)}</p></div>`:''}<div class="ai-report-note">統計與計算摘要由本機排盤固定產生；Gemini 只負責串聯解讀，不會改寫統計數字。老師原始觀點仍以本頁知識庫為準。${model?' 模型：'+aiEscape(model):''}</div>`;
   full.classList.remove('ai-report-loading');
 }
 if(quick){
-  quick.innerHTML=`<div class="ai-report-heading">這份命盤先看六個重點</div>${keywordHtml?`<div class="ai-keyword-grid">${keywordHtml}</div>`:''}<p class="ai-report-summary">${aiEscape(data.summary)}</p>`;
+  quick.innerHTML=`<div class="ai-report-heading">這份命盤先看六個重點</div>${keywordHtml?`<div class="ai-keyword-grid">${keywordHtml}</div>`:''}<div class="ai-analysis-item"><h4>命盤計算摘要</h4><p>${aiEscape(calculatedSummary)}</p></div><div class="ai-analysis-item"><h4>白話解讀</h4><p>${aiEscape(data.summary)}</p></div>`;
   quick.classList.remove('ai-report-loading');
 }
 }
-function setAiReportFailure(message){
+function aiReportFailureMessage(error){
+const raw=String(error?.message||error||'');
+if(error?.status===429 || error?.code==='GEMINI_RATE_LIMIT' || /quota|rate limit|resource exhausted|429/i.test(raw)){
+  return 'Gemini 免費額度目前忙碌，系統已自動重試但仍未取得結果。請稍候約一分鐘再按「重新生成」。';
+}
+if(/完整的報告 JSON|json|finish_reason|max.*token/i.test(raw)){
+  return 'Gemini 這次回傳的內容不完整，沒有套用到報告。可以直接按「重新生成」。';
+}
+if(/GEMINI_API_KEY|API key/i.test(raw)){
+  return 'Vercel 的 Gemini API Key 尚未生效，請檢查環境變數後重新部署。';
+}
+return 'Gemini 暫時無法完成情境化串聯；下方仍是完整的本機精算報告，可稍後重新生成。';
+}
+function setAiReportFailure(error){
+const message=aiReportFailureMessage(error);
 console.warn('AI report generation unavailable:',message);
 ['ai-full-report','ai-quick-report'].forEach(id=>{
   const el=document.getElementById(id);
   if(!el) return;
   el.querySelector('.kb-loading')?.remove();
-  el.insertAdjacentHTML('beforeend','<div class="ai-report-error">情境化串聯暫時無法生成，本頁仍保留完整的本機精算報告。請稍後重新整理再試。</div>');
+  el.querySelector('.ai-report-error')?.remove();
+  el.insertAdjacentHTML('beforeend',`<div class="ai-report-error">${aiEscape(message)} <button type="button" class="btn-secondary" onclick="retryAiReport()">重新生成</button></div>`);
 });
+}
+function retryAiReport(){
+if(!lastAiReportTags || aiReportPending) return;
+try{localStorage.removeItem(aiReportCacheKey(lastAiReportTags));}catch(_){}
+['ai-full-report','ai-quick-report'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(!el) return;
+  el.querySelector('.ai-report-error')?.remove();
+  el.insertAdjacentHTML('beforeend','<div class="kb-loading">正在重新比對命盤結構與流年交集⋯</div>');
+});
+void enhanceReportWithGemini(lastAiReportTags);
 }
 function aiReportCacheKey(tags){
 const source=AI_REPORT_CACHE_VERSION+'|'+JSON.stringify(tags);
@@ -2677,6 +2732,7 @@ for(let i=0;i<source.length;i++){
 return `doris_ai_report_${(hash>>>0).toString(36)}`;
 }
 async function enhanceReportWithGemini(tags){
+lastAiReportTags=tags;
 const requestId=++aiReportRequestId;
 aiReportPending=true;
 const exportBtn=document.getElementById('btn-export-pdf');
@@ -2686,19 +2742,19 @@ try{
   let cached=null;
   try{cached=JSON.parse(localStorage.getItem(cacheKey)||'null');}catch(_){localStorage.removeItem(cacheKey);}
   if(isValidAiReport(cached?.data)){
-    renderAiReport(cached.data,cached.model||'快取');
+    renderAiReport(cached.data,cached.model||'快取',tags);
     return;
   }
   const result=await callGeminiRoute({mode:'polish',outputType:'json',tags,maxOutputTokens:4000,temperature:.35});
   if(requestId!==aiReportRequestId) return;
   const data=result.json || (()=>{try{return JSON.parse(result.text);}catch(_){return null;}})();
   if(!isValidAiReport(data)) throw new Error('API 未回傳完整的報告 JSON。');
-  renderAiReport(data,result.model);
+  renderAiReport(data,result.model,tags);
   localStorage.setItem(cacheKey,JSON.stringify({data,model:result.model||'',savedAt:Date.now()}));
 }catch(error){
   if(requestId===aiReportRequestId){
     console.warn('AI report enhancement failed:',error);
-    setAiReportFailure(error.message);
+    setAiReportFailure(error);
   }
 }finally{
   if(requestId===aiReportRequestId){
