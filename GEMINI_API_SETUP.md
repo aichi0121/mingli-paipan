@@ -27,7 +27,7 @@ GEMINI_API_KEY=你的 Google AI Studio API Key
 可選：
 
 ```text
-GEMINI_MODEL=gemini-1.5-flash-latest
+GEMINI_MODEL=gemini-3.5-flash
 ALLOWED_ORIGIN=https://aichi0121.github.io
 ```
 
@@ -104,7 +104,7 @@ location.reload();
 ```json
 {
   "ok": true,
-  "model": "gemini-1.5-flash-latest",
+  "model": "gemini-3.5-flash",
   "outputType": "json",
   "text": "{...}",
   "json": {

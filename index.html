@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>源澄潤設計事務所｜Doris 的八字路口相談室</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&subset=chinese-traditional&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
 <style>
 /* ══════════════════════════════════════
  基礎重置
@@ -1411,6 +1411,159 @@ padding:14px;
 .date-row{flex-wrap:wrap;}
 }
 
+/* 2026 奶茶色介面重整 */
+:root{
+--milk:#F7F2EA;
+--paper:#FFFEFB;
+--tea-50:#F2E8DA;
+--tea-100:#E4D2BC;
+--tea-300:#C5A37B;
+--tea-500:#8C6747;
+--ink:#382E27;
+--muted:#806F61;
+--line:#E7DCCF;
+--sage:#5E7565;
+--clay:#A75B42;
+--blue:#496A80;
+--shadow:0 10px 30px rgba(75,55,39,.07);
+}
+body{
+font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;
+background:var(--milk);
+color:var(--ink);
+}
+.container{max-width:1120px;padding:28px 24px 80px;}
+.site-header{
+min-height:118px;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:flex-start;
+text-align:left;
+padding:24px 76px 24px 28px;
+margin-bottom:28px;
+background:var(--paper);
+border:1px solid var(--line);
+border-radius:8px;
+box-shadow:var(--shadow);
+}
+.site-header::before{
+content:'八字諮詢工作台';
+font-size:.72rem;
+font-weight:700;
+letter-spacing:.14em;
+color:var(--clay);
+margin-bottom:7px;
+}
+.site-header h1{font-family:'Noto Serif TC',serif;font-size:1.65rem;color:var(--ink);letter-spacing:.04em;}
+.site-header p{font-size:.84rem;color:var(--muted);margin-top:6px;}
+.auth-panel{right:24px;top:37px;}
+.auth-trigger{width:44px;height:44px;border-color:var(--tea-100);background:var(--tea-50);box-shadow:none;}
+.auth-menu{top:54px;background:var(--paper);border-color:var(--line);border-radius:8px;box-shadow:var(--shadow);}
+.list-topbar,.page-topbar,.report-topbar{margin-bottom:18px;}
+.list-topbar h2,.page-topbar h2{font-family:'Noto Serif TC',serif;color:var(--ink);font-size:1.35rem;}
+.card,.client-card{
+background:var(--paper);
+border:1px solid var(--line);
+border-radius:8px;
+box-shadow:var(--shadow);
+}
+.card{padding:28px;margin-bottom:18px;}
+.client-card{box-shadow:none;border-left:4px solid var(--tea-300);}
+.client-card:hover{border-color:var(--tea-300);box-shadow:var(--shadow);}
+.section-title{
+font-family:'Noto Serif TC',serif;
+font-size:1.15rem;
+color:var(--ink);
+padding-bottom:12px;
+margin-bottom:20px;
+border-bottom:1px solid var(--line);
+}
+.section-title::before{width:5px;height:23px;background:var(--clay);border-radius:1px;}
+.btn{min-height:42px;border-radius:6px;font-family:'Noto Sans TC',sans-serif;}
+.btn-primary{background:var(--tea-500);color:#fff;}
+.btn-primary:hover{background:#715038;}
+.btn-ghost{color:var(--tea-500);border-color:var(--tea-300);background:var(--paper);}
+.btn-ghost:hover{background:var(--tea-50);}
+.form-group input,.form-group select,.gemini-input{border-color:var(--line);border-radius:6px;background:var(--paper);}
+.form-group input:focus,.form-group select:focus,.gemini-input:focus{border-color:var(--tea-500);box-shadow:0 0 0 3px rgba(140,103,71,.1);}
+.toggle-btn{border-radius:6px;border-color:var(--line);}
+.toggle-btn.active{border-color:var(--tea-500);background:var(--tea-50);color:var(--tea-500);}
+.info-table{border:1px solid var(--line);}
+.info-table td{border-color:var(--line);padding:12px 16px;}
+.info-table td.label,.bazi-table th,.col-label,.dayun-row-label,.row-label-cell,.dayun-table th{background:#F5EFE7!important;color:var(--tea-500);}
+.info-table td.label{font-size:.8rem;letter-spacing:.04em;}
+.bazi-table th,.bazi-table td,.dayun-row-table td,.dayun-table th,.dayun-table td{border-color:var(--line);}
+.bazi-table th{padding:11px 8px;}
+.rizhu-bg{background:#FBF3E8!important;}
+.hl-col,.dayun-row-cur{background:#F5E6D5!important;}
+.wuxing-wrap{align-items:center;gap:32px;}
+.wuxing-chart-box{background:#FAF7F2;border:1px solid var(--line);padding:16px;min-width:390px;}
+.legend-item{color:var(--muted);line-height:1.65;}
+.tab-bar{border-color:var(--line);}
+.tab-btn{font-weight:600;color:var(--muted);}
+.tab-btn.active{color:var(--tea-500);border-bottom-color:var(--clay);}
+details.kb-section{border-color:var(--line);border-radius:8px;background:var(--paper);}
+details.kb-section summary{background:#FAF6F0;color:var(--ink);}
+.kb-card,.report-detail,.summary-panel,.teacher-view,.ai-analysis-item,.ai-keyword-item{border-color:var(--line);background:#FCF9F5;}
+.report-block{border-left-color:var(--clay);background:#FCF9F5;border-radius:0 6px 6px 0;}
+.ai-report-shell{border-color:var(--line);border-left-color:var(--clay);background:#FCF9F5;padding:26px;}
+.ai-report-heading{font-family:'Noto Serif TC',serif;color:var(--ink);font-size:1.3rem;}
+.ai-keyword-item{border-radius:6px;}
+.key-token-core{background:var(--tea-50);}
+.key-context,.detail-label{color:var(--clay);}
+.key-career{color:var(--blue);}.key-output,.key-health{color:var(--sage);}
+.gemini-launcher{background:var(--tea-500);border-color:var(--tea-100);}
+.gemini-card{background:var(--paper);border-color:var(--line);border-radius:8px;}
+.gemini-message.user{background:var(--tea-50);border-color:var(--line);}
+.gemini-message.assistant{background:#FAF7F2;border-left-color:var(--sage);}
+
+@media(min-width:780px){
+#screen-report{display:grid;grid-template-columns:minmax(0,1fr);}
+.info-table td.label{width:110px;}
+}
+
+@media(max-width:700px){
+.container{padding:14px 12px 96px;}
+.site-header{min-height:94px;padding:17px 64px 17px 18px;margin-bottom:16px;}
+.site-header::before{font-size:.62rem;margin-bottom:4px;}
+.site-header h1{font-size:1.25rem;line-height:1.3;}
+.site-header p{font-size:.76rem;margin-top:3px;}
+.auth-panel{right:16px;top:24px;}
+.auth-trigger{width:40px;height:40px;}
+.report-topbar{display:grid;grid-template-columns:1fr 1fr;align-items:stretch;}
+.report-topbar>div{display:contents;}
+.report-topbar .btn{width:100%;font-size:.84rem;padding:9px 8px;}
+.card{padding:18px 14px;margin-bottom:12px;box-shadow:0 5px 18px rgba(75,55,39,.055);}
+.section-title{font-size:1.05rem;padding-bottom:10px;margin-bottom:14px;}
+.section-title::before{height:19px;}
+.info-table tr{grid-template-columns:92px minmax(0,1fr);border-color:var(--line);}
+.info-table td{padding:11px 12px;font-size:.92rem;line-height:1.55;word-break:normal;overflow-wrap:break-word;}
+.info-table td.label{font-size:.78rem;display:flex;align-items:center;}
+.wuxing-chart-box{padding:8px;border:0;background:transparent;}
+.wuxing-legend{padding:0 4px;}
+.bazi-wrap{overflow:visible;}
+.bazi-table{table-layout:fixed;width:100%;min-width:0;}
+.bazi-table th,.bazi-table td{padding:7px 2px;font-size:.7rem;overflow-wrap:anywhere;}
+.bazi-table th:not(.col-label),.bazi-table td:not(.col-label){width:calc((100% - 32px)/4);}
+.col-label{width:32px!important;font-size:.64rem!important;writing-mode:vertical-rl;letter-spacing:.08em;}
+.tg-char,.dz-char{font-size:1.65rem;}
+.canggan-cell{letter-spacing:0;}
+.canggan-cell span,.fs-item{font-size:.62rem;}
+.dayun-row-wrap,.dayun-wrap{position:relative;margin-right:-14px;padding-right:14px;padding-bottom:8px;scroll-snap-type:x proximity;}
+.dayun-row-wrap::before,.dayun-wrap::before{content:'左右滑動查看完整表格';position:sticky;left:0;display:block;width:max-content;margin:0 0 7px;padding:3px 8px;background:var(--tea-50);color:var(--tea-500);font-size:.68rem;font-weight:600;border-radius:4px;z-index:3;}
+.dayun-row-table,.dayun-table{min-width:720px;}
+.dayun-row-table td,.dayun-table th,.dayun-table td{scroll-snap-align:start;padding:9px 11px;font-size:.78rem;}
+.dayun-row-label,.row-label-cell{left:0;right:auto;box-shadow:2px 0 5px rgba(75,55,39,.08);}
+.ai-report-shell{padding:16px 13px;}
+.ai-keyword-grid{grid-template-columns:1fr;}
+.ai-keyword-item{padding:12px;}
+.tab-btn{font-size:.88rem;}
+details.kb-section summary{font-size:.92rem;padding:13px 11px;}
+.kb-content,.report-summary,.report-detail p{font-size:.9rem;line-height:1.82;}
+.gemini-card{top:max(12px,env(safe-area-inset-top));bottom:max(12px,env(safe-area-inset-bottom));height:auto;max-height:none;}
+}
+
 /* 列印 */
 @media print{
 .no-print{display:none!important;}
@@ -2506,11 +2659,12 @@ if(quick){
 }
 }
 function setAiReportFailure(message){
+console.warn('AI report generation unavailable:',message);
 ['ai-full-report','ai-quick-report'].forEach(id=>{
   const el=document.getElementById(id);
   if(!el) return;
   el.querySelector('.kb-loading')?.remove();
-  el.insertAdjacentHTML('beforeend',`<div class="ai-report-error">情境化串聯暫時無法生成，本頁仍保留完整的本機精算報告。${canViewTeacherReport()?' '+aiEscape(message):''}</div>`);
+  el.insertAdjacentHTML('beforeend','<div class="ai-report-error">情境化串聯暫時無法生成，本頁仍保留完整的本機精算報告。請稍後重新整理再試。</div>');
 });
 }
 function aiReportCacheKey(tags){
