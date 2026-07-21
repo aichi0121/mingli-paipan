@@ -339,6 +339,11 @@ background:#FFFCF7;
 .ai-analysis-item p{margin:0 0 8px;line-height:1.75;}
 .ai-analysis-action{font-weight:700;color:#7B4B2A;}
 .ai-chapter-summaries{display:grid;gap:12px;margin-top:16px;}
+.ai-inline-summary{margin-top:18px;padding:15px 17px;border-top:2px solid #D9BE98;background:#FFFDF9;}
+.ai-inline-summary h4{margin:0 0 9px;color:#8B6914;font-size:.96rem;}
+.ai-inline-summary ul{margin:0;padding-left:1.25rem;display:grid;gap:7px;}
+.ai-inline-summary li{line-height:1.7;}
+.ai-inline-summary strong{color:#6E4D2E;}
 .ai-chapter-summary{padding:16px 18px;border:1px solid #E8DDD0;background:#FFF;}
 .ai-chapter-summary h4{margin:0 0 9px;color:#8B6914;font-size:1rem;}
 .ai-chapter-summary ul{margin:0;padding-left:1.25rem;}
@@ -2619,7 +2624,7 @@ return {
 
 let aiReportRequestId=0;
 let aiReportPending=false;
-const AI_REPORT_CACHE_VERSION='2026-07-22-v5.2';
+const AI_REPORT_CACHE_VERSION='2026-07-22-v5.3';
 let lastAiReportTags=null;
 function aiEscape(value){
 return String(value??'').replace(/[&<>"']/g,ch=>({
@@ -2661,7 +2666,7 @@ const luck=timing.currentLuck||{};
 const annual=timing.annual||{};
 return `這張盤以【${chart.dayMaster||'日主'}】與【${chart.strength?.label||'格局待判'}】為核心；原局有${domains.wealth?.count??0}個財星、${domains.career?.officialCount??0}個官星、${domains.career?.outputCount??0}個食傷訊號。目前【${luck.ganzhi||''}${luck.tenGod||''}】大運遇上【${annual.ganzhi||''}${annual.tenGod||''}】流年，解讀時要把原局能力、十年環境與今年事件一起看。`;
 }
-function aiChapterSummariesHtml(chapters){
+function normalizedAiChapterSummaries(chapters){
 const seen=new Set();
 return (chapters||[]).slice(0,13).map((chapter,index)=>{
   const number=String(chapter?.number||['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩','⑪','⑫','⑬'][index]);
@@ -2672,9 +2677,18 @@ return (chapters||[]).slice(0,13).map((chapter,index)=>{
     seen.add(key);
     return true;
   });
-  if(!bullets.length) return '';
-  return `<section class="ai-chapter-summary"><h4>${aiEscape(number)} ${aiEscape(title)}</h4><ul>${bullets.map(item=>`<li><strong>${aiEscape(item?.label||'重點')}：</strong>${aiEscape(item?.value||'')}</li>`).join('')}</ul></section>`;
-}).join('');
+  return {number,title,bullets};
+}).filter(chapter=>chapter.bullets.length);
+}
+function renderChapterSummariesIntoReport(chapters){
+const fullReport=document.getElementById('tab-full');
+if(!fullReport) return;
+fullReport.querySelectorAll('.ai-inline-summary').forEach(node=>node.remove());
+normalizedAiChapterSummaries(chapters).forEach(chapter=>{
+  const body=fullReport.querySelector(`details.kb-section[data-report-chapter="${chapter.number}"] > .section-body`);
+  if(!body) return;
+  body.insertAdjacentHTML('beforeend',`<aside class="ai-inline-summary"><h4>Gemini 本章總結</h4><ul>${chapter.bullets.map(item=>`<li><strong>${aiEscape(item?.label||'重點')}：</strong>${aiEscape(item?.value||'')}</li>`).join('')}</ul></aside>`);
+});
 }
 function renderAiReport(data,tags){
 const keywordHtml=aiKeywordHtml(deterministicAiKeywords(tags));
@@ -2682,8 +2696,9 @@ const calculatedSummary=deterministicAiSummary(tags);
 const full=document.getElementById('ai-full-report');
 const quick=document.getElementById('ai-quick-report');
 if(full){
-  full.innerHTML=`<div class="ai-report-heading">全盤情境化串聯</div>${keywordHtml?`<div class="ai-keyword-grid">${keywordHtml}</div>`:''}<div class="ai-analysis-item"><h4>命盤計算摘要</h4><p>${aiEscape(calculatedSummary)}</p></div><div class="ai-analysis-item"><h4>Gemini 情境解讀</h4><p>${aiEscape(data.summary)}</p></div><div class="ai-chapter-summaries">${aiChapterSummariesHtml(data.chapterSummaries)}</div>${data.teacherFriendlyScript?`<div class="ai-analysis-item"><h4>諮詢講稿</h4><p>${aiEscape(data.teacherFriendlyScript)}</p></div>`:''}<div class="ai-report-note">命盤數據以排盤結果為準；老師原始觀點仍以本頁知識庫為依據。</div>`;
+  full.innerHTML=`<div class="ai-report-heading">全盤情境化串聯</div>${keywordHtml?`<div class="ai-keyword-grid">${keywordHtml}</div>`:''}<div class="ai-analysis-item"><h4>命盤計算摘要</h4><p>${aiEscape(calculatedSummary)}</p></div><div class="ai-analysis-item"><h4>Gemini 情境解讀</h4><p>${aiEscape(data.summary)}</p></div>${data.teacherFriendlyScript?`<div class="ai-analysis-item"><h4>諮詢講稿</h4><p>${aiEscape(data.teacherFriendlyScript)}</p></div>`:''}<div class="ai-report-note">命盤數據以排盤結果為準；老師原始觀點仍以本頁知識庫為依據。</div>`;
   full.classList.remove('ai-report-loading');
+  renderChapterSummariesIntoReport(data.chapterSummaries);
 }
 if(quick){
   quick.innerHTML=`<div class="ai-report-heading">這份命盤先看六個重點</div>${keywordHtml?`<div class="ai-keyword-grid">${keywordHtml}</div>`:''}<div class="ai-analysis-item"><h4>命盤計算摘要</h4><p>${aiEscape(calculatedSummary)}</p></div><div class="ai-analysis-item"><h4>白話解讀</h4><p>${aiEscape(data.summary)}</p></div>`;
@@ -4636,8 +4651,9 @@ function personalCard({icon,title,id,personalSummary,details,tags,hideTitle=fals
 
 // ── 折疊區塊 ──
 function section(icon, title, bodyHtml, open=false){
+  const chapter=(String(title).match(/[①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬]/)||[])[0]||'';
   return `
-    <details class="kb-section" ${open?'open':''}>
+    <details class="kb-section" ${chapter?`data-report-chapter="${chapter}"`:''} ${open?'open':''}>
       <summary>${icon} ${title}</summary>
       <div class="section-body">${bodyHtml}</div>
     </details>
