@@ -338,6 +338,12 @@ background:#FFFCF7;
 .ai-analysis-item h4{font-size:.94rem;color:#8B6914;margin:0 0 7px;}
 .ai-analysis-item p{margin:0 0 8px;line-height:1.75;}
 .ai-analysis-action{font-weight:700;color:#7B4B2A;}
+.ai-chapter-summaries{display:grid;gap:12px;margin-top:16px;}
+.ai-chapter-summary{padding:16px 18px;border:1px solid #E8DDD0;background:#FFF;}
+.ai-chapter-summary h4{margin:0 0 9px;color:#8B6914;font-size:1rem;}
+.ai-chapter-summary ul{margin:0;padding-left:1.25rem;}
+.ai-chapter-summary li{margin:6px 0;line-height:1.7;color:#4A3728;}
+.ai-chapter-summary strong{color:#7B4B2A;}
 .ai-report-note{font-size:.78rem;color:#9A826A;margin-top:14px;}
 .ai-report-error{padding:12px 0;color:#9A826A;font-size:.88rem;}
 .pdf-report-header{display:none;}
@@ -2613,23 +2619,16 @@ return {
 
 let aiReportRequestId=0;
 let aiReportPending=false;
-const AI_REPORT_CACHE_VERSION='2026-07-21-v2';
+const AI_REPORT_CACHE_VERSION='2026-07-22-v5.2';
 let lastAiReportTags=null;
 function aiEscape(value){
 return String(value??'').replace(/[&<>"']/g,ch=>({
   '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
 }[ch]));
 }
-function normalizeAiSection(value){
-if(typeof value==='string') return {headline:'',analysis:value,action:''};
-return {
-  headline:String(value?.headline||''),
-  analysis:String(value?.analysis||''),
-  action:String(value?.action||'')
-};
-}
 function isValidAiReport(data){
-return !!(data && typeof data==='object' && String(data.summary||'').trim() && Array.isArray(data.keywords));
+const expected=['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩','⑪','⑫','⑬'];
+return !!(data && typeof data==='object' && String(data.summary||'').trim() && Array.isArray(data.keywords) && Array.isArray(data.chapterSummaries) && data.chapterSummaries.length===13 && data.chapterSummaries.every((chapter,index)=>String(chapter?.number||'')===expected[index] && Array.isArray(chapter?.bullets) && chapter.bullets.length>=2 && chapter.bullets.length<=3));
 }
 function aiKeywordHtml(keywords){
 const allowed=new Set(['identity','career','wealth','relationship','health','annual']);
@@ -2662,24 +2661,28 @@ const luck=timing.currentLuck||{};
 const annual=timing.annual||{};
 return `這張盤以【${chart.dayMaster||'日主'}】與【${chart.strength?.label||'格局待判'}】為核心；原局有${domains.wealth?.count??0}個財星、${domains.career?.officialCount??0}個官星、${domains.career?.outputCount??0}個食傷訊號。目前【${luck.ganzhi||''}${luck.tenGod||''}】大運遇上【${annual.ganzhi||''}${annual.tenGod||''}】流年，解讀時要把原局能力、十年環境與今年事件一起看。`;
 }
-function aiAnalysisHtml(data){
-const sections=[
-  ['事業',data.career],['財運',data.wealth],['感情',data.relationship],
-  ['健康',data.health],['年度',data.annual],['空間',data.fengShui]
-];
-return sections.map(([label,value])=>{
-  const item=normalizeAiSection(value);
-  if(!item.headline&&!item.analysis&&!item.action) return '';
-  return `<div class="ai-analysis-item"><h4>${aiEscape(label)}${item.headline?'｜'+aiEscape(item.headline):''}</h4>${item.analysis?`<p>${aiEscape(item.analysis)}</p>`:''}${item.action?`<p class="ai-analysis-action">行動建議：${aiEscape(item.action)}</p>`:''}</div>`;
+function aiChapterSummariesHtml(chapters){
+const seen=new Set();
+return (chapters||[]).slice(0,13).map((chapter,index)=>{
+  const number=String(chapter?.number||['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩','⑪','⑫','⑬'][index]);
+  const title=String(chapter?.title||'章節摘要');
+  const bullets=(chapter?.bullets||[]).slice(0,3).filter(item=>{
+    const key=String(item?.value||'').replace(/[\s，。；、：:]/g,'');
+    if(!key||seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  if(!bullets.length) return '';
+  return `<section class="ai-chapter-summary"><h4>${aiEscape(number)} ${aiEscape(title)}</h4><ul>${bullets.map(item=>`<li><strong>${aiEscape(item?.label||'重點')}：</strong>${aiEscape(item?.value||'')}</li>`).join('')}</ul></section>`;
 }).join('');
 }
-function renderAiReport(data,model,tags){
+function renderAiReport(data,tags){
 const keywordHtml=aiKeywordHtml(deterministicAiKeywords(tags));
 const calculatedSummary=deterministicAiSummary(tags);
 const full=document.getElementById('ai-full-report');
 const quick=document.getElementById('ai-quick-report');
 if(full){
-  full.innerHTML=`<div class="ai-report-heading">全盤情境化串聯</div>${keywordHtml?`<div class="ai-keyword-grid">${keywordHtml}</div>`:''}<div class="ai-analysis-item"><h4>命盤計算摘要</h4><p>${aiEscape(calculatedSummary)}</p></div><div class="ai-analysis-item"><h4>Gemini 情境解讀</h4><p>${aiEscape(data.summary)}</p></div><div class="ai-analysis-grid">${aiAnalysisHtml(data)}</div>${data.teacherFriendlyScript?`<div class="ai-analysis-item"><h4>諮詢講稿</h4><p>${aiEscape(data.teacherFriendlyScript)}</p></div>`:''}<div class="ai-report-note">統計與計算摘要由本機排盤固定產生；Gemini 只負責串聯解讀，不會改寫統計數字。老師原始觀點仍以本頁知識庫為準。${model?' 模型：'+aiEscape(model):''}</div>`;
+  full.innerHTML=`<div class="ai-report-heading">全盤情境化串聯</div>${keywordHtml?`<div class="ai-keyword-grid">${keywordHtml}</div>`:''}<div class="ai-analysis-item"><h4>命盤計算摘要</h4><p>${aiEscape(calculatedSummary)}</p></div><div class="ai-analysis-item"><h4>Gemini 情境解讀</h4><p>${aiEscape(data.summary)}</p></div><div class="ai-chapter-summaries">${aiChapterSummariesHtml(data.chapterSummaries)}</div>${data.teacherFriendlyScript?`<div class="ai-analysis-item"><h4>諮詢講稿</h4><p>${aiEscape(data.teacherFriendlyScript)}</p></div>`:''}<div class="ai-report-note">命盤數據以排盤結果為準；老師原始觀點仍以本頁知識庫為依據。</div>`;
   full.classList.remove('ai-report-loading');
 }
 if(quick){
@@ -2741,25 +2744,15 @@ try{
   const cacheKey=aiReportCacheKey(tags);
   let cached=null;
   try{cached=JSON.parse(localStorage.getItem(cacheKey)||'null');}catch(_){localStorage.removeItem(cacheKey);}
-  if(!isValidAiReport(cached?.data)){
-    const legacyKey=aiReportCacheKey(tags,'2026-07-21-v1');
-    try{
-      const legacy=JSON.parse(localStorage.getItem(legacyKey)||'null');
-      if(isValidAiReport(legacy?.data)){
-        cached=legacy;
-        localStorage.setItem(cacheKey,JSON.stringify({...legacy,migratedAt:Date.now()}));
-      }
-    }catch(_){localStorage.removeItem(legacyKey);}
-  }
   if(isValidAiReport(cached?.data)){
-    renderAiReport(cached.data,cached.model||'快取',tags);
+    renderAiReport(cached.data,tags);
     return;
   }
-  const result=await callGeminiRoute({mode:'polish',outputType:'json',tags,maxOutputTokens:4000,temperature:.35});
+  const result=await callGeminiRoute({mode:'polish',outputType:'json',tags,maxOutputTokens:7000,temperature:.25});
   if(requestId!==aiReportRequestId) return;
   const data=result.json || (()=>{try{return JSON.parse(result.text);}catch(_){return null;}})();
   if(!isValidAiReport(data)) throw new Error('API 未回傳完整的報告 JSON。');
-  renderAiReport(data,result.model,tags);
+  renderAiReport(data,tags);
   localStorage.setItem(cacheKey,JSON.stringify({data,model:result.model||'',savedAt:Date.now()}));
 }catch(error){
   if(requestId===aiReportRequestId){
@@ -3634,6 +3627,40 @@ function healthDetailByStructure(){
   return notes;
 }
 
+const ELEMENT_GENERATES={木:'火',火:'土',土:'金',金:'水',水:'木'};
+const ELEMENT_CONTROLS={木:'土',土:'水',水:'火',火:'金',金:'木'};
+function elementInteraction(fromElement,toElement){
+  if(!fromElement||!toElement) return '';
+  if(fromElement===toElement) return `${fromElement}${toElement}同氣`;
+  if(ELEMENT_GENERATES[fromElement]===toElement) return `${fromElement}生${toElement}`;
+  if(ELEMENT_GENERATES[toElement]===fromElement) return `${toElement}生${fromElement}`;
+  if(ELEMENT_CONTROLS[fromElement]===toElement) return `${fromElement}剋${toElement}`;
+  if(ELEMENT_CONTROLS[toElement]===fromElement) return `${toElement}剋${fromElement}`;
+  return `${fromElement}與${toElement}互動`;
+}
+function hourPillarOutcome(){
+  const record=pillarDataList.find(({label})=>String(label).includes('時'))||pillarDataList[pillarDataList.length-1]||{};
+  const data=record.data||{};
+  const stem=data['天干']?.['天干']||'';
+  const branch=data['地支']?.['地支']||'';
+  const stemElement=data['天干']?.['五行']||WX_MAP[stem]||'';
+  const branchElement=data['地支']?.['五行']||WX_MAP[branch]||'';
+  const stemTenGod=toTrad(data['天干']?.['十神']||'');
+  const hidden=data['地支']?.['藏干']||{};
+  const branchTenGod=toTrad(data['地支']?.['十神']||hidden['主气']?.['十神']||hidden['中气']?.['十神']||hidden['余气']?.['十神']||'');
+  const relation=elementInteraction(branchElement,stemElement);
+  const gods=[stemTenGod,branchTenGod];
+  let structureSignal=`${branchTenGod||branchElement}與${stemTenGod||stemElement}共同影響晚年、晚輩及成果累積`;
+  if(gods.some(g=>['正官','七殺'].includes(g))&&gods.some(g=>['正印','偏印'].includes(g))){
+    structureSignal='官星與印星在時柱相接，成果較適合走專業背書、知識整理與制度化累積';
+  }else if(gods.some(g=>['食神','傷官'].includes(g))){
+    structureSignal='時柱帶食傷，成果較容易透過表達、作品、教學或內容輸出被看見';
+  }else if(gods.some(g=>['正財','偏財'].includes(g))){
+    structureSignal='時柱帶財星，成果較重視市場承接、資源整合與實際變現';
+  }
+  return {label:record.label||'時柱',ganzhi:`${stem}${branch}`,stem,branch,stemElement,branchElement,stemTenGod,branchTenGod,elementRelation:relation,structureSignal};
+}
+
 function childWorkAnalysis(){
   const outputThroughPillars = pillarDataList.filter(({data}) => {
     const tgShen = toTrad(data['天干']?.['十神'] || '');
@@ -3644,6 +3671,9 @@ function childWorkAnalysis(){
   const isFemale = client.gender === '女';
   const childEntries = isFemale ? shiShangEntries : guanEntries;
   const childLabel = isFemale ? '食神、傷官' : '正官、七殺';
+  const workEntries = isFemale ? [...guanEntries,...caiEntries] : shiShangEntries;
+  const workLabel = isFemale ? '官星、財星' : '食神、傷官';
+  const hourOutcome=hourPillarOutcome();
   const hasChildStar = childEntries.length > 0;
   const rootedPillars = isFemale
     ? outputThroughPillars
@@ -3653,24 +3683,25 @@ function childWorkAnalysis(){
         const hiddenHasOfficial = ['余气','中气','主气'].some(key => ['正官','七殺'].includes(toTrad(hidden[key]?.['十神'] || '')));
         return ['正官','七殺'].includes(tgShen) && hiddenHasOfficial;
       }).map(({label}) => label);
-  const guarantee = hasChildStar && rootedPillars.length ? 1 : 0;
   const hiddenChildEntries = childEntries.filter(entry => entry.place === '藏干');
+  const visibleChildEntries = childEntries.filter(entry => entry.place !== '藏干');
   const details = [
     isFemale
-      ? '女命看子女與心血作品，可以先看副星【食神、傷官】。'
+      ? '女命子女緣看【食神、傷官】；心血作品與成果承接另看【官星、財星】，兩條線分開判讀。'
       : '男命看子女緣，先看【正官、七殺】；作品與專業輸出則另外看【食神、傷官】，兩者不能混成同一個判斷。',
     hasChildStar ? `你的子女星有${childEntries.length}個訊號：${formatTenGodEntries(childEntries)}。` : `原局【${childLabel}】子女星不明顯，緣分與時機要再看大運、流年及後天選擇。`,
-    rootedPillars.length ? `子女星天透地藏位置：${rootedPillars.join('、')}，代表這股緣分在原局較有根。` : '',
+    rootedPillars.length ? `子女星同柱透藏位置：${rootedPillars.join('、')}，這些柱位同時在天干與地支出現子女星，根氣較完整。` : '',
     hasChildStar && rootedPillars.length
       ? `緣分判斷：原局在${rootedPillars.join('、')}形成天透地藏，子女星的根氣較清楚；實際數量與時機仍需搭配流年引動及現實身心狀態。`
       : hasChildStar
-        ? `緣分判斷：原局【${childLabel}】訊號明確（共${childEntries.length}個）${hiddenChildEntries.length ? `，其中${hiddenChildEntries.length}個落在地支藏干，代表有根但未必透到天干` : ''}；實質子女緣分與數量仍建議搭配大運、流年引動判定。`
+        ? `子女星結構：原局【${childLabel}】共${childEntries.length}個訊號${hiddenChildEntries.length ? `，其中${hiddenChildEntries.length}個在地支藏干，根氣明確` : ''}${visibleChildEntries.length ? `，另有${visibleChildEntries.length}個顯於天干或主位` : ''}。這不等於固定子女數量，實質緣分與時機仍要搭配大運、流年引動。`
         : '',
-    shiShangEntries.length ? `心血作品訊號：盤裡有${shiShangEntries.length}個食傷訊號，適合把表達、教學、內容或專業方法累積成長期成果。` : '作品輸出訊號較弱，適合先建立固定產出節奏，再等待大運或流年引動。',
-    isFemale && shiShangEntries.length ? '現代化轉譯：若現實中選擇少生或不生，多餘的食傷能量也可能轉成個人品牌、公司、課程、作品集或其他長期照顧投入。' : ''
+    `時柱宮位：時柱為【${hourOutcome.ganzhi}】（時干${hourOutcome.stemTenGod||hourOutcome.stemElement}／時支${hourOutcome.branchTenGod||hourOutcome.branchElement}）；${hourOutcome.elementRelation ? `${hourOutcome.elementRelation}，` : ''}${hourOutcome.structureSignal}。`,
+    workEntries.length ? `心血作品訊號：原局有${workEntries.length}個【${workLabel}】相關訊號；${hourOutcome.structureSignal}。` : `心血作品訊號：原局【${workLabel}】不明顯，但可依時柱的「${hourOutcome.structureSignal}」建立合適的成果路線。`,
+    isFemale && childEntries.length ? '現代化轉譯：若現實中選擇少生或不生，食傷能量也可能轉成個人品牌、公司、課程、作品集或其他長期照顧投入。' : ''
   ].filter(Boolean);
   const summary = hasChildStar
-    ? `${client.name}，你是${isFemale ? '女命' : '男命'}，子女星以【${childLabel}】判讀；原局共有${childEntries.length}個相關訊號。作品成果則另外參考食傷，不把兩套規則混在一起。`
+    ? `${client.name}，你是${isFemale ? '女命' : '男命'}，子女星以【${childLabel}】判讀；原局共有${childEntries.length}個相關訊號。作品成果另看【${workLabel}】並結合時柱【${hourOutcome.ganzhi}】，不把兩套規則混在一起。`
     : `${client.name}，你是${isFemale ? '女命' : '男命'}，原局【${childLabel}】子女星不明顯，重點會落在大運、流年引動與後天選擇。`;
   return {summary, details};
 }
@@ -4021,7 +4052,7 @@ function teacherCombinedBlock(kb, items, options = {}){
   return `<div class="teacher-view"><div class="teacher-view-title">${options.title || '老師觀點依據（精選）'}</div>${rows.join('')}</div>`;
 }
 
-function actionList(text){
+function actionParts(text){
   if(!text) return '';
   const protectedPhrases = [];
   const cleaned = personalizeContent(text).replace(/【[^】]+】/g, phrase => {
@@ -4046,8 +4077,16 @@ function actionList(text){
       return true;
     })
     .slice(0, 8);
-  if(parts.length < 3) return restorePhrase(cleaned);
-  return `${restorePhrase(prefix)}<ul class="action-list">${parts.map(item => `<li>${restorePhrase(item)}</li>`).join('')}</ul>`;
+  return {cleaned:restorePhrase(cleaned),prefix:restorePhrase(prefix),parts:parts.map(restorePhrase)};
+}
+
+function actionList(text, excluded=[]){
+  const parsed=actionParts(text);
+  if(!parsed) return '';
+  const excludedKeys=new Set((excluded||[]).map(item=>String(item).replace(/[\s，。；、：:【】]/g,'')));
+  const parts=parsed.parts.filter(item=>!excludedKeys.has(String(item).replace(/[\s，。；、：:【】]/g,'')));
+  if(parts.length < 3) return parts.length ? `${parsed.prefix}<ul class="action-list">${parts.map(item=>`<li>${item}</li>`).join('')}</ul>` : '';
+  return `${parsed.prefix}<ul class="action-list">${parts.map(item => `<li>${item}</li>`).join('')}</ul>`;
 }
 
 function compactList(items){
@@ -4579,16 +4618,14 @@ const waterPlacementHtml = `
 `;
 
 // ── 個人化卡片 ──
-function personalCard({icon,title,id,personalSummary,details,tags}){
+function personalCard({icon,title,id,personalSummary,details,tags,hideTitle=false}){
   const detailsHtml=(details||[]).filter(Boolean).map(d=>{
     const html = String(d);
     return renderReportText(html);
   }).join('');
   return `
     <div class="kb-card">
-      <div class="kb-card-title">
-        ${icon||''} ${title}
-      </div>
+      ${hideTitle?'':`<div class="kb-card-title">${icon||''} ${title}</div>`}
       <div class="kb-content">
         ${personalSummary ? renderReportText(personalSummary, 'report-summary') : ''}
         ${detailsHtml?`<div class="kb-talk-details">${detailsHtml}</div>`:''}
@@ -4610,6 +4647,7 @@ function section(icon, title, bodyHtml, open=false){
 // ① 日主特質
 const sec1Html = personalCard({
   icon:'🌟', title:'日主【'+riTg+'】與五行【'+riWx+'】特質分析', id:'BAZI_001',
+  hideTitle:true,
   personalSummary:'親愛的'+client.name+'，從你的命盤來看，你的日主天干是【'+riTg+riWx+'】，屬於'+yinYang+riWx+'。'+(new_gexing||teacher_inner||''),
   details:[
     new_wxTrait ? '從五行來看，你帶著【'+riWx+'】的底色：'+new_wxTrait : '',
@@ -4873,6 +4911,8 @@ const sec11Html = `
 // ⑬ 八字×風水整合
 const supportMethod = new_wuxing || new_buyun || '';
 const fengshuiTeacherEvidence = fengshuiEvidenceHtml();
+const supportActionItems = actionParts(supportMethod)?.parts || [];
+const kaiyunActionHtml = actionList(new_kaiyun, supportActionItems);
 const sec12Html = `
 <div class="kb-card">
   <div class="kb-card-title">🏠 ${client.name} 的專屬風水佈局建議</div>
@@ -4888,7 +4928,7 @@ const sec12Html = `
     </div>
     ${waterPlacementHtml}
     ${supportMethod ? `<div class="summary-panel"><div class="summary-panel-title">五行補強</div>${actionList(supportMethod)}</div>` : ''}
-    ${new_kaiyun ? `<div class="summary-panel"><div class="summary-panel-title">開運物</div>${actionList(new_kaiyun)}</div>` : ''}
+    ${kaiyunActionHtml ? `<div class="summary-panel"><div class="summary-panel-title">開運物</div>${kaiyunActionHtml}</div>` : ''}
     ${fengshuiTeacherEvidence}
   </div>
 </div>
@@ -4935,12 +4975,33 @@ const quickSec6Html = personalCard({
 });
 
 // ── 組合完整版 ──
+function reportPlainText(html){
+  const node=document.createElement('div');
+  node.innerHTML=String(html||'');
+  return String(node.textContent||'').replace(/\s+/g,' ').trim().slice(0,1600);
+}
+const rawChapters=[
+  ['①','日主與五行特質',sec1Html],
+  ['②','四柱宮位與十神結構',sec3Html],
+  ['③','合化與刑沖牽動',secComboHtml],
+  ['④','命盤格局與喜用神',sec4Html],
+  ['⑤','當前大運',sec5Html],
+  ['⑥',`${lyYear}流年影響`,sec6Html],
+  ['⑦','財運模式與防禦提醒',sec7Html],
+  ['⑧','事業與職涯定位',sec8Html],
+  ['⑨','感情與婚姻模式',sec9Html],
+  ['⑩','子女與作品緣分',secChildHtml],
+  ['⑪','健康體質與保養',sec10Html],
+  ['⑫',`${lyYear}流日擇吉方向`,sec11Html],
+  ['⑬','風水與開運整合佈局',sec12Html]
+].map(([number,title,html])=>({number,title,raw:reportPlainText(html)}));
 const aiReportTags={
+  rawChapters,
   clientContext:{
     gender:client.gender,
     genderRule:client.gender==='男'
       ? '男命：配偶／妻星看正財、偏財；子女星看正官、七殺；作品輸出另看食神、傷官。'
-      : '女命：配偶／夫星看正官、七殺；子女與作品星看食神、傷官。'
+      : '女命：配偶／夫星看正官、七殺；子女星看食神、傷官；作品與成果承接另看官星、財星。'
   },
   chart:{
     dayMaster:`${riTg}${riWx}`,
@@ -4971,15 +5032,41 @@ const aiReportTags={
     wealth:{element:caiStar,count:caiEntries.length,positiveWealth:zhengCaiEntries.length,indirectWealth:pianCaiEntries.length,robWealth:jieCaiEntries.length},
     career:{officialElement:guanStar,officialCount:guanEntries.length,outputCount:shiShangEntries.length},
     relationship:{gender:client.gender,spouseRule:client.gender==='男'?'妻星看財星':'夫星看官星',spouseElement:peiouStar,spousePalace:riDz,hiddenTenGods:spousePalaceHidden},
-    children:{gender:client.gender,childStarRule:client.gender==='男'?'子女星看正官、七殺':'子女星看食神、傷官',childStarCount:(client.gender==='男'?guanEntries:shiShangEntries).length,outputCount:shiShangEntries.length},
-    health:{dayMasterOrgans:WX_ORGAN[riWx]||'',weakerElement:weakWx,weakerOrgans:WX_ORGAN[weakWx]||''},
+    children:{
+      gender:client.gender,
+      childStarRule:client.gender==='男'?'子女星看正官、七殺':'子女星看食神、傷官',
+      childStarCount:(client.gender==='男'?guanEntries:shiShangEntries).length,
+      childStarPositions:(client.gender==='男'?guanEntries:shiShangEntries).map(entry=>({...entry,element:WX_MAP[entry.stem]||''})),
+      workStarRule:client.gender==='男'?'作品與專業輸出看食神、傷官':'作品與成果承接看官星、財星',
+      workStarCount:(client.gender==='男'?shiShangEntries:[...guanEntries,...caiEntries]).length,
+      workStarPositions:(client.gender==='男'?shiShangEntries:[...guanEntries,...caiEntries]).map(entry=>({...entry,element:WX_MAP[entry.stem]||''})),
+      outputCount:shiShangEntries.length,
+      outputPositions:shiShangEntries.map(entry=>({...entry,element:WX_MAP[entry.stem]||''})),
+      hourPillar:hourPillarOutcome(),
+      samePillarRooted:(client.gender==='男'?guanEntries:shiShangEntries).some(entry=>{
+        if(entry.place==='藏干') return (client.gender==='男'?guanEntries:shiShangEntries).some(other=>other.pillar===entry.pillar&&other.place!=='藏干');
+        return (client.gender==='男'?guanEntries:shiShangEntries).some(other=>other.pillar===entry.pillar&&other.place==='藏干');
+      }),
+      rule:'子女緣、作品星位與時柱成果質地分開判讀；只有同一柱天干與藏干都有對應星，才可稱同柱透藏。'
+    },
+    health:{
+      dayMasterOrgans:WX_ORGAN[riWx]||'',
+      weakerElement:weakWx,
+      weakerOrgans:WX_ORGAN[weakWx]||'',
+      elementCounts:visibleWxCounts,
+      dominantElements:Object.entries(visibleWxCounts).filter(([,count])=>Number(count)===Math.max(...Object.values(visibleWxCounts).map(Number))).map(([element])=>element),
+      missingElements:Object.entries(visibleWxCounts).filter(([,count])=>Number(count)===0).map(([element])=>element),
+      controllingPressure:{element:healthCautionWx,count:Number(visibleWxCounts[healthCautionWx]||0),targetElement:riWx,targetOrgans:WX_ORGAN[riWx]||''},
+      rule:'健康判讀須以當次命盤的 elementCounts 為準：數量高代表旺，數量為 0 才是缺；依實際生剋與臟腑映射描述，不得套用範例數值。'
+    },
     fengShui:{topIntersections:bestFengshuiIntersections(xuOverlapSummary()),wealthDirections:xuFs.wealth||'',year:CURRENT_YEAR}
   },
   generationPolicy:{
     deterministicCalculationIsSourceOfTruth:true,
     teacherEvidenceRenderedSeparately:true,
     audience:canViewTeacherReport()?'consultant_full':'client_quick',
-    style:'情境化串聯、繁體中文、口語專業、避免罐頭與恐嚇'
+    style:'情境化串聯、繁體中文、口語專業、避免罐頭與恐嚇',
+    chapterSummaryRule:'①至⑬每章2至3個Key-Value重點，全域去重，禁止稱呼、開場白與段落散文；每章只保留該主題獨有的結論。'
   }
 };
 const localAiKeywords=[
