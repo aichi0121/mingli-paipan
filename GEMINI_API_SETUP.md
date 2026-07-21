@@ -40,12 +40,18 @@ ALLOWED_ORIGIN=https://aichi0121.github.io
 
 ## 如果前端仍放在 GitHub Pages
 
-GitHub Pages 不能執行 `/api` 後端，所以需要把 API Route 部署到 Vercel，然後在瀏覽器 console 設定一次：
+GitHub Pages 不能執行 `/api` 後端，因此前端已預設改為呼叫：
+
+```text
+https://mingli-paipan.vercel.app/api/gemini-polish
+```
+
+一般使用不需要再設定。只有未來更換 Vercel 網址時，才需要在瀏覽器 console 覆寫：
 
 ```js
 localStorage.setItem(
   'doris_gemini_api_route',
-  'https://你的-vercel 網址.vercel.app/api/gemini-polish'
+  'https://新的-vercel 網址.vercel.app/api/gemini-polish'
 );
 location.reload();
 ```
@@ -107,4 +113,4 @@ location.reload();
 
 不要把 `GEMINI_API_KEY` 寫進 `index.html`、README 或 GitHub。
 
-前端帳號選單中的 Gemini API Key 欄位目前保留為備援：如果後端 route 還沒部署，才需要暫時貼在自己的瀏覽器裡使用。
+前端不提供 API Key 輸入欄位；所有 Gemini 請求都經由 Vercel 後端，避免金鑰出現在瀏覽器或 GitHub 原始碼中。

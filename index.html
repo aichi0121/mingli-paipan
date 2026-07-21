@@ -185,9 +185,6 @@ gap:8px;
 flex-wrap:wrap;
 justify-content:flex-start;
 }
-.auth-menu .gemini-key-box{
-margin:0;
-}
 /* ══════════════════════════════════════
  畫面一：客戶列表
 ══════════════════════════════════════ */
@@ -387,59 +384,6 @@ font-size:1.1rem;
 cursor:pointer;
 }
 .gemini-close:hover{background:#F0E8DC;}
-.gemini-key-box{
-border:1px solid #F0E8DC;
-background:#FFFCF8;
-border-radius:10px;
-padding:10px;
-margin-bottom:12px;
-flex-shrink:0;
-}
-.gemini-key-box summary{
-display:flex;
-align-items:center;
-justify-content:space-between;
-gap:10px;
-font-size:0.74rem;
-font-weight:700;
-color:#8B6914;
-cursor:pointer;
-list-style:none;
-}
-.gemini-key-box summary::-webkit-details-marker{display:none;}
-.gemini-key-box[open] summary{margin-bottom:8px;}
-.gemini-key-status{
-font-size:0.68rem;
-font-weight:700;
-color:#B89C7D;
-}
-.gemini-key-box.has-key:not([open]){
-padding:8px 10px;
-margin-bottom:10px;
-}
-.gemini-key-row{
-display:flex;
-gap:6px;
-}
-.gemini-key-row input{
-flex:1;
-min-width:0;
-border:1.5px solid #E8DDD0;
-border-radius:8px;
-padding:8px 9px;
-font-family:inherit;
-font-size:0.78rem;
-color:#4A3728;
-background:#fff;
-outline:none;
-}
-.gemini-key-row input:focus{border-color:#D4B896;}
-.gemini-key-note{
-font-size:0.68rem;
-line-height:1.5;
-color:#B89C7D;
-margin-top:6px;
-}
 .gemini-input{
 width:100%;
 min-height:86px;
@@ -1490,17 +1434,6 @@ details.kb-section summary::after{display:none;}
   <button id="btn-cloud-sync" class="btn btn-ghost btn-small hidden" onclick="syncLocalClientsToCloud()">同步本機資料</button>
   <button id="btn-google-logout" class="btn btn-ghost btn-small hidden" onclick="signOutGoogle()">登出</button>
 </div>
-<details id="gemini-key-box" class="gemini-key-box" open>
-  <summary>
-    <span>Gemini API Key</span>
-    <span id="gemini-key-status" class="gemini-key-status">尚未設定</span>
-  </summary>
-  <div class="gemini-key-row">
-    <input id="gemini-api-key" type="password" placeholder="貼上自己的 API Key">
-    <button class="btn btn-ghost btn-small" type="button" onclick="saveGeminiKey()">儲存</button>
-  </div>
-  <div id="gemini-key-note" class="gemini-key-note">只存在這台裝置；正式付費版建議改用後端保護。</div>
-</details>
 </div>
 </div>
 </div>
@@ -1706,9 +1639,7 @@ details.kb-section summary::after{display:none;}
 // ══════════════════════════════════════════════
 const CURRENT_YEAR = new Date().getFullYear();
 const LS_KEY = 'doris_clients';
-const GEMINI_KEY = 'doris_gemini_api_key';
-const GEMINI_API_ROUTE = window.DORIS_GEMINI_API_ROUTE || localStorage.getItem('doris_gemini_api_route') || '/api/gemini-polish';
-const GEMINI_MODELS = ['gemini-1.5-flash-latest','gemini-1.5-flash'];
+const GEMINI_API_ROUTE = window.DORIS_GEMINI_API_ROUTE || localStorage.getItem('doris_gemini_api_route') || 'https://mingli-paipan.vercel.app/api/gemini-polish';
 const GITHUB_RAW = 'https://raw.githubusercontent.com/aichi0121/mingli-paipan/main/data/';
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyBHUerxO5VyQA_taGIJxD0vYv1-scdgfM0",
@@ -1908,59 +1839,12 @@ if(!menu || !trigger) return;
 const open=typeof force==='boolean' ? force : menu.classList.contains('hidden');
 menu.classList.toggle('hidden',!open);
 trigger.setAttribute('aria-expanded',open?'true':'false');
-if(open) updateGeminiKeyUI();
 }
 
 document.addEventListener('click', e=>{
 const panel=document.getElementById('auth-panel');
 if(panel && !panel.contains(e.target)) toggleAuthMenu(false);
 });
-
-function getGeminiKey(){
-return localStorage.getItem(GEMINI_KEY)||'';
-}
-
-function saveGeminiKey(){
-const input=document.getElementById('gemini-api-key');
-const note=document.getElementById('gemini-key-note');
-if(!input) return;
-const key=input.value.trim();
-if(!key){
-  localStorage.removeItem(GEMINI_KEY);
-  if(note) note.textContent='已清除 API Key。';
-  updateGeminiKeyUI();
-  return;
-}
-localStorage.setItem(GEMINI_KEY,key);
-input.value='';
-if(note) note.textContent='已儲存，可在報告頁使用 Gemini 提問。';
-updateGeminiKeyUI();
-}
-
-function updateGeminiKeyUI(){
-const input=document.getElementById('gemini-api-key');
-const note=document.getElementById('gemini-key-note');
-const box=document.getElementById('gemini-key-box');
-const status=document.getElementById('gemini-key-status');
-if(!input || !note) return;
-if(getGeminiKey()){
-  input.placeholder='已儲存 API Key；留空按儲存可清除';
-  note.textContent=note.textContent.includes('已儲存') ? note.textContent : 'Gemini 已可使用。API Key 只存在這台裝置。';
-  if(status) status.textContent='已儲存';
-  if(box){
-    box.classList.add('has-key');
-    box.open=false;
-  }
-}else{
-  input.placeholder='貼上自己的 API Key';
-  note.textContent='只存在這台裝置；正式付費版建議改用後端保護。';
-  if(status) status.textContent='尚未設定';
-  if(box){
-    box.classList.remove('has-key');
-    box.open=true;
-  }
-}
-}
 
 function toggleGeminiChat(force){
 const card=document.getElementById('gemini-card');
@@ -1969,7 +1853,6 @@ if(!card) return;
 const open=typeof force==='boolean' ? force : !card.classList.contains('active');
 card.classList.toggle('active',open);
 if(launcher) launcher.setAttribute('aria-expanded',open?'true':'false');
-if(open) updateGeminiKeyUI();
 }
 
 function updateAuthUI(){
@@ -1997,7 +1880,6 @@ if(currentUser){
   syncBtn.classList.add('hidden');
 }
 badge.textContent = roleLabel();
-updateGeminiKeyUI();
 }
 
 // ══════════════════════════════════════════════
@@ -2016,18 +1898,6 @@ return json;
 console.error('KB fetch error:', fileName, e);
 return null;
 }
-}
-
-function getEntry(kb, id){
-if(!kb) return null;
-const arr = kb.entries || kb.comparison_entries || [];
-return arr.find(e=>e.id===id) || null;
-}
-
-function getByCategory(kb, cat){
-if(!kb) return [];
-const arr = kb.entries || kb.comparison_entries || [];
-return arr.filter(e=>e.category===cat || e.sub_category===cat);
 }
 
 // ══════════════════════════════════════════════
@@ -2049,12 +1919,6 @@ return kb.knowledge_base.find(entry => {
 function qContent(kb, sub_item, query_key, fallback) {
 const entry = queryKB(kb, sub_item, query_key);
 return (entry && entry.content) ? entry.content : (fallback || '');
-}
-
-// 依 section 取得所有項目
-function queryKBSection(kb, section) {
-if (!kb || !kb.knowledge_base) return [];
-return kb.knowledge_base.filter(e => e.section === section);
 }
 
 // ══════════════════════════════════════════════
@@ -2445,13 +2309,6 @@ const log=document.getElementById('gemini-chat-log');
 if(log) log.scrollTop=log.scrollHeight;
 }
 
-function getGeminiHistoryText(){
-return geminiChatHistory
-  .slice(-8)
-  .map(item=>`${item.role==='user' ? '使用者' : 'Gemini'}：${item.text}`)
-  .join('\n');
-}
-
 function getLastGeminiAnswer(){
 for(let i=geminiChatHistory.length-1;i>=0;i--){
   if(geminiChatHistory[i].role==='assistant') return geminiChatHistory[i].text;
@@ -2531,14 +2388,6 @@ return {
 };
 }
 
-function looksGeminiIncomplete(text, finishReason){
-const trimmed=(text||'').trim();
-if(!trimmed) return true;
-if(finishReason === 'MAX_TOKENS') return true;
-const compact=trimmed.replace(/\s+/g,'');
-return /[，、；：]$/.test(compact) || /(擁有|包含|以及|例如|可以|能夠|代表|表示|因為|所以|但是|不過|並且|而且|與|和|願意|只要|需要|透過|將|把|在|從|用|讓)$/.test(compact);
-}
-
 function sanitizeGeminiOutput(text){
 return (text||'')
   .replace(/\*\*/g,'')
@@ -2548,50 +2397,6 @@ return (text||'')
   .replace(/\n?\s*["“]?\s*\(?the end of system prompt[\s\S]*$/i,'')
   .replace(/\n?\s*請從上面最後一句中斷處[\s\S]*$/,'')
   .trim();
-}
-
-async function callGeminiOnce(key, contents, maxOutputTokens=2200){
-let data=null,lastModelErr='';
-for(const model of GEMINI_MODELS){
-  const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,{
-    method:'POST',
-    headers:{'Content-Type':'application/json','x-goog-api-key':key},
-    body:JSON.stringify({
-      contents,
-      generationConfig:{temperature:0.38,maxOutputTokens}
-    })
-  });
-  data=await res.json();
-  if(res.ok) break;
-  lastModelErr=data.error?.message || `Gemini API 錯誤：${res.status}`;
-  if(!/not found|not available|not supported|is no longer available/i.test(lastModelErr)) {
-    throw new Error(lastModelErr);
-  }
-  data=null;
-}
-if(!data) throw new Error(lastModelErr || 'Gemini 模型目前不可用，請稍後再試。');
-const candidate=data.candidates?.[0] || {};
-return {
-  text:sanitizeGeminiOutput((candidate.content?.parts||[]).map(p=>p.text||'').join('\n')),
-  finishReason:candidate.finishReason || ''
-};
-}
-
-async function callGeminiText(key, prompt, maxOutputTokens=2200, continueLimit=2){
-let finalText='';
-let contents=[{role:'user',parts:[{text:prompt}]}];
-for(let i=0;i<=continueLimit;i++){
-  const result=await callGeminiOnce(key,contents,maxOutputTokens);
-  const piece=sanitizeGeminiOutput(result.text);
-  if(piece) finalText=finalText ? `${finalText}\n\n${piece}` : piece;
-  if(!looksGeminiIncomplete(finalText,result.finishReason) || i===continueLimit) break;
-  contents=[
-    {role:'user',parts:[{text:prompt}]},
-    {role:'model',parts:[{text:finalText}]},
-    {role:'user',parts:[{text:'請直接接續上一則回答未完成的地方。不要重複前文，不要提到 prompt、system、Interrupted text、continuation，也不要解釋你正在接續；只輸出給客戶看的繁體中文內容，最後一句要完整收尾。'}]}
-  ];
-}
-return finalText;
 }
 
 async function callGeminiRoute(payload){
@@ -2613,26 +2418,18 @@ return {
 };
 }
 
-async function callGeminiAssistant({question,prompt,maxOutputTokens=2200,continueLimit=2}){
-try{
-  const result=await callGeminiRoute({
-    mode:'chat',
-    outputType:'article',
-    tags:getBaziTagsForGemini(),
-    reportDraft:getReportContextForGemini(),
-    history:geminiChatHistory,
-    question,
-    maxOutputTokens
-  });
-  if(result.text) return result.text;
-}catch(routeErr){
-  console.warn('Gemini backend route unavailable, fallback to local key:', routeErr);
-  const key=getGeminiKey();
-  if(!key){
-    throw new Error(routeErr.message+'。若網站仍放在 GitHub Pages，請先把 /api/gemini-polish 部署到 Vercel，或暫時在帳號選單貼上自己的 Gemini API Key 作為備援。');
-  }
-}
-return callGeminiText(getGeminiKey(),prompt,maxOutputTokens,continueLimit);
+async function callGeminiAssistant({question,maxOutputTokens=2200}){
+const result=await callGeminiRoute({
+  mode:'chat',
+  outputType:'article',
+  tags:getBaziTagsForGemini(),
+  reportDraft:getReportContextForGemini(),
+  history:geminiChatHistory,
+  question,
+  maxOutputTokens
+});
+if(!result.text) throw new Error('Gemini 後端沒有回傳文字，請稍後再試。');
+return result.text;
 }
 
 async function askGeminiAboutReport(){
@@ -2649,50 +2446,7 @@ if(q) q.value='';
 const pending=appendGeminiMessage('assistant','正在整理回答中⋯');
 if(btn) btn.disabled=true;
 try{
-  const prompt=[
-    '你是命理師 Doris 的報告助理，請使用繁體中文回答。',
-    '只能依據下方命盤報告內容與一般八字概念延伸，不要假裝有看到未提供的老師講義。',
-    '若問題超出命盤可判斷範圍，請溫和說明限制，並給可追問方向。',
-    '語氣要口語、清楚、適合命理師拿去對客戶說明；不要恐嚇，不做醫療、法律、投資保證。',
-    '不要使用「嗨、老師、我幫你整理」這類寒暄開頭，直接回答問題。',
-    '不得輸出英文思考字樣或技術字樣，例如 Wait、refine、Interrupted text、My continuation、prompt、system prompt。',
-    '不要使用 Markdown 符號，例如 **粗體** 或項目符號星號。',
-    '回答格式固定為三段，每段都要有標題：一、結論；二、命盤依據；三、可以對客戶這樣說。',
-    '不可只回答一句話。總長度請控制在 300 到 700 個中文字之間，句子必須完整收尾。',
-    '如果答案需要保留彈性，請說「比較偏向」或「可以這樣觀察」，不要講成絕對判斷。',
-    '',
-    '【目前對話紀錄】',
-    getGeminiHistoryText() || '（尚無）',
-    '',
-    '【目前報告內容】',
-    getReportContextForGemini(),
-    '',
-    '【使用者問題】',
-    question
-  ].join('\n');
-  let text=await callGeminiAssistant({question,prompt,maxOutputTokens:1800});
-  if(text.replace(/\s/g,'').length<160 || !/一、|二、|三、/.test(text) || /[，、；：]$/.test(text.trim())){
-    const rewritePrompt=[
-      '請把下方回答重寫成完整的繁體中文命理師話術。',
-      '不可只回一句。請固定三段：一、結論；二、命盤依據；三、可以對客戶這樣說。',
-      '總長度 300 到 700 個中文字，語氣溫和、口語、可直接對客戶說，最後一句必須完整收尾。',
-      '不得輸出英文思考字樣或技術字樣，例如 Wait、refine、Interrupted text、My continuation、prompt、system prompt。',
-      '不要使用 Markdown 符號，例如 **粗體** 或項目符號星號。',
-      '',
-      '【目前對話紀錄】',
-      getGeminiHistoryText() || '（尚無）',
-      '',
-      '【原問題】',
-      question,
-      '',
-      '【原回答】',
-      text,
-      '',
-      '【目前報告內容】',
-      getReportContextForGemini()
-    ].join('\n');
-    text=await callGeminiAssistant({question,prompt:rewritePrompt,maxOutputTokens:2200});
-  }
+  const text=await callGeminiAssistant({question,maxOutputTokens:2200});
   const finalText=text || 'Gemini 沒有回傳文字，請稍後再試。';
   setGeminiMessage(pending,finalText);
   geminiChatHistory.push({role:'assistant',text:finalText});
@@ -2718,22 +2472,7 @@ geminiChatHistory.push({role:'user',text:userText});
 const pending=appendGeminiMessage('assistant','繼續補充中⋯');
 if(btn) btn.disabled=true;
 try{
-  const prompt=[
-    '你是命理師 Doris 的報告助理，請使用繁體中文回答。',
-    '請接續上一則回答，補充尚未說完或可以更白話說明的部分。',
-    '不要重複前文，不要重新從第一段開始。',
-    '請用 2 到 4 段口語文字補充，最後加一段「可以對客戶這樣說」。',
-    '不得輸出英文思考字樣或技術字樣，例如 Wait、refine、Interrupted text、My continuation、prompt、system prompt。',
-    '不要使用 Markdown 符號，例如 **粗體** 或項目符號星號。',
-    '不要做醫療、法律、投資保證。',
-    '',
-    '【目前對話紀錄】',
-    getGeminiHistoryText(),
-    '',
-    '【目前報告內容】',
-    getReportContextForGemini()
-  ].join('\n');
-  const text=await callGeminiAssistant({question:userText,prompt,maxOutputTokens:1800,continueLimit:2});
+  const text=await callGeminiAssistant({question:userText,maxOutputTokens:1800});
   const finalText=text || 'Gemini 沒有回傳補充內容，請稍後再試。';
   setGeminiMessage(pending,finalText);
   geminiChatHistory.push({role:'assistant',text:finalText});
@@ -3921,11 +3660,6 @@ function compactList(items){
     .filter(Boolean);
   if(!cleaned.length) return '';
   return `<ul class="action-list">${cleaned.map(item => `<li>${item}</li>`).join('')}</ul>`;
-}
-
-function focusItem(label, value, toneClass = ''){
-  if(!value) return '';
-  return `<div class="focus-item"><span class="focus-label">${label}</span><span class="focus-value ${toneClass}">${value}</span></div>`;
 }
 
 function reportTokenClass(token, coreTokens){
