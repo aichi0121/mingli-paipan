@@ -3708,26 +3708,8 @@ function liunianAppliedSummary(){
 }
 
 function careerDirectionSummary(){
-  const directions = [];
-  if(comboFlags.outputWealthDominant){
-    directions.push('由你建立制度流程、幫團隊制定規範、主導獨立專案、資源整合，或是去規範別人而非被死板管束的職位');
-  }
-  if(comboFlags.outputMakesWealth){
-    directions.push('作品變現、專案接案、內容商業化、個人品牌、顧問服務、技術或創意商品化');
-  }
-  if(curDyShen === '偏印' || curDyShen === '正印'){
-    directions.push('研究分析、命理玄學、身心靈、宗教哲學、教學進修、顧問型工作');
-  }
-  if(shiShangEntries.length){
-    directions.push('內容輸出、課程設計、寫作表達、作品型工作、講師或知識型產品');
-  }
-  if(guanEntries.length && !comboFlags.outputWealthDominant){
-    directions.push('制度流程、專案管理、專業證照、需要責任感與規範的職位');
-  }
-  if(caiEntries.length){
-    directions.push('資源整合、客戶經營、財務秩序、可被成果衡量的工作');
-  }
-  return uniqueJoined(directions).replace(/、內容輸出/g, '；內容輸出');
+  const decision = plainDecisionProfiles().career;
+  return `你的職涯型態以「${decision.type}」最能發揮。${decision.reason}。${decision.avoid}。`;
 }
 
 function wealthBigSummary(){
@@ -4703,23 +4685,19 @@ function bestFengshuiIntersections(overlap){
 function fengshuiIntegratedHtml(){
   const overlap = xuOverlapSummary();
   const best = bestFengshuiIntersections(overlap);
-  const bestText = best.length
-    ? best.map(item => `${item.direction}：${item.themes}`).join('；')
-    : '依四格明細選方位';
-  const precisionItems = [
-    ...(overlap.sharedItems || []).slice(0, 5),
-    ...(overlap.sharedMaterials || []).slice(0, 2)
-  ].slice(0, 7).join('、') || '少量、乾淨、好維護的物品';
+  const directionAction = {
+    '東北': '放一盆好照顧的綠植，或一支木質文昌筆，集中加強學習、企劃與貴人合作。',
+    '正北': '放一個金屬鬧鐘，或一杯每天更換的乾淨清水，讓財務與人際節奏更穩。',
+    '正東': '保持明亮整潔，放一盆健康綠植，作為今年推動工作與收入的起點。',
+    '東南': '放一小束鮮花或暖色燈，溫和加強合作、人緣與喜慶氣場。',
+    '正西': '放少量白色或金屬物件，避免堆放雜物。',
+    '西北': '以安靜、乾淨為主，今年不放大型動水。'
+  };
+  const selected = best.length ? best : [{ direction:'東北' }, { direction:'正北' }];
   return `
     <div class="summary-panel">
-      <div class="summary-panel-title">三位老師統整版：只先做最關鍵的 1～2 位</div>
-      ${compactList([
-        `最佳交集方位：${bestText}。先處理這 1～2 個位置，不要把所有方位一次擺滿。`,
-        `精準擺件先抓：${precisionItems}。擺件少量、乾淨、方便維護，比堆滿更有效。`,
-        `求財或招財水缸，仍優先回到徐玉蘭老師的${riWx}命財位【${xuFs.wealth || '需查表'}】；若要疊加${CURRENT_YEAR}流年，再看正東、正北是否剛好落在你家可用位置。`,
-        `擺放規則用湯鎮瑋老師：財位要乾淨、明亮、不受壓，擺件控制在3～5樣內；不把招財物一次堆滿。`,
-        `水缸只優先放財位或可動水的流年吉位；正南五黃、西北二黑、正西三碧、西南七赤今年先安靜，不放大型動水。`
-      ])}
+      <div class="summary-panel-title">三位老師統整：今年先整理這兩個位置</div>
+      ${compactList(selected.slice(0,2).map(item => `<strong>${item.direction}</strong>：${directionAction[item.direction] || '保持乾淨明亮，只放一件符合目前需求且容易維護的物品。'}`))}
     </div>
   `;
 }
@@ -4791,22 +4769,30 @@ function xuRemedyDetail(label, direction, remedy, toneClass = ''){
 }
 const waterPlacementHtml = `
   ${fengshuiIntegratedHtml()}
-  <div class="summary-panel">
-    <div class="summary-panel-title">徐玉蘭老師五行命主方位（明細保留）</div>
-    <div class="focus-grid">
-      ${xuRemedyDetail('財位／招財水缸', xuFs.wealth || '需查表', xuRemedies.wealth, 'tone-wealth')}
-      ${xuRemedyDetail('事業／貴人位', xuFs.career || '需查表', xuRemedies.career, 'tone-career')}
-      ${xuRemedyDetail('文昌／學習位', xuFs.wenchang || '需查表', xuRemedies.wenchang, 'tone-career')}
-      ${xuRemedyDetail('桃花／人緣位', xuFs.peach || '需查表', xuRemedies.peach, 'tone-love')}
+  <details class="teacher-accordion">
+    <summary>徐玉蘭老師五行命主方位（四格明細）</summary>
+    <div class="summary-panel">
+      <div class="focus-grid">
+        ${xuRemedyDetail('財位／招財水缸', xuFs.wealth || '需查表', xuRemedies.wealth, 'tone-wealth')}
+        ${xuRemedyDetail('事業／貴人位', xuFs.career || '需查表', xuRemedies.career, 'tone-career')}
+        ${xuRemedyDetail('文昌／學習位', xuFs.wenchang || '需查表', xuRemedies.wenchang, 'tone-career')}
+        ${xuRemedyDetail('桃花／人緣位', xuFs.peach || '需查表', xuRemedies.peach, 'tone-love')}
+      </div>
+      ${compactList([
+        `招財水缸優先放在財位【${xuFs.wealth || '需查表'}】；若有多個財位，先選家中最乾淨、明亮、不受壓且方便維護水質的位置。`,
+        `水缸材質與顏色：${XU_WATER_TANK[riWx] || waterTankInsights[0] || '需依五行命主選材質與添運色彩。'}`,
+        `共通設置：${XU_WATER_COMMON}`
+      ])}
     </div>
-    ${compactList([
-      `招財水缸優先放在財位【${xuFs.wealth || '需查表'}】；若有多個財位，先選家中最乾淨、明亮、不受壓且方便維護水質的位置。`,
-      `水缸材質與顏色：${XU_WATER_TANK[riWx] || waterTankInsights[0] || '需依五行命主選材質與添運色彩。'}`,
-      `共通設置：${XU_WATER_COMMON}`
-    ])}
-  </div>
-  ${xuCombinedRemedyHtml()}
-  ${zibai2026Html()}
+  </details>
+  <details class="teacher-accordion">
+    <summary>徐玉蘭老師軟裝交集整理</summary>
+    ${xuCombinedRemedyHtml()}
+  </details>
+  <details class="teacher-accordion">
+    <summary>${CURRENT_YEAR} 紫白飛星九宮格</summary>
+    ${zibai2026Html()}
+  </details>
 `;
 
 // ── 個人化卡片 ──
@@ -5096,14 +5082,6 @@ const sec12Html = `
   <div class="kb-card-title">🏠 ${client.name} 的專屬風水佈局建議</div>
   <div class="kb-content">
     <p style="font-weight:600;color:${wxColor};">你是【${riTg}${riWx}】命主，${strongLabel}格局</p>
-    <div class="summary-panel">
-      <div class="summary-panel-title">這一欄怎麼看</div>
-      ${compactList([
-        `先看「三位老師統整版」決定實際操作方向。`,
-        `再看「徐玉蘭老師五行命主方位（明細保留）」核對財位、事業位、文昌位、桃花位。`,
-        `最後看紫白九宮格，確認${CURRENT_YEAR}年哪些方位可催旺、哪些方位先安靜。`
-      ])}
-    </div>
     ${waterPlacementHtml}
     ${supportMethod ? `<div class="summary-panel"><div class="summary-panel-title">五行補強</div>${actionList(supportMethod)}</div>` : ''}
     ${kaiyunActionHtml ? `<div class="summary-panel"><div class="summary-panel-title">開運物</div>${kaiyunActionHtml}</div>` : ''}
