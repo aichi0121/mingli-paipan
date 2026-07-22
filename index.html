@@ -17,7 +17,11 @@ color:#4A3728;
 min-height:100vh;
 overflow-x:hidden;
 }
-html{overflow-x:hidden;}
+html{
+overflow-x:hidden;
+-webkit-text-size-adjust:100%;
+text-size-adjust:100%;
+}
 img{max-width:100%;height:auto;}
 .hidden{display:none!important;}
 
@@ -1588,11 +1592,47 @@ details.kb-section summary{background:#FAF6F0;color:var(--ink);}
 .info-table td.label{font-size:.78rem;display:flex;align-items:center;}
 .wuxing-chart-box{padding:8px;border:0;background:transparent;}
 .wuxing-legend{padding:0 4px;}
-.bazi-wrap{overflow:visible;}
-.bazi-table{table-layout:fixed;width:100%;min-width:0;}
-.bazi-table th,.bazi-table td{padding:7px 2px;font-size:.7rem;overflow-wrap:anywhere;}
-.bazi-table th:not(.col-label),.bazi-table td:not(.col-label){width:calc((100% - 32px)/4);}
-.col-label{width:32px!important;font-size:.64rem!important;writing-mode:vertical-rl;letter-spacing:.08em;}
+.bazi-wrap{
+position:relative;
+margin-right:-14px;
+padding-right:14px;
+padding-bottom:8px;
+overflow-x:auto;
+overflow-y:hidden;
+-webkit-overflow-scrolling:touch;
+}
+.bazi-wrap:not(:empty)::before{
+content:'左右滑動查看完整排盤';
+position:sticky;
+left:0;
+display:inline-block;
+width:auto;
+margin:0 0 7px;
+padding:3px 8px;
+background:var(--tea-50);
+color:var(--tea-500);
+font-size:.68rem;
+font-weight:600;
+border-radius:4px;
+z-index:3;
+}
+.bazi-table{table-layout:fixed;width:520px;min-width:520px;max-width:none;}
+.bazi-table th,.bazi-table td{
+padding:8px 5px;
+font-size:.72rem;
+word-break:keep-all;
+overflow-wrap:normal;
+-webkit-text-size-adjust:100%;
+}
+.bazi-table th:not(.col-label),.bazi-table td:not(.col-label){width:119px;min-width:119px;}
+.col-label{
+width:44px!important;
+min-width:44px;
+font-size:.66rem!important;
+writing-mode:horizontal-tb;
+letter-spacing:0;
+white-space:normal;
+}
 .tg-char,.dz-char{font-size:1.65rem;}
 .canggan-cell{letter-spacing:0;}
 .canggan-cell span,.fs-item{font-size:.62rem;}
