@@ -81,6 +81,132 @@ function cleanChapterConclusion(value, { title = '', clientName = '' } = {}) {
   return text.replace(/(?:你的)?(?:命理)?(?:分析|解析|報告)[，,：:]?/g, '').replace(/^[：:，,、\s]+/, '').replace(/\s+/g, ' ').trim();
 }
 
+function normalizedForComparison(value) {
+  return cleanChapterConclusion(value)
+    .replace(/[\s，。！？；：、,.!?;:「」『』【】（）()\-／/]/g, '')
+    .toLowerCase();
+}
+
+function chapterSourceText(rawChapter) {
+  if (!rawChapter) return '';
+  if (typeof rawChapter === 'string') return rawChapter;
+  return [rawChapter.title, rawChapter.text, rawChapter.content, rawChapter.body, safeString(rawChapter)]
+    .filter(Boolean)
+    .join(' ');
+}
+
+function isCopiedOrCanned(value, rawChapter) {
+  const text = normalizedForComparison(value);
+  const source = normalizedForComparison(chapterSourceText(rawChapter));
+  if (!text || text.length < 12) return true;
+  const canned = [
+    '前後階段會呈現不同的外在事件與內在累積',
+    '需要和原局及大運一起判斷',
+    '家庭背景工作節奏親密關係與長期成果各有不同作用',
+    '命盤中的合與沖會讓',
+    '流日適合用來安排',
+    '空間調整以一至兩個最重要方位為主',
+    '這不是單純的好或壞',
+    '理解這個傾向之後',
+    '熟悉你的人往往更能感受到',
+    '這份氣質會自然流露'
+  ].map(normalizedForComparison);
+  if (canned.some((phrase) => text.includes(phrase))) return true;
+  if (!source) return false;
+  if (source.includes(text)) return true;
+  const sampleLength = Math.min(18, text.length);
+  for (let index = 0; index <= text.length - sampleLength; index += 4) {
+    if (source.includes(text.slice(index, index + sampleLength))) return true;
+  }
+  return false;
+}
+
+function listText(values, fallback = '') {
+  const items = [...new Set((Array.isArray(values) ? values : [values])
+    .flatMap((value) => String(value || '').split(/[、,，/]/))
+    .map((value) => value.trim())
+    .filter(Boolean))];
+  if (!items.length) return fallback;
+  if (items.length === 1) return items[0];
+  return `${items.slice(0, -1).join('、')}與${items.at(-1)}`;
+}
+
+function tenGodLifeTheme(tenGod) {
+  const value = String(tenGod || '');
+  if (value.includes('印')) return '進修、證照、貴人與專業背書';
+  if (value.includes('財')) return '客戶、現金流、定價與資源調度';
+  if (/官|殺/.test(value)) return '責任、規則、職位與客戶要求';
+  if (/食神|傷官|食傷/.test(value)) return '作品、表達、教學與專業輸出';
+  if (/比肩|劫財|比劫/.test(value)) return '自主權、同儕競合與合作界線';
+  return '目前最重要的生活課題';
+}
+
+function pillarSummary(pillars) {
+  const areas = ['原生家庭', '現實環境與工作', '核心需求與親密關係', '晚輩、作品與長期成果'];
+  return (Array.isArray(pillars) ? pillars : []).slice(0, 4).map((pillar, index) => {
+    const label = pillar?.label || ['年柱', '月柱', '日柱', '時柱'][index];
+    return `${label}【${pillar?.ganzhi || '未提供'}】連到${areas[index]}`;
+  }).join('；');
+}
+
+function interactionSummary(interactions) {
+  const items = (Array.isArray(interactions) ? interactions : [])
+    .map((item) => cleanChapterConclusion(typeof item === 'string' ? item : safeString(item)))
+    .filter(Boolean);
+  return items.slice(0, 2).join('；');
+}
+
+function fengShuiSummary(intersections) {
+  const items = (Array.isArray(intersections) ? intersections : []).slice(0, 2);
+  if (!items.length) return '最適合你的兩個空間重點仍需依住宅方位定位';
+  return items.map((item) => {
+    const themes = listText(item?.themes, '個人重點');
+    return `${item?.direction || '適合方位'}主掌${themes}`;
+  }).join('；');
+}
+
+function decisionAwareFallbacks(tags) {
+  const domains = tags?.domains || {};
+  const career = domains.career?.decision || {};
+  const wealth = domains.wealth?.decision || {};
+  const relationship = domains.relationship?.decision || {};
+  const careerType = String(career.type || '');
+  const wealthType = String(wealth.type || '');
+  const relationshipType = String(relationship.type || '');
+  return {
+    '⑦': {
+      status: wealthType.includes('高單價')
+        ? '你的收入成長不在衝量，而在提高專業服務的單價、可信度與收款品質。'
+        : wealthType.includes('作品')
+          ? '你的財路來自把作品、技術或內容做成可收費的產品，收入管道宜少而精。'
+          : '你的財務優勢在於把現實資源整理成穩定收入，而不是追逐短期機會。',
+      action: wealthType.includes('高單價')
+        ? '先完成一份高單價服務方案，並把訂金、尾款、改稿與取消規則寫進合約。'
+        : '保留一至兩項核心收費項目，為每項服務訂出價格、交付內容與收款節點。'
+    },
+    '⑧': {
+      status: /接案|顧問|企劃/.test(careerType)
+        ? '你更適合以個人專業與口碑承接複雜案件，不必靠擴大團隊或服從僵硬體制來證明能力。'
+        : /創業|品牌/.test(careerType)
+          ? '你適合掌握產品與決策主導權，把自己的方法做成品牌，而不是長期替別人的制度執行。'
+          : '你在有公信力的平台中最能發揮，先借助制度與專業背書，再逐步提高自主權。',
+      action: /接案|顧問|企劃/.test(careerType)
+        ? '整理一項最能代表你的專業服務，補齊案例、流程與報價後再集中對外曝光。'
+        : /創業|品牌/.test(careerType)
+          ? '先用單一核心產品驗證市場，不在收入尚未穩定前擴編大量人力。'
+          : '今年鎖定一項關鍵證照或代表作，利用平台資源建立可被辨識的專業位置。'
+    },
+    '⑨': {
+      status: relationshipType.includes('戰友')
+        ? '你要的是能一起處理現實生活、說到做到的伴侶，可靠度比表面浪漫更重要。'
+        : relationshipType.includes('陪伴')
+          ? '你在關係裡重視長期陪伴與生活穩定，會先觀察對方是否可靠再真正靠近。'
+          : '你需要能交流想法又尊重彼此空間的關係，過度控制會快速消耗親密感。',
+      action: '固定安排一次不處理工作與雜事的對話，把需求、界線與現實分工直接說清楚。'
+    }
+  };
+}
+
 function chapterStatusFallbacks(tags) {
   const chart = tags?.chart || {};
   const domains = tags?.domains || {};
@@ -88,20 +214,73 @@ function chapterStatusFallbacks(tags) {
   const luck = timing.currentLuck || {};
   const annual = timing.annual || {};
   const relationship = domains.relationship || {};
+  const children = domains.children || {};
+  const health = domains.health || {};
+  const wealth = domains.wealth || {};
+  const career = domains.career || {};
+  const interactions = interactionSummary(chart.stemBranchInteractions);
+  const usefulElements = listText(chart.usefulElements, '能讓全盤恢復平衡的能量');
+  const dominantElements = listText(health.dominantElements, '較旺的五行');
+  const missingElements = listText(health.missingElements, '較缺的五行');
+  const childRule = children.childStarRule || (children.gender === '男' ? '官星' : '作品與表達星');
+  const pressure = health.controllingPressure || {};
+  const pressureText = pressure.element
+    ? `${pressure.element}對${pressure.targetElement || chart.dayMaster || '日主'}的壓力（原局${Number(pressure.count || 0)}個訊號）`
+    : '忙碌期的身體消耗';
+  const topDirections = fengShuiSummary(domains.fengShui?.topIntersections);
   return {
-    '①': `你以${chart.dayMaster || '本命日主'}為核心，做事風格會受到${chart.strength?.label || '整體格局'}與出生月份環境共同影響。`,
-    '②': '家庭背景、工作節奏、親密關係與長期成果各有不同作用，需要分開閱讀。',
-    '③': '命盤中的合與沖會讓家庭、工作或關係彼此牽動，重點在於事件發生時的界線與取捨。',
-    '④': `目前以${chart.strength?.label || '整體平衡'}理解承載力，適合補充的方向是${chart.usefulElements || '依全盤調整'}。`,
-    '⑤': `目前十年環境由${luck.ganzhi || ''}${luck.tenGod || ''}主導，前後階段會呈現不同的外在事件與內在累積。`,
-    '⑥': `${annual.year || '今年'}的${annual.ganzhi || '流年'}會把${annual.tenGod || '年度課題'}推到生活前景，需要和原局及大運一起判斷。`,
+    '①': `你的核心是【${chart.dayMaster || '本命日主'}】（${chart.yinYang || '陰陽屬性依排盤'}），目前判為【${chart.strength?.label || '依全盤判定強弱'}】；做事風格會同時受到月令【${chart.strength?.monthBranch || '未提供'}${chart.strength?.monthElement || ''}】影響。`,
+    '②': pillarSummary(chart.pillars) || '四柱資料需分別對照原生家庭、工作、親密關係與長期成果。',
+    '③': interactions ? `盤中實際牽動以${interactions}最明顯，相關宮位遇事時容易彼此連動。` : '目前原局未抓到需要優先放大的合沖訊號，事件判斷以各宮位本身為主。',
+    '④': chart.strength?.label?.includes('弱')
+      ? '你不是能力不足，而是容易同時承接太多外界要求；先補足休息與支援，表現才會穩定。'
+      : '你的自主性與承擔力很強，但能量過滿時容易固執或硬撐，需要有固定的輸出與放鬆出口。',
+    '⑤': `【${luck.ganzhi || '目前'}】大運（${luck.ageRange || '目前十年'}）把${tenGodLifeTheme(luck.tenGod)}推到生活主軸；前半段偏外在事件，後半段逐步轉入環境與心理累積。`,
+    '⑥': `${annual.year || '今年'}【${annual.ganzhi || '流年'}】帶來${tenGodLifeTheme(annual.tenGod)}；和【${luck.ganzhi || '目前大運'}】疊加後，最值得集中的是一項能留下成果的年度計畫。`,
     '⑦': domains.wealth?.decision ? `獲利模式是「${domains.wealth.decision.type}」：${domains.wealth.decision.path}。` : '收入機會與資金留存方式不同，需同時看賺錢能力與合作風險。',
     '⑧': domains.career?.decision ? `職涯定位是「${domains.career.decision.type}」：${domains.career.decision.reason}。` : '職涯適合集中在能累積專業成果、口碑與自主權的工作結構。',
     '⑨': domains.relationship?.decision ? `關係定位是「${domains.relationship.decision.type}」：${domains.relationship.decision.partner}。` : `關係中重視${relationship.spousePalace || '夫妻宮'}所代表的安全感、承諾與相處界線。`,
-    '⑩': '子女緣與作品輸出採不同規則判讀，實際時機仍需配合後續時間變化。',
-    '⑪': `日常保養先留意${domains.health?.dayMasterOrgans || '作息與壓力反應'}，並依五行偏旺或不足調整生活節奏。`,
-    '⑫': '得財、工作、關係與健康各有適合留意的日子，宜作為安排節奏的參考。',
-    '⑬': '空間調整以一至兩個最重要方位為主，保持整潔明亮比堆放大量擺件更有效。'
+    '⑩': `${children.gender || '此命盤'}的判讀規則是「${childRule}」，原局抓到${children.childStarCount ?? 0}個子女訊號；作品另看${children.workStarRule || '專業輸出'}，目前有${children.workStarCount ?? children.outputCount ?? 0}個訊號，兩條線不混算。`,
+    '⑪': `原局以${dominantElements}較突出、${missingElements}較需補位，壓力優先反映在${health.dayMasterOrgans || '睡眠與消化'}；${pressureText}是保養重點。`,
+    '⑫': `得財日優先看【${wealth.element || '財星五行'}】，工作機會看【${career.officialElement || '官星五行'}】，關係互動看【${relationship.spouseElement || '配偶星五行'}】，健康則依${health.dayMasterOrgans || '本命臟腑'}調整節奏。`,
+    '⑬': `${topDirections}；主章只保留這兩個交集，不必把所有方位與擺件同時啟動。`
+  };
+}
+
+function chapterActionFallbacks(tags) {
+  const chart = tags?.chart || {};
+  const domains = tags?.domains || {};
+  const timing = tags?.timing || {};
+  const luck = timing.currentLuck || {};
+  const annual = timing.annual || {};
+  const children = domains.children || {};
+  const health = domains.health || {};
+  const usefulElements = listText(chart.usefulElements, '適合你的平衡方向');
+  const positions = Array.isArray(domains.fengShui?.topIntersections) ? domains.fengShui.topIntersections : [];
+  const firstDirection = positions[0]?.direction || '最重要的交集方位';
+  const secondDirection = positions[1]?.direction || '';
+  return {
+    '①': chart.strength?.label?.includes('弱')
+      ? '先刪減一項不必要的責任，保留固定休息與求助空間，再承接新的任務。'
+      : '每週安排一個能輸出成果的節點，避免把強大的承擔力變成硬撐與控制。',
+    '②': '遇到問題時先確認它屬於家庭、工作、伴侶還是長期成果，再用該宮位的角色處理，不把所有責任混在一起。',
+    '③': interactionSummary(chart.stemBranchInteractions)
+      ? '牽涉到合沖對應的兩個生活領域時，把分工、期限與界線先說清楚再承諾。'
+      : '目前不必為了尋找合沖而放大焦慮，先依四柱各自的現實事件判斷。',
+    '④': `生活與工作決策可優先運用${usefulElements}所代表的輸出、資源與環境，避免讓原局能量持續失衡。`,
+    '⑤': luck.tenGod?.includes('印')
+      ? `在【${luck.ganzhi || '目前大運'}】期間選定一項證照、方法論或代表作，設定完成日期並公開交付。`
+      : `把【${luck.ganzhi || '目前大運'}】的十年主題拆成年度成果，不只停留在感受運勢。`,
+    '⑥': annual.tenGod?.includes('印')
+      ? `${annual.year || '今年'}只挑一項最能提高專業可信度的進修或作品完成，避免把時間全花在蒐集資訊。`
+      : `${annual.year || '今年'}設定一個可驗收的主要成果，按季檢查進度，不同時追逐過多方向。`,
+    '⑦': '把定價、訂金、尾款、合作與分帳規則寫成固定文件，先保住收入品質再追求數量。',
+    '⑧': '依本章判定的職涯型態集中累積案例、口碑與定價能力，暫停不符合定位的工作邀約。',
+    '⑨': '固定安排一次不處理工作與雜事的對話，把需求、界線與現實分工直接說清楚。',
+    '⑩': `${children.birthOrderText ? '胎次只視為傳統命理傾向；' : ''}作品方面把專業整理成可重複交付的模組，子女時機另配合實際人生規劃與流年判斷。`,
+    '⑪': `固定照顧${health.dayMasterOrgans || '睡眠與消化'}；若已有持續不適，直接交由合格醫療專業評估，不以命理取代診斷。`,
+    '⑫': '把適合的日子用於收款、提案或重要溝通，把健康注意日留給減量與休息，不因單一天象取消必要決策。',
+    '⑬': `先整理${firstDirection}${secondDirection ? `與${secondDirection}` : ''}的雜物與光線，各放一項對應用途的物品即可，其餘老師明細留在折疊區查閱。`
   };
 }
 
@@ -122,21 +301,7 @@ function enforceStructuredFacts(data, tags) {
     ['⑫', '流日擇吉方向'],
     ['⑬', '風水與開運整合佈局']
   ];
-  const actionFallbacks = {
-    '①': '做決定前先確認自己的真正需求，再把穩定與責任感用在最重要的事情上。',
-    '②': '分開觀察家庭、工作、關係與長期成果，不要用同一種反應方式處理所有人生領域。',
-    '③': '當工作、家庭與關係互相牽動時，先說清楚界線與優先順序，再做承諾。',
-    '④': '把力氣放在能恢復平衡的生活選擇，避免長期勉強自己承接超出負荷的責任。',
-    '⑤': '依目前十年環境安排學習與成果節點，前後階段採用不同的工作節奏。',
-    '⑥': '今年先選一項最重要的目標落地，避免同時追逐太多方向而分散力氣。',
-    '⑦': '收入、合作與分帳一律先寫清楚規則，並保留可持續運作的現金緩衝。',
-    '⑧': '依本章判定的職涯型態集中累積作品、口碑與定價能力，避開不合適的工作結構。',
-    '⑨': '固定安排坦誠溝通的時間，把期待、界線與現實分工說清楚。',
-    '⑩': '子女判讀只作為命理傾向參考；作品方面則建立可重複執行的固定產出節奏。',
-    '⑪': '健康內容只作日常保養提醒；若有持續不適，應交由合格醫療專業判斷。',
-    '⑫': '把流日當成安排節奏的提醒，不用因單一天象取消必要的生活與工作決定。',
-    '⑬': '只挑一至兩個最重要方位維持乾淨明亮，先改善動線，再增加少量合適擺設。'
-  };
+  const actionFallbacks = chapterActionFallbacks(tags);
   const rawChapters = Array.isArray(tags?.rawChapters) ? tags.rawChapters : [];
   const generatedChapters = Array.isArray(data.chapterSummaries) ? data.chapterSummaries : [];
   const generatedByNumber = new Map(generatedChapters.map((chapter, index) => [
@@ -144,12 +309,20 @@ function enforceStructuredFacts(data, tags) {
     chapter
   ]));
   const statusFallbacks = chapterStatusFallbacks(tags);
+  const decisionFallbacks = decisionAwareFallbacks(tags);
   const clientName = tags?.client?.name || tags?.clientContext?.name || '';
   data.chapterSummaries = chapterDefinitions.map(([number, title], index) => {
     const generated = generatedByNumber.get(number) || generatedChapters[index] || {};
     const bullets = Array.isArray(generated?.bullets) ? generated.bullets : [];
-    const status = cleanChapterConclusion(bullets[0]?.value, { title, clientName });
-    const action = cleanChapterConclusion(bullets[1]?.value, { title, clientName });
+    const rawChapter = rawChapters[index];
+    const generatedStatus = cleanChapterConclusion(bullets[0]?.value, { title, clientName });
+    const generatedAction = cleanChapterConclusion(bullets[1]?.value, { title, clientName });
+    const status = isCopiedOrCanned(generatedStatus, rawChapter)
+      ? (decisionFallbacks[number]?.status || statusFallbacks[number])
+      : generatedStatus;
+    const action = isCopiedOrCanned(generatedAction, rawChapter)
+      ? (decisionFallbacks[number]?.action || actionFallbacks[number])
+      : generatedAction;
     return {
       number,
       title,
@@ -198,22 +371,6 @@ function enforceStructuredFacts(data, tags) {
       { label: '行動處方', value: `${workText}面對子女或晚輩，給予清楚規則，也保留各自發展空間。` }
     ];
   }
-  const chapterByNumber = (number) => (data.chapterSummaries || []).find((chapter) => String(chapter?.number) === number);
-  const careerDecision = tags?.domains?.career?.decision;
-  const wealthDecision = tags?.domains?.wealth?.decision;
-  const relationshipDecision = tags?.domains?.relationship?.decision;
-  if (careerDecision && chapterByNumber('⑧')) chapterByNumber('⑧').bullets = [
-    { label: '現況定性', value: `職涯定位是「${careerDecision.type}」：${careerDecision.reason}。` },
-    { label: '行動處方', value: careerDecision.avoid }
-  ];
-  if (wealthDecision && chapterByNumber('⑦')) chapterByNumber('⑦').bullets = [
-    { label: '現況定性', value: `獲利模式是「${wealthDecision.type}」：${wealthDecision.path}。` },
-    { label: '行動處方', value: wealthDecision.risk }
-  ];
-  if (relationshipDecision && chapterByNumber('⑨')) chapterByNumber('⑨').bullets = [
-    { label: '現況定性', value: `關係定位是「${relationshipDecision.type}」：${relationshipDecision.partner}。` },
-    { label: '行動處方', value: relationshipDecision.blindspot }
-  ];
   const plainReplacements = [
     [/官印相生/g, '外界責任能透過學習、證照與平台支援轉成成果'],
     [/食傷生財/g, '作品與專業能直接轉成收入'],
@@ -314,8 +471,12 @@ function buildPrompt(body) {
       '每章只能有兩點：現況定性、行動處方。必須依動態資料與原章內容判斷，去除重複套話。',
       '【現況定性】必須重新生成一句白話判斷，不可擷取原章第一句。嚴禁包含章節編號、章節標題、emoji、姓名、稱呼、親愛的、從你的命盤來看或任何開場白。',
       '【行動處方】只給一項可執行做法，不重述現況或章名。',
+      '防重複硬規則：每一點不得連續沿用原章內文 8 個以上中文字；現況與行動也不得使用相同句型。請先理解原文，再用不同語序提煉。',
+      '禁止空泛句：不得寫「前後階段呈現不同事件」、「需要一起判斷」、「看見自己的力量」、「依情況調整」等沒有直接結論的句子。',
       '總結須白話化；不要直接輸出官印相生、食傷生財、比劫奪財、官殺混雜等術語。',
       '第⑦到⑨章採用資料中的明確判型；第⑩章嚴格依性別與 birthOrderSequence，不可自行改胎次；健康須核對五行數量。',
+      '章節專屬要求：⑤直接說明這十年要累積什麼；⑥直接說今年要完成什麼；⑦指出收入增長方式；⑧明確選定上班、接案或創業型態；⑨指出伴侶與相處需求；⑪指出最先受壓的身體系統；⑫說明流日如何實際安排。',
+      '⑧範例：現況可寫「你更適合以個人專業與口碑承接複雜案件，不必靠擴大團隊證明能力」；行動可寫「整理一項代表性服務，補齊案例、流程與報價後集中曝光」。不得直接複製 decision.reason。',
       '正確範例：{"number":"①","title":"日主與五行特質","bullets":[{"label":"現況定性","value":"你是一個踏實、內斂且具包容力的人，習慣先消化情緒再承擔責任。"},{"label":"行動處方","value":"做決定前先確認自己的需求，避免無止境滿足他人。"}]}',
       '只回傳合法 JSON，不要 Markdown、code fence 或額外文字：',
       '{"chapterSummaries":[{"number":"①","title":"日主與五行特質","bullets":[{"label":"現況定性","value":"一句白話結論"},{"label":"行動處方","value":"一項具體行動"}]}]}',
