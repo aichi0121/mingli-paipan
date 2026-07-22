@@ -61,6 +61,50 @@ function createFallbackReport(tags) {
   };
 }
 
+function escapeRegExp(value) {
+  return String(value || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function cleanChapterConclusion(value, { title = '', clientName = '' } = {}) {
+  let text = sanitizeGeminiOutput(value)
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/^[\s#>*\-•]+/gm, '')
+    .replace(/[🌟🏛🔗⚖️🌀📅💰💼💕🏥📆🏠👶]+/gu, ' ')
+    .replace(/[①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬]/g, ' ')
+    .replace(/(?:現況定性|行動處方)\s*[：:]?/g, '')
+    .replace(/(?:親愛的|嗨|您好)[^，。！？]{0,20}[，,：:]?/g, '')
+    .replace(/從你的命盤來看[，,：:]?/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (title) text = text.replace(new RegExp(escapeRegExp(title), 'g'), '').trim();
+  if (clientName) text = text.replace(new RegExp(escapeRegExp(clientName), 'g'), '').replace(/^[，,、：:\s]+/, '').trim();
+  return text.replace(/(?:你的)?(?:命理)?(?:分析|解析|報告)[，,：:]?/g, '').replace(/^[：:，,、\s]+/, '').replace(/\s+/g, ' ').trim();
+}
+
+function chapterStatusFallbacks(tags) {
+  const chart = tags?.chart || {};
+  const domains = tags?.domains || {};
+  const timing = tags?.timing || {};
+  const luck = timing.currentLuck || {};
+  const annual = timing.annual || {};
+  const relationship = domains.relationship || {};
+  return {
+    '①': `你以${chart.dayMaster || '本命日主'}為核心，做事風格會受到${chart.strength?.label || '整體格局'}與出生月份環境共同影響。`,
+    '②': '家庭背景、工作節奏、親密關係與長期成果各有不同作用，需要分開閱讀。',
+    '③': '命盤中的合與沖會讓家庭、工作或關係彼此牽動，重點在於事件發生時的界線與取捨。',
+    '④': `目前以${chart.strength?.label || '整體平衡'}理解承載力，適合補充的方向是${chart.usefulElements || '依全盤調整'}。`,
+    '⑤': `目前十年環境由${luck.ganzhi || ''}${luck.tenGod || ''}主導，前後階段會呈現不同的外在事件與內在累積。`,
+    '⑥': `${annual.year || '今年'}的${annual.ganzhi || '流年'}會把${annual.tenGod || '年度課題'}推到生活前景，需要和原局及大運一起判斷。`,
+    '⑦': domains.wealth?.decision ? `獲利模式是「${domains.wealth.decision.type}」：${domains.wealth.decision.path}。` : '收入機會與資金留存方式不同，需同時看賺錢能力與合作風險。',
+    '⑧': domains.career?.decision ? `職涯定位是「${domains.career.decision.type}」：${domains.career.decision.reason}。` : '職涯適合集中在能累積專業成果、口碑與自主權的工作結構。',
+    '⑨': domains.relationship?.decision ? `關係定位是「${domains.relationship.decision.type}」：${domains.relationship.decision.partner}。` : `關係中重視${relationship.spousePalace || '夫妻宮'}所代表的安全感、承諾與相處界線。`,
+    '⑩': '子女緣與作品輸出採不同規則判讀，實際時機仍需配合後續時間變化。',
+    '⑪': `日常保養先留意${domains.health?.dayMasterOrgans || '作息與壓力反應'}，並依五行偏旺或不足調整生活節奏。`,
+    '⑫': '得財、工作、關係與健康各有適合留意的日子，宜作為安排節奏的參考。',
+    '⑬': '空間調整以一至兩個最重要方位為主，保持整潔明亮比堆放大量擺件更有效。'
+  };
+}
+
 function enforceStructuredFacts(data, tags) {
   if (!data || typeof data !== 'object') return data;
   const chapterDefinitions = [
@@ -99,17 +143,19 @@ function enforceStructuredFacts(data, tags) {
     String(chapter?.number || chapterDefinitions[index]?.[0] || ''),
     chapter
   ]));
+  const statusFallbacks = chapterStatusFallbacks(tags);
+  const clientName = tags?.client?.name || tags?.clientContext?.name || '';
   data.chapterSummaries = chapterDefinitions.map(([number, title], index) => {
     const generated = generatedByNumber.get(number) || generatedChapters[index] || {};
-    const raw = rawChapters.find((chapter) => String(chapter?.number) === number)?.raw || '';
-    const rawSummary = String(raw).split(/[。！？]/).map((item) => item.trim()).find(Boolean);
     const bullets = Array.isArray(generated?.bullets) ? generated.bullets : [];
+    const status = cleanChapterConclusion(bullets[0]?.value, { title, clientName });
+    const action = cleanChapterConclusion(bullets[1]?.value, { title, clientName });
     return {
       number,
-      title: String(generated?.title || title),
+      title,
       bullets: [
-        { label: '現況定性', value: String(bullets[0]?.value || rawSummary || `${title}已完成本機命盤比對。`) },
-        { label: '行動處方', value: String(bullets[1]?.value || actionFallbacks[number]) }
+        { label: '現況定性', value: status || statusFallbacks[number] },
+        { label: '行動處方', value: action || actionFallbacks[number] }
       ]
     };
   });
@@ -231,6 +277,52 @@ function buildPrompt(body) {
       '',
       '【使用者問題】',
       question
+    ].join('\n');
+  }
+
+  if (mode === 'polish-core') {
+    const coreTags = { ...(body.tags || body.baziTags || {}) };
+    delete coreTags.rawChapters;
+    return [
+      '你是命理師 Doris 的八字報告潤飾引擎，請使用繁體中文。',
+      '請根據已計算完成的動態命盤資料，生成「全盤情境化串聯」。這是命理師執業講稿，不是章節摘要。',
+      '原局、大運、流年必須分清楚；不得把大運或流年的印星寫成原局印星旺。健康描述必須核對五行統計，不得把旺寫成弱、把存在寫成缺。',
+      '性別是正式判讀條件：男命配偶看財星、子女看官星；女命配偶看官星、子女看食傷。',
+      '文字要像舊版完整分析：先說核心矛盾，再串聯目前十年與今年時機，最後給可實行方向。不要複製統計摘要，不要只改寫數字。',
+      '老師原始觀點由前端知識庫呈現，不可虛構老師引言。',
+      '只回傳合法 JSON，不要 Markdown、code fence 或額外解說。結構必須是：',
+      '{',
+      '  "summary":"3到5句全盤情境解讀，必須是分析，不得重複命盤統計摘要",',
+      '  "career":{"headline":"一句明確定位","analysis":"2到4句串聯分析","action":"一項具體行動"},',
+      '  "wealth":{"headline":"一句明確定位","analysis":"2到4句串聯分析","action":"一項具體行動"},',
+      '  "health":{"headline":"一句健康重點","analysis":"2到4句生活化分析","action":"一項保養提醒"},',
+      '  "relationship":{"headline":"一句關係定位","analysis":"2到4句串聯分析","action":"一項溝通行動"},',
+      '  "annual":{"headline":"一句年度主題","analysis":"2到4句大運流年分析","action":"一項年度行動"},',
+      '  "fengShui":{"headline":"一句空間重點","analysis":"只取1到2個交集方位","action":"一項可執行佈置"},',
+      '  "teacherFriendlyScript":"命理師可直接口頭說明的4到7句連貫講稿"',
+      '}',
+      '',
+      '【動態命盤資料】',
+      safeString(coreTags, 26000)
+    ].join('\n');
+  }
+
+  if (mode === 'chapter-summaries') {
+    return [
+      '你是命理師 Doris 的章節摘要編輯，請使用繁體中文。',
+      '只整理①到⑬章的「本章總結」，不可改寫上方全盤 Gemini 情境解讀。',
+      '每章只能有兩點：現況定性、行動處方。必須依動態資料與原章內容判斷，去除重複套話。',
+      '【現況定性】必須重新生成一句白話判斷，不可擷取原章第一句。嚴禁包含章節編號、章節標題、emoji、姓名、稱呼、親愛的、從你的命盤來看或任何開場白。',
+      '【行動處方】只給一項可執行做法，不重述現況或章名。',
+      '總結須白話化；不要直接輸出官印相生、食傷生財、比劫奪財、官殺混雜等術語。',
+      '第⑦到⑨章採用資料中的明確判型；第⑩章嚴格依性別與 birthOrderSequence，不可自行改胎次；健康須核對五行數量。',
+      '正確範例：{"number":"①","title":"日主與五行特質","bullets":[{"label":"現況定性","value":"你是一個踏實、內斂且具包容力的人，習慣先消化情緒再承擔責任。"},{"label":"行動處方","value":"做決定前先確認自己的需求，避免無止境滿足他人。"}]}',
+      '只回傳合法 JSON，不要 Markdown、code fence 或額外文字：',
+      '{"chapterSummaries":[{"number":"①","title":"日主與五行特質","bullets":[{"label":"現況定性","value":"一句白話結論"},{"label":"行動處方","value":"一項具體行動"}]}]}',
+      'chapterSummaries 必須依序完整輸出①到⑬，不可缺章，每章恰好兩點。',
+      '',
+      '【動態命盤資料與原章內容】',
+      tags
     ].join('\n');
   }
 
@@ -415,10 +507,51 @@ module.exports = async function handler(req, res) {
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
-    const prompt = buildPrompt(body);
-    const result = await callGemini(prompt, body);
     const tags = body.tags || body.baziTags || {};
     const wantsJson = (body.outputType || body.format) === 'json';
+
+    if ((body.mode || 'polish') === 'polish' && wantsJson) {
+      const coreBody = { ...body, mode: 'polish-core', maxOutputTokens: Math.min(Number(body.maxOutputTokens) || 4200, 4200) };
+      const coreResult = await callGemini(buildPrompt(coreBody), coreBody);
+      const coreData = tryParseJson(coreResult.text);
+      if (!coreData?.summary) {
+        const error = new Error('Gemini 全盤情境解讀回傳不完整，未以本機摘要冒充 AI 內容。請稍後重新生成。');
+        error.statusCode = 502;
+        error.code = 'GEMINI_CORE_INCOMPLETE';
+        throw error;
+      }
+
+      let chapterResult = null;
+      let chapterData = null;
+      try {
+        const chapterBody = { ...body, mode: 'chapter-summaries', maxOutputTokens: 3600 };
+        chapterResult = await callGemini(buildPrompt(chapterBody), chapterBody);
+        chapterData = tryParseJson(chapterResult.text);
+      } catch (chapterError) {
+        console.warn('Gemini chapter summaries unavailable; using calculated chapter fallback:', chapterError.message);
+      }
+
+      const merged = enforceStructuredFacts({
+        ...coreData,
+        chapterSummaries: Array.isArray(chapterData?.chapterSummaries) ? chapterData.chapterSummaries : []
+      }, tags);
+
+      res.status(200).json({
+        ok: true,
+        model: coreResult.model,
+        chapterModel: chapterResult?.model || '',
+        outputType: 'json',
+        text: coreResult.text,
+        json: merged,
+        usedFallback: !chapterData,
+        finishReason: coreResult.finishReason,
+        usageMetadata: coreResult.usageMetadata
+      });
+      return;
+    }
+
+    const prompt = buildPrompt(body);
+    const result = await callGemini(prompt, body);
     const parsed = wantsJson ? tryParseJson(result.text) : null;
     const parsedJson = wantsJson
       ? enforceStructuredFacts(parsed || createFallbackReport(tags), tags)
