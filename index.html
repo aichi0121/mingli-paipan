@@ -4672,7 +4672,7 @@ function bestFengshuiIntersections(overlap){
       const [direction, theme = ''] = row.split('：');
       const countMatch = theme.match(/(\d+)項重複/);
       const count = countMatch ? Number(countMatch[1]) : (theme.match(/、/g) || []).length + 1;
-      const annualBonus = annualGood.has(direction) ? 2 : 0;
+      const annualBonus = annualGood.has(direction.replace(/方$/, '')) ? 2 : 0;
       return {
         direction,
         themes: cleanDirectionTheme(theme),
@@ -4685,19 +4685,27 @@ function bestFengshuiIntersections(overlap){
 function fengshuiIntegratedHtml(){
   const overlap = xuOverlapSummary();
   const best = bestFengshuiIntersections(overlap);
-  const directionAction = {
-    '東北': '放一盆好照顧的綠植，或一支木質文昌筆，集中加強學習、企劃與貴人合作。',
-    '正北': '放一個金屬鬧鐘，或一杯每天更換的乾淨清水，讓財務與人際節奏更穩。',
-    '正東': '保持明亮整潔，放一盆健康綠植，作為今年推動工作與收入的起點。',
-    '東南': '放一小束鮮花或暖色燈，溫和加強合作、人緣與喜慶氣場。',
-    '正西': '放少量白色或金屬物件，避免堆放雜物。',
-    '西北': '以安靜、乾淨為主，今年不放大型動水。'
-  };
-  const selected = best.length ? best : [{ direction:'東北' }, { direction:'正北' }];
+  const selected = best.length ? best : [
+    {direction:'東北方', themes:'財位、事業、貴人、文昌、學習、桃花、人緣'},
+    {direction:'正北方', themes:'財位、事業、貴人、桃花、人緣'}
+  ];
+  const preciseItems = [...new Set([
+    ...overlap.sharedItems.slice(0, 5),
+    ...overlap.sharedMaterials.slice(0, 1)
+  ])];
+  const intersectionText = selected.slice(0, 2)
+    .map(item => `${item.direction}：${item.themes || '多項主題交集'}`)
+    .join('；');
   return `
     <div class="summary-panel">
-      <div class="summary-panel-title">三位老師統整：今年先整理這兩個位置</div>
-      ${compactList(selected.slice(0,2).map(item => `<strong>${item.direction}</strong>：${directionAction[item.direction] || '保持乾淨明亮，只放一件符合目前需求且容易維護的物品。'}`))}
+      <div class="summary-panel-title">三位老師統整版：只先做最關鍵的 1～2 個方位</div>
+      ${compactList([
+        `最佳交集方位：${intersectionText}。先處理這 1～2 個位置，不要把所有方位一次擺滿。`,
+        preciseItems.length ? `精準擺件先抓：${preciseItems.join('、')}。擺件少量、乾淨、方便維護，比堆滿更有效。` : '',
+        `求財或招財水缸，仍優先回到徐玉蘭老師的${riWx}命財位【${xuFs.wealth || '請依五行命主表確認'}】；若要疊加${CURRENT_YEAR}流年，再看正東、正北是否剛好落在你家可用位置。`,
+        '擺放規則用湯鎮瑋老師：財位要乾淨、明亮、不受壓，擺件控制在 3～5 樣內；不把招財物一次堆滿。',
+        '水缸只優先放財位或可動水的流年吉位；正南五黃、西北二黑、正西三碧、西南七赤今年先安靜，不放大型動水。'
+      ])}
     </div>
   `;
 }
