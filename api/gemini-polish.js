@@ -40,8 +40,79 @@ function tryParseJson(text) {
   }
 }
 
+function createFallbackReport(tags) {
+  const chart = tags?.chart || {};
+  const domains = tags?.domains || {};
+  const timing = tags?.timing || {};
+  const luck = timing.currentLuck || {};
+  const annual = timing.annual || {};
+  const relationship = domains.relationship || {};
+  return {
+    summary: `這張盤以【${chart.dayMaster || '日主'}】與【${chart.strength?.label || '格局待判'}】為核心；原局有${domains.wealth?.count ?? 0}個財星、${domains.career?.officialCount ?? 0}個官星、${domains.career?.outputCount ?? 0}個食傷訊號。目前【${luck.ganzhi || ''}${luck.tenGod || ''}】大運遇上【${annual.ganzhi || ''}${annual.tenGod || ''}】流年，解讀時要把原局能力、十年環境與今年事件一起看。`,
+    keywords: [
+      { label: '核心命格', value: `${chart.dayMaster || '日主'}・${chart.strength?.label || '格局待判'}`, tone: 'identity' },
+      { label: '事業結構', value: `${domains.career?.officialCount ?? 0}官星・${domains.career?.outputCount ?? 0}食傷`, tone: 'career' },
+      { label: '財運結構', value: `${domains.wealth?.count ?? 0}財星・${domains.wealth?.robWealth ?? 0}劫財`, tone: 'wealth' },
+      { label: '關係模式', value: `${relationship.spousePalace || '日支'}夫妻宮・${relationship.gender === '男' ? '妻星' : '夫星'}${relationship.spouseElement || ''}`, tone: 'relationship' },
+      { label: '健康重點', value: domains.health?.dayMasterOrgans || '依五行調養', tone: 'health' },
+      { label: `${annual.year || '流年'}主題`, value: `${annual.ganzhi || ''}${annual.tenGod || ''}・${luck.ganzhi || ''}${luck.tenGod || ''}`, tone: 'annual' }
+    ],
+    chapterSummaries: []
+  };
+}
+
 function enforceStructuredFacts(data, tags) {
   if (!data || typeof data !== 'object') return data;
+  const chapterDefinitions = [
+    ['①', '日主與五行特質'],
+    ['②', '四柱宮位與十神結構'],
+    ['③', '合化與刑沖牽動'],
+    ['④', '命盤格局與生活調整'],
+    ['⑤', '當前大運'],
+    ['⑥', '流年影響'],
+    ['⑦', '財運模式與防禦提醒'],
+    ['⑧', '事業與職涯定位'],
+    ['⑨', '感情與婚姻模式'],
+    ['⑩', '子女與作品緣分'],
+    ['⑪', '健康體質與保養'],
+    ['⑫', '流日擇吉方向'],
+    ['⑬', '風水與開運整合佈局']
+  ];
+  const actionFallbacks = {
+    '①': '做決定前先確認自己的真正需求，再把穩定與責任感用在最重要的事情上。',
+    '②': '分開觀察家庭、工作、關係與長期成果，不要用同一種反應方式處理所有人生領域。',
+    '③': '當工作、家庭與關係互相牽動時，先說清楚界線與優先順序，再做承諾。',
+    '④': '把力氣放在能恢復平衡的生活選擇，避免長期勉強自己承接超出負荷的責任。',
+    '⑤': '依目前十年環境安排學習與成果節點，前後階段採用不同的工作節奏。',
+    '⑥': '今年先選一項最重要的目標落地，避免同時追逐太多方向而分散力氣。',
+    '⑦': '收入、合作與分帳一律先寫清楚規則，並保留可持續運作的現金緩衝。',
+    '⑧': '依本章判定的職涯型態集中累積作品、口碑與定價能力，避開不合適的工作結構。',
+    '⑨': '固定安排坦誠溝通的時間，把期待、界線與現實分工說清楚。',
+    '⑩': '子女判讀只作為命理傾向參考；作品方面則建立可重複執行的固定產出節奏。',
+    '⑪': '健康內容只作日常保養提醒；若有持續不適，應交由合格醫療專業判斷。',
+    '⑫': '把流日當成安排節奏的提醒，不用因單一天象取消必要的生活與工作決定。',
+    '⑬': '只挑一至兩個最重要方位維持乾淨明亮，先改善動線，再增加少量合適擺設。'
+  };
+  const rawChapters = Array.isArray(tags?.rawChapters) ? tags.rawChapters : [];
+  const generatedChapters = Array.isArray(data.chapterSummaries) ? data.chapterSummaries : [];
+  const generatedByNumber = new Map(generatedChapters.map((chapter, index) => [
+    String(chapter?.number || chapterDefinitions[index]?.[0] || ''),
+    chapter
+  ]));
+  data.chapterSummaries = chapterDefinitions.map(([number, title], index) => {
+    const generated = generatedByNumber.get(number) || generatedChapters[index] || {};
+    const raw = rawChapters.find((chapter) => String(chapter?.number) === number)?.raw || '';
+    const rawSummary = String(raw).split(/[。！？]/).map((item) => item.trim()).find(Boolean);
+    const bullets = Array.isArray(generated?.bullets) ? generated.bullets : [];
+    return {
+      number,
+      title: String(generated?.title || title),
+      bullets: [
+        { label: '現況定性', value: String(bullets[0]?.value || rawSummary || `${title}已完成本機命盤比對。`) },
+        { label: '行動處方', value: String(bullets[1]?.value || actionFallbacks[number]) }
+      ]
+    };
+  });
   const counts = tags?.domains?.health?.elementCounts || {};
   const correctHealthText = (value) => {
     let text = String(value || '');
@@ -346,8 +417,11 @@ module.exports = async function handler(req, res) {
     const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
     const prompt = buildPrompt(body);
     const result = await callGemini(prompt, body);
-    const parsedJson = (body.outputType || body.format) === 'json'
-      ? enforceStructuredFacts(tryParseJson(result.text), body.tags || body.baziTags || {})
+    const tags = body.tags || body.baziTags || {};
+    const wantsJson = (body.outputType || body.format) === 'json';
+    const parsed = wantsJson ? tryParseJson(result.text) : null;
+    const parsedJson = wantsJson
+      ? enforceStructuredFacts(parsed || createFallbackReport(tags), tags)
       : null;
 
     res.status(200).json({
@@ -356,6 +430,7 @@ module.exports = async function handler(req, res) {
       outputType: body.outputType || body.format || 'article',
       text: result.text,
       json: parsedJson,
+      usedFallback: wantsJson && !parsed,
       finishReason: result.finishReason,
       usageMetadata: result.usageMetadata
     });
