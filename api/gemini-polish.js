@@ -69,19 +69,65 @@ function enforceStructuredFacts(data, tags) {
   const chapter10 = (data.chapterSummaries || []).find((chapter) => String(chapter?.number) === '⑩');
   if (chapter10 && children.gender) {
     const isMale = children.gender === '男';
-    const childRule = isMale ? '男命以官星看子女緣' : '女命以食傷看子女緣';
-    const workRule = isMale ? '作品與專業輸出另看食傷' : '作品與成果承接另看官星、財星';
-    const hour = children.hourPillar || {};
-    const hourGods = [hour.stemTenGod, hour.branchTenGod].filter(Boolean).join('／');
-    const childConclusion = Number(children.childStarCount || 0) > 0
-      ? `原局共有${children.childStarCount}個相關訊號；${children.samePillarRooted ? '可見同柱透藏，根氣較完整' : '星位可見，但不直接等同固定子女數量'}，實際時機仍看大運、流年與現實選擇。`
-      : '原局相關星位不明顯，緣分與時機需搭配大運、流年及後天選擇。';
+    const birthOrder = Array.isArray(children.birthOrderSequence) ? children.birthOrderSequence : [];
+    const sequenceText = birthOrder.length
+      ? birthOrder.map((item) => item.label || `第${item.order}胎（${item.predictedGender}）`).join('、')
+      : '原局沒有足夠訊號排列胎次';
+    const workText = Number(children.workStarCount || 0) > 0
+      ? `作品與專業成果有${children.workStarCount}個可用訊號，適合整理成可重複交付的服務、作品或方法。`
+      : '作品輸出需要後天建立固定節奏，先把專業經驗整理成一套可重複使用的方法。';
     chapter10.bullets = [
-      { label: '性別與星位', value: `${childRule}，${workRule}。${childConclusion}` },
-      { label: `時柱【${hour.ganzhi || '待判'}】`, value: `${hourGods ? `十神為${hourGods}；` : ''}${hour.elementRelation ? `${hour.elementRelation}，` : ''}${hour.structureSignal || '用來補充晚年、晚輩與成果質地。'}` },
-      { label: '作品與成果', value: Number(children.workStarCount || 0) > 0 ? `原局有${children.workStarCount}個作品／成果相關訊號，須結合時柱判斷適合的承接方式。` : `原局作品／成果星位較弱，可依時柱建立固定且適合自己的累積路線。` }
+      { label: '現況定性', value: `${isMale ? '男命' : '女命'}的子女緣分排列傾向為：${sequenceText}。${children.birthOrderDisclaimer || '此為命理結構傾向，不等於實際胎數、生理性別或生育保證。'}` },
+      { label: '行動處方', value: `${workText}面對子女或晚輩，給予清楚規則，也保留各自發展空間。` }
     ];
   }
+  const chapterByNumber = (number) => (data.chapterSummaries || []).find((chapter) => String(chapter?.number) === number);
+  const careerDecision = tags?.domains?.career?.decision;
+  const wealthDecision = tags?.domains?.wealth?.decision;
+  const relationshipDecision = tags?.domains?.relationship?.decision;
+  if (careerDecision && chapterByNumber('⑧')) chapterByNumber('⑧').bullets = [
+    { label: '現況定性', value: `職涯定位是「${careerDecision.type}」：${careerDecision.reason}。` },
+    { label: '行動處方', value: careerDecision.avoid }
+  ];
+  if (wealthDecision && chapterByNumber('⑦')) chapterByNumber('⑦').bullets = [
+    { label: '現況定性', value: `獲利模式是「${wealthDecision.type}」：${wealthDecision.path}。` },
+    { label: '行動處方', value: wealthDecision.risk }
+  ];
+  if (relationshipDecision && chapterByNumber('⑨')) chapterByNumber('⑨').bullets = [
+    { label: '現況定性', value: `關係定位是「${relationshipDecision.type}」：${relationshipDecision.partner}。` },
+    { label: '行動處方', value: relationshipDecision.blindspot }
+  ];
+  const plainReplacements = [
+    [/官印相生/g, '外界責任能透過學習、證照與平台支援轉成成果'],
+    [/食傷生財/g, '作品與專業能直接轉成收入'],
+    [/比劫奪財/g, '人情與合作容易造成資金流失'],
+    [/官殺混雜/g, '外界規則與壓力來源較複雜'],
+    [/日主身弱|身弱/g, '底氣與承載力較需要支持'],
+    [/日主身強|身強/g, '自主性與承擔力較強'],
+    [/專旺[／/]從強格|從強格|專旺格|身極旺/g, '自主性、持久力與主導需求非常強'],
+    [/正官|七殺/g, '責任與外界要求'],
+    [/正印|偏印/g, '學習、貴人與休息支援'],
+    [/食神|傷官/g, '作品、表達與創意輸出'],
+    [/比肩|劫財/g, '自我主張與同儕競合'],
+    [/正財|偏財/g, '收入與現實資源'],
+    [/官殺/g, '責任與外界要求'],
+    [/印星/g, '學習與支援'],
+    [/食傷/g, '作品與表達'],
+    [/比劫/g, '同儕競合與自我主張'],
+    [/財星/g, '現實資源與收入機會'],
+    [/喜用神/g, '適合補充的生活能量'],
+    [/忌神/g, '需要節制的生活能量'],
+    [/月令/g, '出生月份的環境力量']
+  ];
+  const toPlainLanguage = (value) => plainReplacements.reduce((textValue, [pattern, replacement]) => textValue.replace(pattern, replacement), correctHealthText(String(value || '')));
+  (data.chapterSummaries || []).forEach((chapter) => {
+    const source = Array.isArray(chapter?.bullets) ? chapter.bullets : [];
+    const values = source.map((item) => toPlainLanguage(item?.value)).filter(Boolean);
+    chapter.bullets = [
+      { label: '現況定性', value: values[0] || '本章資料已完成計算，重點需與整體命盤一起閱讀。' },
+      { label: '行動處方', value: values[1] || '先從一項可執行的小調整開始，並依後續時間變化持續檢視。' }
+    ];
+  });
   return data;
 }
 
@@ -133,6 +179,10 @@ function buildPrompt(body) {
     '4. 風水或擺件只輸出 1 到 2 個最精準交集，不要把所有方位全列出。',
     '5. 避免重複罐頭警語，請換成具體行動建議。',
     `6. 語氣：${tone}。`,
+    '7. 上方 summary、各領域 analysis 與 teacherFriendlyScript 維持原本的全盤情境串聯寫法；以下白話與兩點格式限制只適用於 chapterSummaries。',
+    '8. chapterSummaries 嚴禁直接出現「官印相生、食傷生財、比劫奪財、日主身弱、官殺混雜」等學理術語，必須翻成生活狀況與可執行行動。',
+    '9. 第⑦、⑧、⑨章必須優先採用 tags.domains.wealth.decision、career.decision、relationship.decision 的確定判型，不得改寫成「都適合、視情況而定」。',
+    '10. 第⑩章只能依 tags.domains.children.birthOrderSequence 的既定順序輸出胎次傾向，不得自行改序、增加或刪除；必須附上命理傾向並非生育保證的提醒。',
     outputType === 'json'
       ? [
           '請只回傳合法 JSON，不要 Markdown、不要 code fence、不要額外解說。',
@@ -147,12 +197,13 @@ function buildPrompt(body) {
           '  "annual": {"headline":"一句年度主題","analysis":"2到4句大運與流年串聯分析","action":"一項年度行動"},',
           '  "fengShui": {"headline":"一句空間重點","analysis":"只取1到2個交集方位的2到3句分析","action":"一項可執行佈置"},',
           '  "teacherFriendlyScript": "命理師可直接口頭說明的3到6句連貫講稿",',
-          '  "chapterSummaries": [{"number":"①","title":"日主與五行特質","bullets":[{"label":"日主與格局","value":"具體結論"}]}]',
+          '  "chapterSummaries": [{"number":"①","title":"日主與五行特質","bullets":[{"label":"現況定性","value":"一句白話結論"},{"label":"行動處方","value":"一項具體行動"}]}]',
           '}',
           'keywords 請提供 5 到 7 個，tone 只能使用指定值。各 analysis 必須是連貫文章，不得用條列符號。',
-          'chapterSummaries 必須依序完整輸出 ① 到 ⑬，不能缺章。每章只能有 2 到 3 個 bullets，每個 bullet 必須使用 label 與 value 的 Key-Value 結構。',
+          'chapterSummaries 必須依序完整輸出 ① 到 ⑬，不能缺章。每章恰好 2 個 bullets，第一個 label 必須是「現況定性」，第二個必須是「行動處方」。',
           '各章內容責任：①日主屬性、特質、盲點；②四柱宮位與十神作用；③實際合化刑沖與生活牽動；④格局、喜用與節制；⑤大運主軸與前後期；⑥流年氣場與大運疊加；⑦財星結構與風險；⑧十神組合後的職涯定位；⑨依性別判定配偶星與夫妻宮；⑩性別星位、時柱成果質地與綜合結論；⑪依五行統計判定健康；⑫流日方向；⑬只留1至2個風水交集與可執行擺設。',
           'chapterSummaries 的內容只可摘要 tags.rawChapters 與已計算 Tag；禁止開場白、稱呼、段落散文、Markdown、HTML、cite 標記或虛構來源。',
+          'chapterSummaries 白話替換：官殺＝責任、壓力、規則、客戶要求；印星＝貴人、學習、證照、品牌支援、休息；食傷＝作品、表達、創意、輸出；比劫＝人情支出、合作風險、自我主張、同儕競合；財星＝現實資源、收入、收款規則與資金安全感。',
           '全域去重：同一結論、形容詞或十神定義若已在前章說明，後章不得換句話重複；後章只保留該章獨有的判讀。',
           '不得虛構老師姓名、引言、課程內容或未提供的命盤事實；老師原始觀點由前端既有知識庫另外呈現。'
         ].join('\n')
@@ -206,7 +257,7 @@ async function requestGemini(apiKey, model, prompt, body) {
       generationConfig: {
         temperature: Number(body.temperature ?? 0.45),
         topP: Number(body.topP ?? 0.9),
-        maxOutputTokens: Number(body.maxOutputTokens ?? 2600),
+        maxOutputTokens: Number(body.maxOutputTokens ?? 5200),
         ...((body.outputType || body.format) === 'json' ? { responseMimeType: 'application/json' } : {})
       }
     })
