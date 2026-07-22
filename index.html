@@ -2664,7 +2664,7 @@ return {
 
 let aiReportRequestId=0;
 let aiReportPending=false;
-const AI_REPORT_CACHE_VERSION='2026-07-22-v5.4-plain-chapters';
+const AI_REPORT_CACHE_VERSION='2026-07-22-v5.5-complete-chapters';
 let lastAiReportTags=null;
 function aiEscape(value){
 return String(value??'').replace(/[&<>"']/g,ch=>({
@@ -2677,6 +2677,47 @@ return !!(data && typeof data==='object' && String(data.summary||'').trim() && A
   const bullets=chapter?.bullets;
   return String(chapter?.number||'')===expected[index] && Array.isArray(bullets) && bullets.length===2 && bullets[0]?.label==='現況定性' && bullets[1]?.label==='行動處方';
 }));
+}
+function completeAiReportData(data,tags){
+if(!data || typeof data!=='object') return null;
+const definitions=[
+  ['①','日主與五行特質'],['②','四柱宮位與十神結構'],['③','合化與刑沖牽動'],
+  ['④','命盤格局與生活調整'],['⑤','當前大運'],['⑥','流年影響'],
+  ['⑦','財運模式與防禦提醒'],['⑧','事業與職涯定位'],['⑨','感情與婚姻模式'],
+  ['⑩','子女與作品緣分'],['⑪','健康體質與保養'],['⑫','流日擇吉方向'],
+  ['⑬','風水與開運整合佈局']
+];
+const actions={
+  '①':'確認自己的真正需求，再把穩定與責任感用在最重要的事情上。',
+  '②':'分開觀察家庭、工作、關係與長期成果，避免用同一種反應處理所有領域。',
+  '③':'當工作、家庭與關係互相牽動時，先說清楚界線與優先順序。',
+  '④':'把力氣放在能恢復平衡的選擇，避免承接超出負荷的責任。',
+  '⑤':'依目前十年環境安排學習與成果節點，前後階段採用不同節奏。',
+  '⑥':'今年先選一項最重要的目標落地，避免方向過多而分散力氣。',
+  '⑦':'收入、合作與分帳先寫清楚規則，並保留可持續運作的現金緩衝。',
+  '⑧':'集中累積符合定位的作品、口碑與定價能力，避開不合適的工作結構。',
+  '⑨':'固定安排坦誠溝通的時間，把期待、界線與現實分工說清楚。',
+  '⑩':'子女判讀只作命理傾向參考；作品方面建立可重複執行的產出節奏。',
+  '⑪':'健康內容只作日常保養提醒；持續不適應交由合格醫療專業判斷。',
+  '⑫':'把流日當成安排節奏的提醒，不因單一天象取消必要決定。',
+  '⑬':'只挑一至兩個重要方位維持乾淨明亮，先改善動線再增加少量擺設。'
+};
+const generated=Array.isArray(data.chapterSummaries)?data.chapterSummaries:[];
+const byNumber=new Map(generated.map((chapter,index)=>[String(chapter?.number||definitions[index]?.[0]||''),chapter]));
+const raw=Array.isArray(tags?.rawChapters)?tags.rawChapters:[];
+data.summary=String(data.summary||deterministicAiSummary(tags));
+data.keywords=Array.isArray(data.keywords)&&data.keywords.length?data.keywords:deterministicAiKeywords(tags);
+data.chapterSummaries=definitions.map(([number,title],index)=>{
+  const chapter=byNumber.get(number)||generated[index]||{};
+  const rawText=String(raw.find(item=>String(item?.number)===number)?.raw||'');
+  const rawSummary=rawText.split(/[。！？]/).map(item=>item.trim()).find(Boolean)||`${title}已完成本機命盤比對`;
+  const bullets=Array.isArray(chapter?.bullets)?chapter.bullets:[];
+  return {number,title:String(chapter?.title||title),bullets:[
+    {label:'現況定性',value:String(bullets[0]?.value||rawSummary)},
+    {label:'行動處方',value:String(bullets[1]?.value||actions[number])}
+  ]};
+});
+return data;
 }
 function aiKeywordHtml(keywords){
 const allowed=new Set(['identity','career','wealth','relationship','health','annual']);
@@ -2817,13 +2858,15 @@ try{
   const cacheKey=aiReportCacheKey(tags);
   let cached=null;
   try{cached=JSON.parse(localStorage.getItem(cacheKey)||'null');}catch(_){localStorage.removeItem(cacheKey);}
-  if(isValidAiReport(cached?.data)){
-    renderAiReport(cached.data,tags,cached.model||'');
+  const completedCache=completeAiReportData(cached?.data,tags);
+  if(isValidAiReport(completedCache)){
+    renderAiReport(completedCache,tags,cached.model||'');
     return;
   }
   const result=await callGeminiRoute({mode:'polish',outputType:'json',tags,maxOutputTokens:7000,temperature:.25});
   if(requestId!==aiReportRequestId) return;
-  const data=result.json || (()=>{try{return JSON.parse(result.text);}catch(_){return null;}})();
+  const parsed=result.json || (()=>{try{return JSON.parse(result.text);}catch(_){return null;}})();
+  const data=completeAiReportData(parsed,tags);
   if(!isValidAiReport(data)) throw new Error('API 未回傳完整的報告 JSON。');
   renderAiReport(data,tags,result.model||'');
   localStorage.setItem(cacheKey,JSON.stringify({data,model:result.model||'',savedAt:Date.now()}));
