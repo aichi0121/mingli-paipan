@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>源澄潤設計事務所｜Doris 的八字路口相談室</title>
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#8C6747">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
 <style>
 /* ══════════════════════════════════════
@@ -390,6 +392,75 @@ background:#FFFCF7;
 .quick-hook-list strong{color:#8B541F;}
 .quick-cta{display:inline-flex;align-items:center;justify-content:center;margin-top:18px;padding:12px 18px;border:1px solid #8C6747;border-radius:6px;background:#8C6747;color:#FFF;font:inherit;font-weight:700;cursor:pointer;}
 .quick-cta:hover{background:#755238;}
+.quick-pain-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;}
+.quick-pain-card{--hook-color:#9B5A43;position:relative;overflow:hidden;padding:18px;border:1px solid #E7DCCF;border-top:4px solid var(--hook-color);border-radius:6px;background:#FFFDF9;}
+.quick-pain-card[data-tone="love"]{--hook-color:#C43F70;}
+.quick-pain-card[data-tone="career"]{--hook-color:#3269AD;}
+.quick-pain-card[data-tone="family"]{--hook-color:#A2672E;}
+.quick-pain-card[data-tone="health"]{--hook-color:#A94338;}
+.quick-pain-title{margin:0 0 10px;color:var(--hook-color);font-size:1.05rem;font-weight:800;}
+.quick-pain-question{margin:0 0 10px;color:#3F332C;font-weight:800;line-height:1.55;}
+.quick-pain-card p{margin:0 0 10px;line-height:1.75;}
+.quick-risk{padding:10px 12px;color:#8D3029;background:#FFF1ED;border-left:3px solid #C85D4F;font-weight:750;}
+.quick-lock{position:relative;min-height:112px;margin-top:14px;overflow:hidden;border-top:1px solid #E7DCCF;background:#FBF6EE;}
+.quick-lock-preview{padding:14px;color:#69594F;filter:blur(4px);opacity:.48;user-select:none;pointer-events:none;}
+.quick-lock-preview p{margin:0 0 6px;}
+.quick-lock-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;padding:14px;text-align:center;background:rgba(255,253,249,.84);}
+.quick-lock-overlay strong{color:#6E432D;}
+.quick-lock-button{border:1px solid #B98D65;border-radius:5px;background:#8D5F3E;color:#FFF;padding:8px 13px;font:inherit;font-weight:750;cursor:pointer;}
+.quick-lock-button:hover{background:#70472F;}
+.quick-boundary-note{margin:14px 0 0;color:#89776A;font-size:.9rem;line-height:1.65;}
+.report-nav{
+position:fixed;
+left:max(16px,env(safe-area-inset-left));
+bottom:max(18px,env(safe-area-inset-bottom));
+z-index:84;
+display:flex;
+gap:6px;
+padding:6px;
+border:1px solid #DCC7AD;
+border-radius:7px;
+background:rgba(255,253,249,.96);
+box-shadow:0 8px 24px rgba(74,55,40,.18);
+backdrop-filter:blur(10px);
+}
+.report-nav-button{
+width:38px;
+height:38px;
+display:inline-flex;
+align-items:center;
+justify-content:center;
+border:0;
+border-radius:5px;
+background:transparent;
+color:#765239;
+font:inherit;
+font-size:1.1rem;
+cursor:pointer;
+}
+.report-nav-button:hover,.report-nav-button:focus-visible{background:#F2E7DA;color:#4A3728;outline:none;}
+.report-nav-button svg{width:19px;height:19px;stroke:currentColor;stroke-width:1.9;fill:none;}
+.chapter-nav-panel{
+position:fixed;
+left:max(16px,env(safe-area-inset-left));
+bottom:72px;
+z-index:85;
+width:min(330px,calc(100vw - 32px));
+max-height:min(620px,calc(100vh - 110px));
+overflow:auto;
+padding:14px;
+border:1px solid #DCC7AD;
+border-radius:8px;
+background:#FFFDF9;
+box-shadow:0 12px 34px rgba(74,55,40,.22);
+}
+.chapter-nav-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;}
+.chapter-nav-header strong{color:#5B4633;font-size:.98rem;}
+.chapter-nav-close{width:32px;height:32px;border:0;border-radius:5px;background:#F5ECE1;color:#765239;font-size:1.15rem;cursor:pointer;}
+.chapter-nav-list{display:grid;gap:5px;}
+.chapter-nav-item{width:100%;padding:9px 10px;border:0;border-left:3px solid transparent;border-radius:3px;background:transparent;color:#4A3728;text-align:left;font:inherit;font-size:.86rem;line-height:1.45;cursor:pointer;}
+.chapter-nav-item:hover,.chapter-nav-item:focus-visible{border-left-color:#A66A4B;background:#F8F0E7;outline:none;}
+.kb-section{scroll-margin-top:16px;}
 .pdf-report-header{display:none;}
 .gemini-launcher{
 position:fixed;
@@ -1642,11 +1713,14 @@ white-space:normal;
 .dayun-row-table td,.dayun-table th,.dayun-table td{scroll-snap-align:start;padding:9px 11px;font-size:.78rem;}
 .dayun-row-label,.row-label-cell{left:0;right:auto;box-shadow:2px 0 5px rgba(75,55,39,.08);}
 .ai-report-shell{padding:16px 13px;}
-.quick-radar-layout,.quick-contrast-grid,.quick-atmosphere{grid-template-columns:1fr;}
+.quick-radar-layout,.quick-contrast-grid,.quick-atmosphere,.quick-pain-grid{grid-template-columns:1fr;}
 .quick-radar{width:min(82vw,280px);}
 .quick-score-item{padding:12px 13px;}
 .quick-consult-hook{padding:18px 15px;}
 .quick-cta{width:100%;}
+.report-nav{left:max(10px,env(safe-area-inset-left));bottom:max(10px,env(safe-area-inset-bottom));gap:2px;padding:4px;}
+.report-nav-button{width:36px;height:36px;}
+.chapter-nav-panel{left:max(10px,env(safe-area-inset-left));bottom:60px;width:min(340px,calc(100vw - 20px));max-height:calc(100vh - 82px);}
 .ai-keyword-grid{grid-template-columns:1fr;}
 .ai-keyword-item{padding:12px;}
 .tab-btn{font-size:.88rem;}
@@ -1894,6 +1968,24 @@ details.kb-section summary::after{display:none;}
 </div>
 
 </div><!-- /screen-report -->
+<nav id="report-nav" class="report-nav no-print hidden" aria-label="報告快速導覽">
+  <button class="report-nav-button" type="button" onclick="showScreen('screen-list')" title="回到客戶列表" aria-label="回到客戶列表">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V21h13V9.5"/><path d="M9.5 21v-6h5v6"/></svg>
+  </button>
+  <button id="chapter-nav-trigger" class="report-nav-button" type="button" onclick="toggleChapterNav()" title="章節目錄" aria-label="開啟章節目錄" aria-expanded="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6h.01M4 12h.01M4 18h.01"/></svg>
+  </button>
+  <button class="report-nav-button" type="button" onclick="scrollReportEdge('top')" title="回到頂端" aria-label="回到頁面頂端">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 11 6-6 6 6M12 5v14"/></svg>
+  </button>
+  <button class="report-nav-button" type="button" onclick="scrollReportEdge('bottom')" title="前往最下方" aria-label="前往頁面最下方">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 13 6 6 6-6M12 19V5"/></svg>
+  </button>
+</nav>
+<aside id="chapter-nav-panel" class="chapter-nav-panel no-print hidden" aria-label="報告章節目錄">
+  <div class="chapter-nav-header"><strong>跳到報告章節</strong><button class="chapter-nav-close" type="button" onclick="toggleChapterNav(false)" aria-label="關閉章節目錄">×</button></div>
+  <div id="chapter-nav-list" class="chapter-nav-list"></div>
+</aside>
 <button id="gemini-launcher" class="gemini-launcher no-print" type="button" onclick="toggleGeminiChat()" aria-label="開啟 Gemini 報告問答">✦</button>
 <div id="gemini-card" class="gemini-card no-print" aria-live="polite">
   <div class="gemini-header">
@@ -2278,9 +2370,62 @@ function showScreen(id){
 ['screen-list','screen-add','screen-report'].forEach(s=>{
 document.getElementById(s).classList.toggle('hidden',s!==id);
 });
+const reportNav=document.getElementById('report-nav');
+reportNav?.classList.toggle('hidden',id!=='screen-report');
+if(id!=='screen-report') toggleChapterNav(false);
 if(id==='screen-list') renderClientList();
 window.scrollTo(0,0);
 }
+
+function getVisibleReportTab(){
+  const full=document.getElementById('tab-full');
+  const quick=document.getElementById('tab-quick');
+  return full && !full.classList.contains('hidden') ? full : quick;
+}
+
+function refreshChapterNav(){
+  const list=document.getElementById('chapter-nav-list');
+  const scope=getVisibleReportTab();
+  if(!list || !scope) return;
+  list.replaceChildren();
+  scope.querySelectorAll('details[data-report-chapter]').forEach((sectionEl)=>{
+    const summary=sectionEl.querySelector(':scope > summary');
+    if(!summary) return;
+    const button=document.createElement('button');
+    button.type='button';
+    button.className='chapter-nav-item';
+    button.textContent=summary.textContent.trim();
+    button.addEventListener('click',()=>jumpToReportChapter(sectionEl));
+    list.appendChild(button);
+  });
+}
+
+function toggleChapterNav(force){
+  const panel=document.getElementById('chapter-nav-panel');
+  if(!panel) return;
+  const shouldOpen=typeof force==='boolean' ? force : panel.classList.contains('hidden');
+  if(shouldOpen) refreshChapterNav();
+  panel.classList.toggle('hidden',!shouldOpen);
+  document.getElementById('chapter-nav-trigger')?.setAttribute('aria-expanded',String(shouldOpen));
+}
+
+function jumpToReportChapter(sectionEl){
+  if(!sectionEl) return;
+  sectionEl.open=true;
+  sectionEl.scrollIntoView({behavior:'smooth',block:'start'});
+  toggleChapterNav(false);
+}
+
+function scrollReportEdge(edge){
+  window.scrollTo({
+    top:edge==='bottom'?document.documentElement.scrollHeight:0,
+    behavior:'smooth'
+  });
+}
+
+document.addEventListener('keydown',(event)=>{
+  if(event.key==='Escape') toggleChapterNav(false);
+});
 
 // ══════════════════════════════════════════════
 // 按鈕式單選
@@ -5194,12 +5339,73 @@ const quickWealthReason=jieCaiEntries.length>=2
   ? `原局有${caiEntries.length}個財星、${jieCaiEntries.length}個劫財訊號，賺取與留存是兩個不同課題。`
   : `原局有${caiEntries.length}個財星訊號，財富表現更取決於成果能否穩定累積。`;
 
+const spouseCount=spouseEntries.length;
+const coreOrgan=(WX_ORGAN[riWx]||'身心節奏').split('、')[0];
+const loveDiagnosis=spouseCount===0
+  ? '你不是沒有感情機會，而是關係通常不會自動往前走。你習慣先觀察、先確認現實條件，對方可能因此讀不到你的靠近。'
+  : spouseCount>=3
+    ? '你的感情訊號偏多，安全感、吸引力與現實標準容易同時拉扯。越在意一段關係，反而越可能反覆評估。'
+    : ['辰','戌','丑','未'].includes(riDz)
+      ? '你談感情比起一時浪漫，更在意可靠、承諾與生活能不能一起落地。確認很慢，但失望也容易在心裡累積很久。'
+      : '你在關係裡需要明確回應與精神交流；一旦對方忽冷忽熱，你會先收回自己，而不是立刻追問。';
+const loveRisk=spouseCount>=3
+  ? '關係警訊：容易因標準太多、顧慮太多，錯過真正需要被說清楚的時刻。'
+  : '關係警訊：表面看起來冷靜，真正的需要卻可能一直沒有被對方聽見。';
+
+const careerDiagnosis=guanEntries.length>=3&&shiShangEntries.length<=1
+  ? '你很容易成為「最能扛事的人」，但被需要不等於待在適合的位置。工作一多，你會先把責任接住，再回頭懷疑自己是否真的想要。'
+  : shiShangEntries.length>=2&&caiEntries.length>=1
+    ? '你真正有優勢的是把想法、作品或技術變成成果；長期只照別人的流程做事，反而容易消耗企圖心。'
+    : isExtremeStrength()
+      ? '你需要工作上的主導權與決策空間。若長期只能被動配合，即使待遇不差，也容易越做越悶。'
+      : '你不是能力不足，而是容易同時顧及責任、穩定與他人期待，導致職涯選擇看起來安全，內心卻不一定踏實。';
+const careerRisk=guanEntries.length>=3
+  ? '職場警訊：責任越堆越高，職稱與報酬卻未必同步上升。'
+  : '職場警訊：如果沒有主動定義自己的價值，容易忙了很多，卻沒有累積成可被看見的定位。';
+
+const familyDiagnosis=yinEntries.length>=2&&guanEntries.length>=2
+  ? '你很早就學會懂事、守規矩或照顧大局，也容易把家人的期待變成自己的責任。即使沒有人開口，你仍會先想著不能讓別人失望。'
+  : jieCaiEntries.length>=2
+    ? '原生家庭裡的公平、資源分配與誰該承擔，容易成為你特別敏感的題目。你可能嘴上不說，心裡卻一直在衡量。'
+    : '你在家人面前常扮演穩定或能處理事情的人，因此自己的疲累與需求反而容易被放到最後。';
+const familyRisk=yinEntries.length+guanEntries.length>=4
+  ? '家庭警訊：你可能正在替家人完成他們的期待，卻還沒確認那是不是你真正要的人生。'
+  : '家庭警訊：界線一旦不清楚，關心很容易慢慢變成壓力與內疚。';
+
+const healthDiagnosis=!isStrong
+  ? `你的恢復速度容易落後於責任增加的速度。壓力累積時，最先需要照顧的是${coreOrgan}、睡眠與日常節奏。`
+  : guanEntries.length>=3
+    ? `你能撐，不代表身體沒有記帳。長期緊繃時，${coreOrgan}、睡眠或肩頸疲勞容易先發出提醒。`
+    : yinEntries.length>=3
+      ? `你的腦袋不容易真正關機，資訊與想法累積太多時，睡眠品質及${coreOrgan}會比情緒更早反映壓力。`
+      : `你的底氣不差，但習慣撐到事情做完才休息；${coreOrgan}與規律作息是最不能被延後的保養重點。`;
+const healthRisk='健康警訊：若疲累已持續影響生活，應以專業醫療評估為準，不要只用命理解釋身體訊號。';
+
+function quickPainCard({tone,icon,title,question,diagnosis,risk,preview}){
+  return `<article class="quick-pain-card" data-tone="${tone}">
+    <h4 class="quick-pain-title">${icon} ${title}</h4>
+    <p class="quick-pain-question">${question}</p>
+    <p>${diagnosis}</p>
+    <p class="quick-risk">${risk}</p>
+    <div class="quick-lock" aria-label="付費諮詢內容已鎖定">
+      <div class="quick-lock-preview">${preview.map(item=>`<p>${item}</p>`).join('')}</div>
+      <div class="quick-lock-overlay"><span>🔒 完整原因、時間點與處理方式</span><strong>深度諮詢解鎖</strong><button type="button" class="quick-lock-button" onclick="requestPrivateConsultation('${title}')">了解這一題</button></div>
+    </div>
+  </article>`;
+}
+
+const quickPainHtml=`<div class="quick-pain-grid">
+  ${quickPainCard({tone:'love',icon:'💕',title:'戀愛與親密關係',question:'為什麼越在意，越不容易把真正需求說出口？',diagnosis:loveDiagnosis,risk:loveRisk,preview:['容易被哪一型伴侶吸引？','關係轉折會落在哪個時間點？','怎麼說，對方才聽得懂？']})}
+  ${quickPainCard({tone:'career',icon:'💼',title:'職場與定位',question:'你現在是在累積身價，還是只是在替別人扛責任？',diagnosis:careerDiagnosis,risk:careerRisk,preview:['正職、接案或創業，哪一條更適合？','職涯轉折的年份與月份','如何把能力換成職稱與收入？']})}
+  ${quickPainCard({tone:'family',icon:'🏠',title:'原生家庭',question:'哪些責任其實不是你的，卻一直被你背在身上？',diagnosis:familyDiagnosis,risk:familyRisk,preview:['你承接了誰的期待？','哪一種家庭互動最消耗你？','如何設界線又不陷入內疚？']})}
+  ${quickPainCard({tone:'health',icon:'🏥',title:'健康與壓力',question:'你的身體通常會先替哪一種壓力說話？',diagnosis:healthDiagnosis,risk:healthRisk,preview:['壓力最容易反映在哪裡？','今年哪些階段需要降低負荷？','適合你的恢復與保養節奏']})}
+</div><p class="quick-boundary-note">快速版提供的是命盤傾向與風險辨識，不取代醫療、心理、法律或財務專業判斷。</p>`;
+
 const quickHooks=[
-  jieCaiEntries.length>=2
-    ? `<strong>財運破口：</strong>哪些月份與人際情境最容易放大共同資源或人情支出的壓力？`
-    : `<strong>財運節奏：</strong>你的穩定收入與機會型收入，分別在哪些時間點最容易被啟動？`,
-  `<strong>事業轉折：</strong>【${curDyGz}${curDyShen}】大運遇上【${lyGz}${lyStar}】後，哪個階段會真正改變你的工作定位？`,
-  `<strong>專屬佈局：</strong>你的財運、事業與人緣需求，實際居家中哪一個交集方位最值得優先處理？`
+  `<strong>感情：</strong>你真正需要的是什麼類型的伴侶，又為何總在關係裡慢一步說出需求？`,
+  `<strong>職場：</strong>【${curDyGz}${curDyShen}】大運遇上【${lyGz}${lyStar}】後，哪個階段會真正改變你的工作定位？`,
+  `<strong>原生家庭：</strong>哪些看似理所當然的責任，正在悄悄影響你的選擇與安全感？`,
+  `<strong>健康：</strong>壓力最容易先落在${coreOrgan}、睡眠，還是情緒恢復上？`
 ];
 
 const quickRadarHtml=`
@@ -5243,7 +5449,7 @@ const quickTimingHtml=`<div class="quick-atmosphere">
 
 const quickConsultHtml=`<div class="quick-consult-hook">
   <h3>${client.name}的專屬深度諮詢導引</h3>
-  <p>基礎掃描已指出你的天賦與盲點；以下三個問題，需要結合流月、實際生活狀況與空間條件才能完整判讀。</p>
+  <p>基礎掃描已指出你目前最值得處理的四個面向；真正的原因、發生時間與調整方式，需要再結合流月、實際生活狀況與空間條件判讀。</p>
   <ol class="quick-hook-list">${quickHooks.map(item=>`<li>${item}</li>`).join('')}</ol>
   <button type="button" class="quick-cta" onclick="requestPrivateConsultation()">預約 1 對 1 深度命理諮詢</button>
 </div>`;
@@ -5387,9 +5593,10 @@ const quickHtml=`
   <p class="ai-report-summary">快速版先指出最明顯的天賦、壓力來源與年度現象；具體解法、時機與空間佈局會留在深度諮詢中逐一拆解。</p>
 </div>
 ${section('📊','① 命盤三力指數',quickRadarHtml,true)}
-${section('💡','② 命格優勢與盲點',quickContrastHtml,true)}
-${section('🌀','③ 當前十年與'+lyYear+'氣場',quickTimingHtml,true)}
-${section('🔮','④ 你的三個關鍵問題',quickConsultHtml,true)}
+${section('⚠️','② 四大人生警訊',quickPainHtml,true)}
+${section('💡','③ 命格優勢與盲點',quickContrastHtml,true)}
+${section('🌀','④ 當前十年與'+lyYear+'氣場',quickTimingHtml,true)}
+${section('🔮','⑤ 尚未解鎖的四個關鍵問題',quickConsultHtml,true)}
 `;
 
 const lockedFullHtml = `
@@ -5405,6 +5612,7 @@ const fullBtn = document.getElementById('tab-btn-full');
 const quickBtn = document.getElementById('tab-btn-quick');
 document.getElementById('tab-full').innerHTML  = canViewTeacherReport() ? fullHtml : lockedFullHtml;
 document.getElementById('tab-quick').innerHTML = quickHtml;
+refreshChapterNav();
 if(canViewTeacherReport()){
   fullBtn?.classList.remove('hidden');
 }else{
@@ -5418,8 +5626,8 @@ if(canViewTeacherReport()) void enhanceReportWithGemini(aiReportTags);
 // ══════════════════════════════════════════════
 // Tab 切換
 // ══════════════════════════════════════════════
-function requestPrivateConsultation(){
-  alert('完整諮詢會依流月、生活情境與居家空間進一步判讀。請直接聯繫 Doris 安排 1 對 1 諮詢。');
+function requestPrivateConsultation(topic='完整報告'){
+  alert(`「${topic}」的完整原因、關鍵時間與調整方式，需要結合個人現況進一步判讀。請直接聯繫 Doris 安排 1 對 1 諮詢。`);
 }
 function switchTab(tab,btn){
 if(tab === 'full' && !canViewTeacherReport()){
@@ -5431,6 +5639,7 @@ document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
 btn.classList.add('active');
 document.getElementById('tab-full') .classList.toggle('hidden',tab!=='full');
 document.getElementById('tab-quick').classList.toggle('hidden',tab!=='quick');
+refreshChapterNav();
 }
 
 // ══════════════════════════════════════════════
