@@ -2664,7 +2664,7 @@ return {
 
 let aiReportRequestId=0;
 let aiReportPending=false;
-const AI_REPORT_CACHE_VERSION='2026-07-22-v5.5-complete-chapters';
+const AI_REPORT_CACHE_VERSION='2026-07-22-v5.7-clean-chapter-decisions';
 let lastAiReportTags=null;
 function aiEscape(value){
 return String(value??'').replace(/[&<>"']/g,ch=>({
@@ -2705,16 +2705,21 @@ const actions={
 const generated=Array.isArray(data.chapterSummaries)?data.chapterSummaries:[];
 const byNumber=new Map(generated.map((chapter,index)=>[String(chapter?.number||definitions[index]?.[0]||''),chapter]));
 const raw=Array.isArray(tags?.rawChapters)?tags.rawChapters:[];
+const clientName=String(tags?.client?.name||tags?.clientContext?.name||'').trim();
+const cleanChapterValue=(value,title)=>{
+  let text=String(value||'').replace(/<[^>]*>/g,' ').replace(/^[\s#>*\-•]+/gm,'').replace(/[🌟🏛🔗⚖️🌀📅💰💼💕🏥📆🏠👶]+/gu,' ').replace(/[①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬]/g,' ').replace(/(?:現況定性|行動處方)\s*[：:]?/g,'').replace(/(?:親愛的|嗨|您好)[^，。！？]{0,20}[，,：:]?/g,'').replace(/從你的命盤來看[，,：:]?/g,'').replace(/\s+/g,' ').trim();
+  if(title) text=text.split(title).join('').trim();
+  if(clientName) text=text.split(clientName).join('').replace(/^[，,、：:\s]+/,'').trim();
+  return text.replace(/(?:你的)?(?:命理)?(?:分析|解析|報告)[，,：:]?/g,'').replace(/^[：:，,、\s]+/,'').replace(/\s+/g,' ').trim();
+};
 data.summary=String(data.summary||deterministicAiSummary(tags));
 data.keywords=Array.isArray(data.keywords)&&data.keywords.length?data.keywords:deterministicAiKeywords(tags);
 data.chapterSummaries=definitions.map(([number,title],index)=>{
   const chapter=byNumber.get(number)||generated[index]||{};
-  const rawText=String(raw.find(item=>String(item?.number)===number)?.raw||'');
-  const rawSummary=rawText.split(/[。！？]/).map(item=>item.trim()).find(Boolean)||`${title}已完成本機命盤比對`;
   const bullets=Array.isArray(chapter?.bullets)?chapter.bullets:[];
   return {number,title:String(chapter?.title||title),bullets:[
-    {label:'現況定性',value:String(bullets[0]?.value||rawSummary)},
-    {label:'行動處方',value:String(bullets[1]?.value||actions[number])}
+    {label:'現況定性',value:cleanChapterValue(bullets[0]?.value,title)||'目前的核心狀態已依個人命盤資料完成判讀。'},
+    {label:'行動處方',value:cleanChapterValue(bullets[1]?.value,title)||actions[number]}
   ]};
 });
 return data;
@@ -4980,23 +4985,18 @@ const sec6Html = personalCard({
 });
 
 // ⑦ 財運
+const reportDecisions=plainDecisionProfiles();
 const sec7Html = personalCard({
   icon:'💰', title:'你的財運分析', id:'BAZI_029',
-  personalSummary:wealthBigSummary(),
+  personalSummary:'財運定位：'+reportDecisions.wealth.type+'。'+reportDecisions.wealth.path+'。',
   details:[
-    client.name+'，以你的日主【'+riTg+riWx+'】來看，財星是【'+caiStar+'】。'+lyYear+'年流年【'+lyGz+'】，'+(lyWx===caiStar?'剛好碰到你的財星，賺錢機會會比較容易被看見。':'財運不只看有沒有錢進來，也要看你能不能穩穩接住。'),
+    '你的獲利模式最適合「'+reportDecisions.wealth.type+'」；'+reportDecisions.wealth.path+'。',
     caiEntries.length
       ? '原局不是沒有財星。你盤裡的財星位置是：'+formatTenGodEntries(caiEntries)+'。正財偏向穩定收入、現實資源與金錢秩序；偏財偏向機會、人脈與彈性收入。'
       : '原局天干與藏干沒有明顯財星，所以財運要更重視大運、流年與食傷生財的時機。',
-    zhengCaiEntries.length ? '正財重點：'+formatTenGodEntries(zhengCaiEntries)+'，代表你其實有務實理財、穩定累積與看重安全感的一面。' : '',
-    pianCaiEntries.length ? '偏財重點：'+formatTenGodEntries(pianCaiEntries)+'，代表你也有靠機會、人脈、專案或非固定收入打開財路的可能。' : '',
-    jieCaiEntries.length ? '劫財提醒：'+formatTenGodEntries(jieCaiEntries)+'，錢容易牽涉朋友、家人、分帳或共同資源；合夥和借貸要規則清楚。' : '',
-    jieCaiEntries.length ? '防禦型提醒：'+guidanceVariant('moneyRules') : '',
+    '主要財務破口：'+reportDecisions.wealth.risk+'。',
+    '具體做法：先把服務內容、價格、收款節點與合作責任寫清楚，再決定是否接案或投入資金。',
     wealthYearAdvice(),
-    isExtremeStrength() ? '你屬於能量極旺的格局，財運不適合只靠等別人給機會；比較適合自己定義產品、服務、案型與價格。' : (isStrong?'你屬於身強格局，原局又有財星，適合主動整理客戶、價格、服務方案與收款規則。':'你屬於身弱格局，財星出現時要記得量力而為，先穩住節奏再擴張。'),
-    ...comboPriorityNotes().filter(note => note.includes('財') || note.includes('變現') || note.includes('機會')).slice(0, 2),
-    ...transformedTenGodNotes().filter(note => note.includes('財') || note.includes('機會') || note.includes('資源')).slice(0, 2),
-    usableEnergySentence()
   ].filter(Boolean),
   tags:['財星'+caiStar, strongLabel, '流年'+lyGz]
 });
@@ -5004,20 +5004,14 @@ const sec7Html = personalCard({
 // ⑧ 事業
 const sec8Html = personalCard({
   icon:'💼', title:'你的事業職涯分析', id:'BAZI_032',
-  personalSummary:careerBigSummary(),
+  personalSummary:'職涯定位：'+reportDecisions.career.type+'。'+reportDecisions.career.reason+'。',
   details:[
-    client.name+'，你的正官星五行是【'+guanStar+'】，它代表職場裡的責任、規則、主管，也代表你可以被看見的位置。目前大運【'+curDyGz+'】帶著【'+curDyShen+'】的主題。',
-    getDayunCareerNote(curDyShen)+'，所以這段時間的職涯選擇，可以多觀察自己是不是正在累積更長線的能力。',
-    lyYear+'年流年是【'+lyStar+'】：'+getLiunianCareerNote(lyStar)+'。',
-    '用這張盤來看，事業不是只看正官星【'+guanStar+'】，還要看目前大運【'+curDyShen+'】怎麼讓你做事：它比較偏向先累積專業、建立方法，再用作品或成果被看見。',
-    '適合職業／職涯方向：'+careerDirectionSummary()+'。這些方向不是硬性職業名稱，而是你比較容易發揮的工作型態。',
-    ...comboPriorityNotes().filter(note => note.includes('事業') || note.includes('制度') || note.includes('作品') || note.includes('體制') || note.includes('規則')).slice(0, 3),
-    ...transformedTenGodNotes().filter(note => note.includes('食傷') || note.includes('官星') || note.includes('印星')).slice(0, 3),
+    '你的命盤結構最適合「'+reportDecisions.career.type+'」，因為'+reportDecisions.career.reason+'。',
+    '不適合的工作結構：'+reportDecisions.career.avoid+'。',
+    '目前【'+curDyGz+curDyShen+'】大運與【'+lyGz+lyStar+'】流年，會影響你累積專業、承接責任與推出成果的節奏。',
     guanEntries.length ? '官星落點：'+formatTenGodEntries(guanEntries)+'，表示責任、制度、名聲與被看見的位置會在這些宮位被啟動。' : '',
     shiShangEntries.length ? '食傷落點：'+formatTenGodEntries(shiShangEntries)+'，代表你可以靠表達、作品、教學、內容輸出或方法整理來累積職涯能見度。' : '',
-    ...careerInsights,
     teacherViewBlock(teacherKB, '職場人際策略', {ten_god:curDyShen}, 1, {title:'老師判斷依據（職場）', maxPoints:3}),
-    '遇到壓力時，不一定要急著硬碰硬；先分清楚哪些是責任，哪些只是別人的期待，會更穩。',
   ].filter(Boolean),
   tags:['正官'+guanStar, '大運'+curDyShen, '流年'+lyStar]
 });
@@ -5025,17 +5019,13 @@ const sec8Html = personalCard({
 // ⑨ 感情
 const sec9Html = personalCard({
   icon:'💕', title:'你的感情婚姻分析', id:'BAZI_034',
-  personalSummary:client.name+'，你是【'+client.gender+'命】；以傳統八字來看，'+(client.gender==='男'?'妻星看財星':'夫星看官星')+'，你的配偶星五行是【'+peiouStar+'】。'+lyYear+'年流年【'+lyGz+'】，'+(lyWx===peiouStar?'剛好碰到配偶星，感情機緣會比較容易浮上檯面。':'感情的重點不一定是突然出現大事件，而是你怎麼回應關係裡的靠近與距離。'),
+  personalSummary:'關係定位：'+reportDecisions.relationship.type+'。'+reportDecisions.relationship.partner+'。',
   details:[
+    '你較適合「'+reportDecisions.relationship.type+'」；'+reportDecisions.relationship.partner+'。',
     '你的日支是【'+riDz+'】，也就是婚姻宮；它透露的是你在親密關係裡容易期待什麼、在意什麼。'+getRizhiMarriageNote(riDz)+'。',
     ...spouseProfileSummary(),
-    lyYear+'年的流年十神是【'+lyStar+'】：'+getLiunianLoveNote(lyStar)+'。這裡講的是今年關係裡比較容易出現的心理狀態，不是直接斷定一定結婚或分手。',
-    lyWx===peiouStar
-      ? '今年流年五行剛好碰到你的配偶星【'+peiouStar+'】，比較容易有人際、曖昧或關係議題被看見；但是否能成為穩定關係，還要看夫妻宮是否受沖合與大運是否支持。'
-      : '今年流年五行不是直接碰到你的配偶星【'+peiouStar+'】，所以感情比較像是調整互動方式，而不是單純等一個桃花事件。',
-    lyWx!==peiouStar ? '感情心法：今年沒有直接牽動配偶星，反而代表感情世界少一點外在雜音。這一年更適合靜下心來建立共識、重新調整步調，把關係裡真正需要修復的地方慢慢說清楚。' : '',
-    ...loveInsights,
-    '這段時間感情上最重要的不是猜對方，而是把自己的界線和需要說清楚。',
+    '相處盲點：'+reportDecisions.relationship.blindspot+'。',
+    lyYear+'年的關係氣氛由【'+lyStar+'】帶動：'+getLiunianLoveNote(lyStar)+'。這是互動傾向，不等於直接斷定結婚或分手。',
   ].filter(Boolean),
   tags:['配偶星'+peiouStar, '日支'+riDz, '流年'+lyStar]
 });
@@ -5253,11 +5243,12 @@ const rawChapters=[
   ['⑫',`${lyYear}流日擇吉方向`,sec11Html],
   ['⑬','風水與開運整合佈局',sec12Html]
 ].map(([number,title,html])=>({number,title,raw:reportPlainText(html)}));
-const plainDecisions=plainDecisionProfiles();
+const plainDecisions=reportDecisions;
 const childBirthOrder=childBirthOrderSequence();
 const aiReportTags={
   rawChapters,
   clientContext:{
+    name:client.name,
     gender:client.gender,
     genderRule:client.gender==='男'
       ? '男命：配偶／妻星看正財、偏財；子女星看正官、七殺；作品輸出另看食神、傷官。'
