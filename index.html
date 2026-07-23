@@ -221,6 +221,11 @@ text-align:center;
 padding:60px 20px;
 color:#B89C7D;
 }
+.admin-request-list{display:grid;gap:10px;}
+.admin-request-item{padding:14px;border:1px solid #E8DDD0;border-left:4px solid #8C6747;border-radius:6px;background:#FFFDF9;}
+.admin-request-meta{display:flex;flex-wrap:wrap;gap:6px 12px;margin-bottom:7px;color:#8A7865;font-size:.75rem;}
+.admin-request-question{color:#4A3728;font-weight:700;line-height:1.65;}
+.admin-request-chart{margin-top:6px;color:#806F61;font-size:.78rem;line-height:1.6;}
 .empty-state .emoji{font-size:3rem;margin-bottom:12px;}
 
 /* ══════════════════════════════════════
@@ -392,8 +397,8 @@ background:#FFFCF7;
 .quick-hook-list strong{color:#8B541F;}
 .quick-cta{display:inline-flex;align-items:center;justify-content:center;margin-top:18px;padding:12px 18px;border:1px solid #8C6747;border-radius:6px;background:#8C6747;color:#FFF;font:inherit;font-weight:700;cursor:pointer;}
 .quick-cta:hover{background:#755238;}
-.quick-pain-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;}
-.quick-pain-card{--hook-color:#9B5A43;position:relative;overflow:hidden;padding:18px;border:1px solid #E7DCCF;border-top:4px solid var(--hook-color);border-radius:6px;background:#FFFDF9;}
+.quick-pain-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:1fr;align-items:stretch;gap:14px;}
+.quick-pain-card{--hook-color:#9B5A43;position:relative;display:flex;min-width:0;flex-direction:column;overflow:hidden;padding:18px;border:1px solid #E7DCCF;border-top:4px solid var(--hook-color);border-radius:6px;background:#FFFDF9;}
 .quick-pain-card[data-tone="love"]{--hook-color:#C43F70;}
 .quick-pain-card[data-tone="career"]{--hook-color:#3269AD;}
 .quick-pain-card[data-tone="family"]{--hook-color:#A2672E;}
@@ -401,8 +406,9 @@ background:#FFFCF7;
 .quick-pain-title{margin:0 0 10px;color:var(--hook-color);font-size:1.05rem;font-weight:800;}
 .quick-pain-question{margin:0 0 10px;color:#3F332C;font-weight:800;line-height:1.55;}
 .quick-pain-card p{margin:0 0 10px;line-height:1.75;}
-.quick-risk{padding:10px 12px;color:#8D3029;background:#FFF1ED;border-left:3px solid #C85D4F;font-weight:750;}
-.quick-lock{position:relative;min-height:112px;margin-top:14px;overflow:hidden;border-top:1px solid #E7DCCF;background:#FBF6EE;}
+.quick-pain-diagnosis{flex:1;}
+.quick-risk{box-sizing:border-box;display:flex;min-height:76px;align-items:center;padding:10px 12px;color:#8D3029;background:#FFF1ED;border-left:3px solid #C85D4F;font-weight:750;}
+.quick-lock{position:relative;box-sizing:border-box;width:100%;min-height:112px;margin-top:auto;overflow:hidden;border-top:1px solid #E7DCCF;background:#FBF6EE;}
 .quick-lock-preview{padding:14px;color:#69594F;filter:blur(4px);opacity:.48;user-select:none;pointer-events:none;}
 .quick-lock-preview p{margin:0 0 6px;}
 .quick-lock-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;padding:14px;text-align:center;background:rgba(255,253,249,.84);}
@@ -412,12 +418,14 @@ background:#FFFCF7;
 .quick-boundary-note{margin:14px 0 0;color:#89776A;font-size:.9rem;line-height:1.65;}
 .report-nav{
 position:fixed;
-left:max(16px,env(safe-area-inset-left));
-bottom:max(18px,env(safe-area-inset-bottom));
+right:max(16px,env(safe-area-inset-right));
+top:50%;
 z-index:84;
 display:flex;
+flex-direction:column;
 gap:6px;
 padding:6px;
+transform:translateY(-50%);
 border:1px solid #DCC7AD;
 border-radius:7px;
 background:rgba(255,253,249,.96);
@@ -442,11 +450,12 @@ cursor:pointer;
 .report-nav-button svg{width:19px;height:19px;stroke:currentColor;stroke-width:1.9;fill:none;}
 .chapter-nav-panel{
 position:fixed;
-left:max(16px,env(safe-area-inset-left));
-bottom:72px;
+right:74px;
+top:50%;
 z-index:85;
 width:min(330px,calc(100vw - 32px));
 max-height:min(620px,calc(100vh - 110px));
+transform:translateY(-50%);
 overflow:auto;
 padding:14px;
 border:1px solid #DCC7AD;
@@ -482,6 +491,7 @@ justify-content:center;
 transition:all 0.2s;
 }
 .gemini-launcher:hover{transform:translateY(-2px);background:#6F5410;}
+.gemini-launcher.hidden,.gemini-card.hidden{display:none!important;}
 .gemini-card{
 position:fixed;
 right:22px;
@@ -1665,46 +1675,29 @@ details.kb-section summary{background:#FAF6F0;color:var(--ink);}
 .wuxing-legend{padding:0 4px;}
 .bazi-wrap{
 position:relative;
-margin-right:-14px;
-padding-right:14px;
-padding-bottom:8px;
-overflow-x:auto;
-overflow-y:hidden;
--webkit-overflow-scrolling:touch;
+margin:0;
+padding:0;
+overflow:visible;
 }
-.bazi-wrap:not(:empty)::before{
-content:'左右滑動查看完整排盤';
-position:sticky;
-left:0;
-display:inline-block;
-width:auto;
-margin:0 0 7px;
-padding:3px 8px;
-background:var(--tea-50);
-color:var(--tea-500);
-font-size:.68rem;
-font-weight:600;
-border-radius:4px;
-z-index:3;
-}
-.bazi-table{table-layout:fixed;width:520px;min-width:520px;max-width:none;}
+.bazi-wrap:not(:empty)::before{display:none;}
+.bazi-table{table-layout:fixed;width:100%;min-width:0;max-width:100%;}
 .bazi-table th,.bazi-table td{
-padding:8px 5px;
-font-size:.72rem;
-word-break:keep-all;
-overflow-wrap:normal;
+padding:7px 2px;
+font-size:clamp(.58rem,2.6vw,.72rem);
+word-break:normal;
+overflow-wrap:anywhere;
 -webkit-text-size-adjust:100%;
 }
-.bazi-table th:not(.col-label),.bazi-table td:not(.col-label){width:119px;min-width:119px;}
+.bazi-table th:not(.col-label),.bazi-table td:not(.col-label){width:auto;min-width:0;}
 .col-label{
-width:44px!important;
-min-width:44px;
-font-size:.66rem!important;
+width:34px!important;
+min-width:34px;
+font-size:.6rem!important;
 writing-mode:horizontal-tb;
 letter-spacing:0;
 white-space:normal;
 }
-.tg-char,.dz-char{font-size:1.65rem;}
+.tg-char,.dz-char{font-size:clamp(1.35rem,7vw,1.65rem);}
 .canggan-cell{letter-spacing:0;}
 .canggan-cell span,.fs-item{font-size:.62rem;}
 .dayun-row-wrap,.dayun-wrap{position:relative;margin-right:-14px;padding-right:14px;padding-bottom:8px;scroll-snap-type:x proximity;}
@@ -1718,9 +1711,11 @@ white-space:normal;
 .quick-score-item{padding:12px 13px;}
 .quick-consult-hook{padding:18px 15px;}
 .quick-cta{width:100%;}
-.report-nav{left:max(10px,env(safe-area-inset-left));bottom:max(10px,env(safe-area-inset-bottom));gap:2px;padding:4px;}
-.report-nav-button{width:36px;height:36px;}
-.chapter-nav-panel{left:max(10px,env(safe-area-inset-left));bottom:60px;width:min(340px,calc(100vw - 20px));max-height:calc(100vh - 82px);}
+.report-nav{right:max(10px,env(safe-area-inset-right));top:50%;bottom:auto;left:auto;transform:translateY(-50%);flex-direction:column;gap:4px;padding:5px;}
+.report-nav-button{width:38px;height:38px;}
+.chapter-nav-panel{right:62px;top:50%;bottom:auto;left:auto;transform:translateY(-50%);width:min(320px,calc(100vw - 82px));max-height:calc(100vh - 30px);}
+.quick-pain-grid{grid-auto-rows:auto;}
+.quick-risk{min-height:0;}
 .ai-keyword-grid{grid-template-columns:1fr;}
 .ai-keyword-item{padding:12px;}
 .tab-btn{font-size:.88rem;}
@@ -1798,6 +1793,10 @@ details.kb-section summary::after{display:none;}
 <button class="btn btn-primary" onclick="showScreen('screen-add')">＋ 新增客戶</button>
 </div>
 <div id="client-list-container"></div>
+<section id="admin-request-panel" class="card hidden" aria-labelledby="admin-request-title">
+  <div id="admin-request-title" class="section-title">客戶題目回傳</div>
+  <div id="admin-request-list" class="admin-request-list"><p>正在讀取客戶操作資料⋯</p></div>
+</section>
 </div>
 
 <!-- 畫面二：新增客戶 -->
@@ -2012,6 +2011,15 @@ details.kb-section summary::after{display:none;}
 const CURRENT_YEAR = new Date().getFullYear();
 const LS_KEY = 'doris_clients';
 const GEMINI_API_ROUTE = window.DORIS_GEMINI_API_ROUTE || localStorage.getItem('doris_gemini_api_route') || 'https://mingli-paipan.vercel.app/api/gemini-polish';
+const BOOKING_URL = window.DORIS_BOOKING_URL || localStorage.getItem('doris_booking_url') || '';
+const AI_ADVISOR_SYSTEM_PROMPT = `你是一位精通子平八字的專業命理顧問。
+使用者上方已經閱讀過系統程式自動產生的命盤基礎數據與條文報告。你的任務是作為「一對一諮詢顧問」，協助使用者解讀報告重點、將條文轉化為生活實用建議，並解答使用者的追加提問。
+
+在回應任何問題時，請遵循以下核心原則：
+1.【一對一直接對話】以親切、專業的顧問口吻直接回覆使用者；嚴禁出現「可以對客戶說」、「講稿範例」、「摘要如下」等第三方、教案式或機械化文字。
+2.【活化上方報告，拒絕死板照抄】不要照搬靜態規則；將十神、大運干支、流年沖合等結構轉化為現代生活情境與具體事件。
+3.【精準推論，拒絕心靈雞湯】避免抽象、模稜兩可或純心理安慰；提出清晰推論與具體行動建議。涉及時間點時，務必指出具體西元年份與年齡。
+4.【靈活應答機制】過去事件著重大運交接與流年沖合引起的轉折；未來運勢、事業、財運著重趨勢、優勢與風險；感情、子女、人際結合命盤氣勢與現代生活型態；流年注意事項提供具體避坑與應對策略。`;
 const GITHUB_RAW = 'https://raw.githubusercontent.com/aichi0121/mingli-paipan/main/data/';
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyBHUerxO5VyQA_taGIJxD0vYv1-scdgfM0",
@@ -2086,6 +2094,7 @@ if(!user){
 try{
   await ensureUserProfile(user);
   await loadCloudClients();
+  await loadAdminConsultationRequests();
   cloudStatusText = '已同步雲端資料。';
 }catch(err){
   console.error('Firebase sync error:', err);
@@ -2198,6 +2207,37 @@ function canViewTeacherReport(){
 return currentRole === 'admin' || currentRole === 'teacher';
 }
 
+function canUseGemini(){
+return currentRole === 'admin';
+}
+
+async function loadAdminConsultationRequests(){
+const panel=document.getElementById('admin-request-panel');
+const list=document.getElementById('admin-request-list');
+panel?.classList.toggle('hidden',currentRole!=='admin');
+if(currentRole!=='admin' || !fbDb || !list) return;
+try{
+  const snap=await fbDb.collection('consultationRequests').orderBy('createdAt','desc').limit(50).get();
+  if(snap.empty){
+    list.innerHTML='<p class="empty-state">目前還沒有客戶題目回傳。</p>';
+    return;
+  }
+  list.replaceChildren(...snap.docs.map(doc=>{
+    const data=doc.data()||{};
+    const item=document.createElement('article');
+    item.className='admin-request-item';
+    const date=data.createdAt?.toDate?.();
+    const dayMaster=data.chart?.dayMaster||'—';
+    const pillars=Object.values(data.chart?.pillars||{}).map(p=>p?.ganzhi||'').filter(Boolean).join('・')||'—';
+    item.innerHTML=`<div class="admin-request-meta"><span>${aiEscape(data.clientName||'未命名客戶')}</span><span>${aiEscape(date?date.toLocaleString('zh-TW'):'同步中')}</span><span>${aiEscape(data.userEmail||'未登入／無信箱')}</span></div><div class="admin-request-question">${aiEscape(data.topic||'完整報告')} — ${aiEscape(data.question||'預約深度諮詢')}</div><div class="admin-request-chart">日主：${aiEscape(dayMaster)}｜四柱：${aiEscape(pillars)}</div>`;
+    return item;
+  }));
+}catch(err){
+  console.error('Admin consultation requests load failed:',err);
+  list.innerHTML='<p class="empty-state">題目回傳讀取失敗，請確認 Firestore Rules 已更新。</p>';
+}
+}
+
 function roleLabel(){
 return currentRole === 'admin' ? 'admin 完整版' :
   currentRole === 'teacher' ? 'teacher 完整版' :
@@ -2219,6 +2259,10 @@ if(panel && !panel.contains(e.target)) toggleAuthMenu(false);
 });
 
 function toggleGeminiChat(force){
+if(!canUseGemini()){
+  document.getElementById('gemini-card')?.classList.remove('active');
+  return;
+}
 const card=document.getElementById('gemini-card');
 const launcher=document.getElementById('gemini-launcher');
 if(!card) return;
@@ -2235,6 +2279,11 @@ const badge = document.getElementById('role-badge');
 const loginBtn = document.getElementById('btn-google-login');
 const logoutBtn = document.getElementById('btn-google-logout');
 const syncBtn = document.getElementById('btn-cloud-sync');
+const geminiLauncher = document.getElementById('gemini-launcher');
+const geminiCard = document.getElementById('gemini-card');
+geminiLauncher?.classList.toggle('hidden',!canUseGemini());
+if(!canUseGemini()) geminiCard?.classList.remove('active');
+document.getElementById('admin-request-panel')?.classList.toggle('hidden',currentRole!=='admin');
 if(!avatar || !title || !subtitle || !badge) return;
 if(currentUser){
   avatar.innerHTML = currentUser.photoURL ? `<img src="${currentUser.photoURL}" alt="">` : (currentUser.displayName || currentUser.email || '已').slice(0,1);
@@ -3106,13 +3155,15 @@ setTimeout(()=>{
 },300);
 }
 
-async function callGeminiAssistant({question,maxOutputTokens=2200}){
+async function callGeminiAssistant({question,maxOutputTokens=3200,history=geminiChatHistory}){
+if(!canUseGemini()) throw new Error('Gemini 對話僅限管理員使用。');
 const result=await callGeminiRoute({
   mode:'chat',
   outputType:'article',
+  systemPrompt:AI_ADVISOR_SYSTEM_PROMPT,
   tags:getBaziTagsForGemini(),
   reportDraft:getReportContextForGemini(),
-  history:geminiChatHistory,
+  history,
   question,
   maxOutputTokens
 });
@@ -3121,6 +3172,7 @@ return result.text;
 }
 
 async function askGeminiAboutReport(){
+if(!canUseGemini()) return;
 const q=document.getElementById('gemini-question');
 const question=q?.value.trim()||'';
 const btn=document.getElementById('btn-ask-gemini');
@@ -3128,16 +3180,16 @@ if(!question){
   alert('請先輸入想問的問題。');
   return;
 }
+const priorHistory=[...geminiChatHistory];
 appendGeminiMessage('user',question);
-geminiChatHistory.push({role:'user',text:question});
 if(q) q.value='';
 const pending=appendGeminiMessage('assistant','正在整理回答中⋯');
 if(btn) btn.disabled=true;
 try{
-  const text=await callGeminiAssistant({question,maxOutputTokens:2200});
+const text=await callGeminiAssistant({question,maxOutputTokens:3200,history:priorHistory});
   const finalText=text || 'Gemini 沒有回傳文字，請稍後再試。';
   setGeminiMessage(pending,finalText);
-  geminiChatHistory.push({role:'assistant',text:finalText});
+geminiChatHistory.push({role:'user',text:question},{role:'assistant',text:finalText});
   document.getElementById('btn-gemini-continue')?.classList.remove('hidden');
 }catch(err){
   console.error('Gemini ask error:', err);
@@ -3154,16 +3206,16 @@ if(!lastAnswer){
   alert('目前還沒有可以接續的 Gemini 回答。');
   return;
 }
-const userText='請繼續補充上一題，避免重複前面已經說過的內容。';
+const userText='請只接續上一則回答尚未完成的地方。若上一則停在半句，直接從中斷處接續；不得重寫、推翻或新增與前文衝突的結論與命盤依據。若上一則已完整，只補充尚未提到的一項具體說法與一項行動建議，避免重複。';
+const priorHistory=[...geminiChatHistory];
 appendGeminiMessage('user',userText);
-geminiChatHistory.push({role:'user',text:userText});
 const pending=appendGeminiMessage('assistant','繼續補充中⋯');
 if(btn) btn.disabled=true;
 try{
-  const text=await callGeminiAssistant({question:userText,maxOutputTokens:1800});
+const text=await callGeminiAssistant({question:userText,maxOutputTokens:2600,history:priorHistory});
   const finalText=text || 'Gemini 沒有回傳補充內容，請稍後再試。';
   setGeminiMessage(pending,finalText);
-  geminiChatHistory.push({role:'assistant',text:finalText});
+geminiChatHistory.push({role:'user',text:userText},{role:'assistant',text:finalText});
 }catch(err){
   console.error('Gemini continue error:', err);
   setGeminiMessage(pending,'Gemini 補充失敗：'+err.message,'error');
@@ -5420,17 +5472,19 @@ const healthDiagnosis=!isStrong
       : `你的底氣不差，但習慣撐到事情做完才休息；${coreOrgan}與規律作息是最不能被延後的保養重點。`;
 const healthRisk='健康警訊：若疲累已持續影響生活，應以專業醫療評估為準，不要只用命理解釋身體訊號。';
 
-function quickPainCard({tone,icon,title,question,diagnosis,risk,preview}){
-  return `<article class="quick-pain-card" data-tone="${tone}">
-    <h4 class="quick-pain-title">${icon} ${title}</h4>
-    <p class="quick-pain-question">${question}</p>
-    <p>${diagnosis}</p>
-    <p class="quick-risk">${risk}</p>
-    <div class="quick-lock" aria-label="付費諮詢內容已鎖定">
-      <div class="quick-lock-preview">${preview.map(item=>`<p>${item}</p>`).join('')}</div>
-      <div class="quick-lock-overlay"><span>🔒 完整原因、時間點與處理方式</span><strong>深度諮詢解鎖</strong><button type="button" class="quick-lock-button" onclick="requestPrivateConsultation('${title}')">了解這一題</button></div>
-    </div>
-  </article>`;
+    function quickPainCard({tone,icon,title,question,diagnosis,risk,preview}){
+      const encodedTitle=encodeURIComponent(title);
+      const encodedQuestion=encodeURIComponent(question);
+      return `<article class="quick-pain-card" data-tone="${tone}">
+        <h4 class="quick-pain-title">${icon} ${title}</h4>
+        <p class="quick-pain-question">${question}</p>
+        <p class="quick-pain-diagnosis">${diagnosis}</p>
+        <p class="quick-risk">${risk}</p>
+        <div class="quick-lock" aria-label="付費諮詢內容已鎖定">
+          <div class="quick-lock-preview">${preview.map(item=>`<p>${item}</p>`).join('')}</div>
+          <div class="quick-lock-overlay"><span>🔒 完整原因、時間點與處理方式</span><strong>深度諮詢解鎖</strong><button type="button" class="quick-lock-button" onclick="requestPrivateConsultation(decodeURIComponent('${encodedTitle}'),decodeURIComponent('${encodedQuestion}'))">了解這一題</button></div>
+        </div>
+      </article>`;
 }
 
 const quickPainHtml=`<div class="quick-pain-grid">
@@ -5665,9 +5719,60 @@ if(canViewTeacherReport()) void enhanceReportWithGemini(aiReportTags);
 // ══════════════════════════════════════════════
 // Tab 切換
 // ══════════════════════════════════════════════
-function requestPrivateConsultation(topic='完整報告'){
-  alert(`「${topic}」的完整原因、關鍵時間與調整方式，需要結合個人現況進一步判讀。請直接聯繫 Doris 安排 1 對 1 諮詢。`);
-}
+    async function recordQuickQuestion(topic,question){
+      const client=currentReportClient;
+      const payload={
+        topic:String(topic||'完整報告'),
+        question:String(question||''),
+        clientId:String(client?.id||''),
+        clientName:String(client?.name||''),
+        chart:getBaziTagsForGemini(),
+        userUid:currentUser?.uid||null,
+        userEmail:currentUser?.email||'',
+        createdAt:firebaseReady ? firebase.firestore.FieldValue.serverTimestamp() : new Date().toISOString()
+      };
+      const localKey='doris_quick_question_events';
+      try{
+        const events=JSON.parse(localStorage.getItem(localKey)||'[]');
+        events.unshift({...payload,createdAt:new Date().toISOString()});
+        localStorage.setItem(localKey,JSON.stringify(events.slice(0,100)));
+      }catch(_){ }
+      if(fbDb){
+        try{ await fbDb.collection('consultationRequests').add(payload); }
+        catch(err){ console.warn('Consultation request sync failed:',err); }
+      }
+    }
+
+    async function requestPrivateConsultation(topic='完整報告',question=''){
+      await recordQuickQuestion(topic,question);
+      if(question && canUseGemini()){
+        const prompt=`【客戶命盤資料】
+${getReportContextForGemini()}
+
+【問題】
+${topic} — ${question}
+
+【回答格式要求】
+請一次完整輸出，包含：
+1. 結論（心理層面分析）
+2. 命盤依據（十神、宮位解析）
+3. 給客戶的實用建議（口語化、有溫度）
+字數約 800-1000 字，請一次輸出完畢，不要要求補充。`;
+        toggleGeminiChat(true);
+        const input=document.getElementById('gemini-question');
+        if(input){
+          input.value=prompt;
+          input.focus();
+        }
+        void askGeminiAboutReport();
+        return;
+      }
+      if(BOOKING_URL){
+        window.location.assign(BOOKING_URL);
+        return;
+      }
+      alert('預約連結尚未設定，請聯繫管理員設定 DORIS_BOOKING_URL。');
+    }
 function switchTab(tab,btn){
 if(tab === 'full' && !canViewTeacherReport()){
   alert('完整版只開放給管理員或命理師帳號。朋友試用會看到客戶快速版。');

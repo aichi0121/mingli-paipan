@@ -10,6 +10,8 @@
 - 角色分級：`guest`、`tester`、`admin`、`teacher`
 - `tester` / `guest` 只看快速版
 - `admin` / `teacher` 可看完整版
+- 客戶點選快速版題目後，題目與命盤摘要會回傳到 `consultationRequests`
+- `admin` 登入後可在客戶列表下方查看回傳；`teacher` 與客戶無法讀取
 
 ## 第一次使用
 
