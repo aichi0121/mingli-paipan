@@ -222,10 +222,14 @@ padding:60px 20px;
 color:#B89C7D;
 }
 .admin-request-list{display:grid;gap:10px;}
-.admin-request-item{padding:14px;border:1px solid #E8DDD0;border-left:4px solid #8C6747;border-radius:6px;background:#FFFDF9;}
+.admin-request-item{padding:14px;border:1px solid #E8DDD0;border-left:4px solid #8C6747;border-radius:6px;background:#FFFDF9;cursor:pointer;transition:border-color .2s,box-shadow .2s,transform .2s;}
+.admin-request-item:hover,.admin-request-item:focus-visible{border-color:#C7A37F;box-shadow:0 5px 16px rgba(74,55,40,.1);transform:translateY(-1px);outline:none;}
 .admin-request-meta{display:flex;flex-wrap:wrap;gap:6px 12px;margin-bottom:7px;color:#8A7865;font-size:.75rem;}
 .admin-request-question{color:#4A3728;font-weight:700;line-height:1.65;}
 .admin-request-chart{margin-top:6px;color:#806F61;font-size:.78rem;line-height:1.6;}
+.admin-request-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid #EEE4D8;}
+.admin-request-actions .btn{min-height:34px;padding:6px 12px;font-size:.76rem;}
+.admin-request-status{margin-top:8px;color:#8B6914;font-size:.76rem;}
 .empty-state .emoji{font-size:3rem;margin-bottom:12px;}
 
 /* ══════════════════════════════════════
@@ -2226,15 +2230,114 @@ try{
     const data=doc.data()||{};
     const item=document.createElement('article');
     item.className='admin-request-item';
+    item.tabIndex=0;
+    item.setAttribute('role','button');
+    item.setAttribute('aria-label',`開啟 ${data.clientName||'未命名客戶'} 的命盤並詢問`);
     const date=data.createdAt?.toDate?.();
     const dayMaster=data.chart?.dayMaster||'—';
     const pillars=Object.values(data.chart?.pillars||{}).map(p=>p?.ganzhi||'').filter(Boolean).join('・')||'—';
-    item.innerHTML=`<div class="admin-request-meta"><span>${aiEscape(data.clientName||'未命名客戶')}</span><span>${aiEscape(date?date.toLocaleString('zh-TW'):'同步中')}</span><span>${aiEscape(data.userEmail||'未登入／無信箱')}</span></div><div class="admin-request-question">${aiEscape(data.topic||'完整報告')} — ${aiEscape(data.question||'預約深度諮詢')}</div><div class="admin-request-chart">日主：${aiEscape(dayMaster)}｜四柱：${aiEscape(pillars)}</div>`;
+    item.innerHTML=`<div class="admin-request-meta"><span>${aiEscape(data.clientName||'未命名客戶')}</span><span>${aiEscape(date?date.toLocaleString('zh-TW'):'同步中')}</span><span>${aiEscape(data.userEmail||'未登入／無信箱')}</span></div><div class="admin-request-question">${aiEscape(data.topic||'完整報告')} — ${aiEscape(data.question||'預約深度諮詢')}</div><div class="admin-request-chart">日主：${aiEscape(dayMaster)}｜四柱：${aiEscape(pillars)}</div><div class="admin-request-actions"><button type="button" class="btn btn-primary admin-request-open">開啟並詢問</button><button type="button" class="btn btn-danger admin-request-delete">刪除回傳</button></div><div class="admin-request-status hidden" aria-live="polite"></div>`;
+    const openRequest=()=>openAdminConsultationRequest(doc.id,data,item);
+    item.addEventListener('click',openRequest);
+    item.addEventListener('keydown',event=>{
+      if(event.key==='Enter' || event.key===' '){
+        event.preventDefault();
+        openRequest();
+      }
+    });
+    item.querySelector('.admin-request-open')?.addEventListener('click',event=>{
+      event.stopPropagation();
+      openRequest();
+    });
+    item.querySelector('.admin-request-delete')?.addEventListener('click',event=>{
+      event.stopPropagation();
+      void deleteAdminConsultationRequest(doc.id,data,item);
+    });
     return item;
   }));
 }catch(err){
   console.error('Admin consultation requests load failed:',err);
   list.innerHTML='<p class="empty-state">題目回傳讀取失敗，請確認 Firestore Rules 已更新。</p>';
+}
+}
+
+function setAdminRequestStatus(item,message,isError=false){
+const status=item?.querySelector('.admin-request-status');
+if(!status) return;
+status.textContent=message;
+status.classList.remove('hidden');
+status.style.color=isError?'#A94338':'#8B6914';
+}
+
+async function openAdminConsultationRequest(requestId,data,item){
+if(currentRole!=='admin' || !fbDb) return;
+const openBtn=item?.querySelector('.admin-request-open');
+if(openBtn?.disabled) return;
+if(openBtn) openBtn.disabled=true;
+setAdminRequestStatus(item,'正在取得完整客戶資料⋯');
+try{
+  const sourceUid=String(data.userUid||'');
+  const sourceClientId=String(data.clientId||'');
+  if(!sourceUid || !sourceClientId) throw new Error('這筆舊回傳沒有客戶資料索引。');
+  const sourceSnap=await fbDb.collection('users').doc(sourceUid).collection('clients').doc(sourceClientId).get();
+  if(!sourceSnap.exists) throw new Error('原客戶資料已不存在，無法還原完整命盤。');
+  const sourceClient={id:sourceClientId,...sourceSnap.data()};
+  if(!sourceClient.baziData) throw new Error('原客戶資料缺少完整排盤，無法開啟。');
+
+  let adminClient=sourceUid===currentUser?.uid
+    ? getClients().find(client=>String(client.id)===sourceClientId)
+    : getClients().find(client=>
+        client.sourceOwnerUid===sourceUid && client.sourceClientId===sourceClientId
+      );
+  if(!adminClient){
+    const importedId=`lead_${sourceUid}_${sourceClientId}`;
+    adminClient={
+      ...sourceClient,
+      id:importedId,
+      sourceOwnerUid:sourceUid,
+      sourceClientId,
+      importedFromRequestId:requestId,
+      importedAt:new Date().toISOString(),
+      consultDate:new Date().toLocaleDateString('zh-TW')
+    };
+    const nextClients=[adminClient,...getClients()];
+    localStorage.setItem(LS_KEY,JSON.stringify(nextClients));
+    cloudClients=nextClients;
+    await saveClientToCloud(adminClient);
+  }
+
+  loadReport(adminClient.id);
+  toggleGeminiChat(true);
+  const input=document.getElementById('gemini-question');
+  if(input){
+    input.value=`【問題】\n${data.topic||'完整報告'} — ${data.question||'請依這位客戶的命盤提供完整分析'}\n\n【回答格式要求】\n請一次完整輸出：1. 結論（心理層面分析）；2. 命盤依據（十神、宮位解析）；3. 給客戶的實用建議（口語化、有溫度）。字數約 800-1000 字，不要要求補充。`;
+  }
+  await askGeminiAboutReport();
+}catch(err){
+  console.error('Open consultation request failed:',err);
+  setAdminRequestStatus(item,err.message||'無法開啟這筆回傳。',true);
+  if(openBtn) openBtn.disabled=false;
+}
+}
+
+async function deleteAdminConsultationRequest(requestId,data,item){
+if(currentRole!=='admin' || !fbDb) return;
+const label=`${data.clientName||'未命名客戶'}：${data.topic||'完整報告'}`;
+if(!confirm(`確定刪除這筆客戶題目回傳？\n${label}\n\n此操作只刪除回傳紀錄，不會刪除客戶命盤。`)) return;
+const deleteBtn=item?.querySelector('.admin-request-delete');
+if(deleteBtn) deleteBtn.disabled=true;
+setAdminRequestStatus(item,'正在刪除回傳紀錄⋯');
+try{
+  await fbDb.collection('consultationRequests').doc(requestId).delete();
+  item?.remove();
+  const list=document.getElementById('admin-request-list');
+  if(list && !list.querySelector('.admin-request-item')){
+    list.innerHTML='<p class="empty-state">目前還沒有客戶題目回傳。</p>';
+  }
+}catch(err){
+  console.error('Delete consultation request failed:',err);
+  setAdminRequestStatus(item,'刪除失敗，請稍後再試。',true);
+  if(deleteBtn) deleteBtn.disabled=false;
 }
 }
 
