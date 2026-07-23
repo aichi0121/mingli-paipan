@@ -2011,7 +2011,7 @@ details.kb-section summary::after{display:none;}
 const CURRENT_YEAR = new Date().getFullYear();
 const LS_KEY = 'doris_clients';
 const GEMINI_API_ROUTE = window.DORIS_GEMINI_API_ROUTE || localStorage.getItem('doris_gemini_api_route') || 'https://mingli-paipan.vercel.app/api/gemini-polish';
-const BOOKING_URL = window.DORIS_BOOKING_URL || localStorage.getItem('doris_booking_url') || 'https://line.me/R/ti/p/@919zifpj';
+const BOOKING_URL = window.DORIS_BOOKING_URL || localStorage.getItem('doris_booking_url') || '';
 const AI_ADVISOR_SYSTEM_PROMPT = `你是一位精通子平八字的專業命理顧問。
 使用者上方已經閱讀過系統程式自動產生的命盤基礎數據與條文報告。你的任務是作為「一對一諮詢顧問」，協助使用者解讀報告重點、將條文轉化為生活實用建議，並解答使用者的追加提問。
 
@@ -2869,12 +2869,26 @@ return {
   luck: {
     startDate: bazi['大运']?.['起运日期']||'',
     startAge: bazi['大运']?.['起运年龄']||'',
-    dayun: (bazi['大运']?.['大运']||[]).map(d=>({
-      age:d['年龄范围']||'',
-      years:d['年份范围']||'',
-      ganzhi:d['干支']||'',
-      tenGod:toTrad(d['十神']||'')
-    }))
+    dayun: (bazi['大运']?.['大运']||[]).map(d=>{
+      const years=String(d['年份范围']||'');
+      const yearNumbers=(years.match(/\d{4}/g)||[]).map(Number);
+      const birthYear=Number(client?.year||0);
+      const ageByYear=yearNumbers.length && birthYear
+        ? yearNumbers.map(year=>({
+            year,
+            westernAgeDuringYear:`${Math.max(0,year-birthYear-1)}～${Math.max(0,year-birthYear)}歲`,
+            traditionalNominalAge:`${Math.max(1,year-birthYear+1)}歲`
+          }))
+        : [];
+      return {
+        age:d['年龄范围']||'',
+        years,
+        ageByYear,
+        ageRule:'預設使用實歲；須依該年生日是否已過判斷。未提供事件月日時，實歲必須寫成範圍；若使用虛歲必須明確標示，不得混用。',
+        ganzhi:d['干支']||'',
+        tenGod:toTrad(d['十神']||'')
+      };
+    })
   },
   visibleMode: canViewTeacherReport() ? 'full_teacher_report' : 'quick_client_report'
 };
@@ -2883,6 +2897,8 @@ return {
 function sanitizeGeminiOutput(text){
 return (text||'')
   .replace(/\*\*/g,'')
+  .replace(/(?:#{1,6}\s*)?(?:三[、.．]\s*)?可以對客戶這樣說\s*[：:]?/g,'三、實用建議\n')
+  .replace(/(?:#{1,6}\s*)?講稿範例\s*[：:]?/g,'')
   .replace(/\n?\s*\*?\s*Wait,\s*let['’]s refine[\s\S]*$/i,'')
   .replace(/\n?\s*Interrupted text:[\s\S]*$/i,'')
   .replace(/\n?\s*My continuation:[\s\S]*$/i,'')
