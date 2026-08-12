@@ -21,6 +21,10 @@ service cloud.firestore {
       return userRole() in ["admin", "teacher"];
     }
 
+    function isStrictAdmin() {
+      return userRole() == "admin";
+    }
+
     match /users/{userId} {
       allow create: if isOwner(userId)
         && request.resource.data.role in ["tester"];
@@ -37,7 +41,20 @@ service cloud.firestore {
         allow read: if isOwner(userId) || isAdmin();
         allow update: if isOwner(userId) || isAdmin();
         allow delete: if isOwner(userId) || isAdmin();
+
+        // 同一帳號可在手機與電腦間接續 Gemini 問答。
+        match /geminiChats/{chatId} {
+          allow read, write: if isOwner(userId) || isAdmin();
+        }
       }
+    }
+
+    match /consultationRequests/{requestId} {
+      allow create: if signedIn()
+        && request.resource.data.userUid == request.auth.uid
+        && request.resource.data.question is string
+        && request.resource.data.topic is string;
+      allow read, update, delete: if isStrictAdmin();
     }
   }
 }
