@@ -1293,6 +1293,7 @@ border-radius:2px;
 .weighted-score{padding:13px;border:1px solid #E8DDD0;background:#fff;}
 .weighted-score span{display:block;color:#806F61;font-size:.78rem;}
 .weighted-score strong{display:block;margin-top:5px;color:#4A3728;font-size:1.25rem;}
+.weighted-score small{display:block;margin-top:6px;color:#806F61;font-size:.75rem;line-height:1.55;}
 .weighted-score.support strong{color:#4D7A57;}.weighted-score.drain strong{color:#A75B42;}
 .weighted-bar{display:flex;height:10px;overflow:hidden;border-radius:999px;background:#EDE5DA;margin:13px 0;}
 .weighted-bar-support{background:#6F8D73;}.weighted-bar-drain{background:#BD765B;}
@@ -2053,7 +2054,8 @@ const AI_ADVISOR_SYSTEM_PROMPT = `你是一位精通子平八字的專業命理�
 1.【一對一直接對話】以親切、專業的顧問口吻直接回覆使用者；嚴禁出現「可以對客戶說」、「講稿範例」、「摘要如下」等第三方、教案式或機械化文字。
 2.【活化上方報告，拒絕死板照抄】不要照搬靜態規則；將十神、大運干支、流年沖合等結構轉化為現代生活情境與具體事件。
 3.【精準推論，拒絕心靈雞湯】避免抽象、模稜兩可或純心理安慰；提出清晰推論與具體行動建議。涉及時間點時，務必指出具體西元年份與年齡。
-4.【靈活應答機制】過去事件著重大運交接與流年沖合引起的轉折；未來運勢、事業、財運著重趨勢、優勢與風險；感情、子女、人際結合命盤氣勢與現代生活型態；流年注意事項提供具體避坑與應對策略。`;
+4.【靈活應答機制】過去事件著重大運交接與流年沖合引起的轉折；未來運勢、事業、財運著重趨勢、優勢與風險；感情、子女、人際結合命盤氣勢與現代生活型態；流年注意事項提供具體避坑與應對策略。
+5.【固定格式】未指定格式時，第一行必須直接輸出「一、結論」，接著「二、命盤依據」，最後「三、實用建議」；只能使用這三個全形中文標題與自然段落，禁止 Markdown 的 #、###、星號清單或 1.／2.／3. 編號。`;
 const GITHUB_RAW = 'https://raw.githubusercontent.com/aichi0121/mingli-paipan/main/data/';
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyBHUerxO5VyQA_taGIJxD0vYv1-scdgfM0",
@@ -3144,6 +3146,7 @@ return {
 function sanitizeGeminiOutput(text){
 return (text||'')
   .replace(/\*\*/g,'')
+  .replace(/^\s*#{1,6}\s*(一、|二、|三、)/gm,'$1')
   .replace(/(?:#{1,6}\s*)?(?:三[、.．]\s*)?可以對客戶這樣說\s*[：:]?/g,'三、實用建議\n')
   .replace(/(?:#{1,6}\s*)?講稿範例\s*[：:]?/g,'')
   .replace(/\n?\s*\*?\s*Wait,\s*let['’]s refine[\s\S]*$/i,'')
@@ -5522,10 +5525,26 @@ const strengthSummary = isExtremeStrength()
     ? `月支【${yueDz}】對你的日主【${riWx}】有支撐，所以這張盤先判定為【身強】。`
     : `月支【${yueDz}】對你的日主【${riWx}】支撐較少，所以這張盤先判定為【身弱】。`;
 const weightedList = items => items.map(item=>`<li>${item.label}【${item.char}${item.element}】${item.kind}，${item.weight?`得 ${item.weight} 分`:'日主位置不計分'}</li>`).join('');
+const strengthAgreement=strongLabel===weightedStrength.label;
+const integratedStrengthHtml=`
+<div class="weighted-strength-card integrated-strength-card">
+  <h4>第一層｜命盤綜合整合分析</h4>
+  <p class="strength-method-note">先把兩套算法放在同一張圖裡閱讀：本網站看月令與全局氣勢；徐玉蘭老師位置分法看同我／生我的固定得分與合化覆寫。${strengthAgreement?'本盤兩者結論一致。':'本盤兩者結論不同，代表環境壓力與內在根氣需要分開判讀。'}</p>
+  <div class="weighted-score-grid">
+    <div class="weighted-score"><span>本網站｜月令優先</span><strong>${strongLabel}</strong><small>月支【${yueDz}${yueDzWx}】為主要判斷起點</small></div>
+    <div class="weighted-score support"><span>老師｜位置加權</span><strong>${weightedStrength.support} 分・${weightedStrength.label}</strong><small>只累加同我／生我的位置分</small></div>
+    <div class="weighted-score"><span>內在根氣</span><strong>${weightedStrength.supporters.filter(item=>item.label.includes('支')).map(item=>`${item.char}${item.element}`).join('、')||'需後天補足'}</strong><small>能回復、承接與穩定發揮的來源</small></div>
+    <div class="weighted-score drain"><span>外在壓力觀察</span><strong>${weightedStrength.nonSupporters.filter(item=>item.label.includes('月')).map(item=>`${item.char}${item.element}`).join('、')||'依全局判讀'}</strong><small>不列入老師法扣分，但仍影響生活體感</small></div>
+  </div>
+  <div class="integrated-strength-analysis">
+    <p><strong>整合結論：</strong>${strengthAgreement?`兩套算法都指向【${strongLabel}】；解讀時可直接以這個結論安排喜用與承擔節奏。`:`月令優先法是【${strongLabel}】，老師位置法是【${weightedStrength.label}】。因此不把你簡化成單一標籤：外部情境較容易帶來壓力，但地支根氣、同儕支持與專業資源接上時，承擔力會明顯提升。`}</p>
+    <p><strong>生活體感：</strong>當責任、規範或高消耗任務密集時，先看是否有足夠的${supportWxByTarget[riWx]}（知識、方法、師長資源）與${riWx}（同儕、合作、行動節奏）支撐；有支撐時是磨練，缺支撐時才容易變成消耗。</p>
+    <p><strong>行動策略：</strong>把重大任務拆成「先建立專業方法與支援者，再承接成果與責任」兩步；不要用短期硬撐來驗證自己的能力。</p>
+  </div>
+</div>`;
 const weightedStrengthHtml=`
-<p class="strength-method-note">本網站原判定採「月令與全局克耗優先」；以下提供另一套「位置加權計分」作為交叉閱讀。它不會改寫原有喜用神與報告邏輯。</p>
 <div class="weighted-strength-card">
-  <h4>第一層｜老師加權計分（量化數據）</h4>
+  <h4>第三層｜徐玉蘭老師位置計分（量化明細）</h4>
   <p class="strength-method-note">日主五行：<strong>${riTg}${riWx}</strong>。${weightedStrength.method}</p>
   <div class="weighted-score-grid">
     <div class="weighted-score support"><span>幫扶日主（${supportWxByTarget[riWx]}、${riWx}）</span><strong>${weightedStrength.support} 分</strong></div>
@@ -5536,13 +5555,7 @@ const weightedStrengthHtml=`
   <div class="weighted-bar" aria-label="幫扶得分 ${weightedStrength.support} 分"><span class="weighted-bar-support" style="width:${weightedStrength.support}%"></span><span class="weighted-bar-drain" style="width:${weightedStrength.nonSupport}%"></span></div>
   <ul class="weighted-contributors"><li><strong>幫扶得分來源：</strong></li>${weightedList(weightedStrength.supporters)}${weightedStrength.transformations.length?`<li><strong>三合／半合覆寫：</strong>${weightedStrength.transformations.map(item=>`${item.label}【${item.char}】${item.before}→${item.after}（${item.name}）`).join('；')}</li>`:''}<li><strong>未加分格：</strong></li>${weightedList(weightedStrength.nonSupporters)}</ul>
 </div>
-<div class="integrated-strength-analysis">
-  <h4>第二層｜命盤綜合動態分析</h4>
-  <p><strong>內在底氣：</strong>${weightedStrength.supporters.filter(item=>item.label.includes('支')).length ? `地支中的${weightedStrength.supporters.filter(item=>item.label.includes('支')).map(item=>`【${item.char}${item.element}】`).join('、')}提供根氣與回復力；這代表你不是沒有韌性，而是需要在對的支援下才能穩定發揮。` : '原局可見地支的生扶訊號較少，底氣更仰賴專業累積、休息與可靠的支持系統。'}</p>
-  <p><strong>外部環境：</strong>${weightedStrength.nonSupporters.filter(item=>item.label.includes('月')).map(item=>`月柱【${item.char}${item.element}】`).join('、')||'命盤中未取得幫扶分的配置'}不會在老師算法中扣分，但仍可作為現實任務、規範或資源壓力的觀察線索。</p>
-  <p><strong>生活體感：</strong>月令優先法判為【${strongLabel}】，加權法判為【${weightedStrength.label}】；兩者放在一起看，重點不是非強即弱，而是「外部壓力」與「內在可調度的根氣」何時失衡、何時重新接上。</p>
-  <p><strong>策略：</strong>優先補足${supportWxByTarget[riWx]}（學習、方法、專業資源）與${riWx}（同儕、合作、行動節奏）的支持，再承接財務、責任或高消耗任務；接近臨界盤時尤其避免長期單打獨鬥。</p>
-</div>`;
+`;
 const sec4Html = personalCard({
   icon:'⚖️', title:'命盤格局：你是【'+strongLabel+'】的'+riTg, id:'BAZI_017',
   personalSummary:client.name+'，你的月支是【'+yueDz+'】，五行屬【'+yueDzWx+'】。'+strengthSummary,
@@ -5557,7 +5570,7 @@ const sec4Html = personalCard({
   ].filter(Boolean),
   tags:[strongLabel,'加權：'+weightedStrength.label,'用神：'+yongshen.split('（')[0],'月支'+yueDz]
 });
-const sec4WithWeightedHtml=sec4Html+weightedStrengthHtml;
+const sec4WithWeightedHtml=integratedStrengthHtml+`<div class="strength-method-note"><strong>第二層｜本網站月令與全局克耗優先判定</strong></div>`+sec4Html+weightedStrengthHtml;
 
 // ⑤ 當前大運
 const dyRelation = getRelation(riWx, curDyWx);
