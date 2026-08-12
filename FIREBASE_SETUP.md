@@ -12,11 +12,12 @@
 - `admin` / `teacher` 可看完整版
 - 客戶點選快速版題目後，題目與命盤摘要會回傳到 `consultationRequests`
 - `admin` 登入後可在客戶列表下方查看回傳；`teacher` 與客戶無法讀取
+- Gemini 問答會依「登入帳號＋客戶」同步到 Firestore；同帳號在手機與電腦開啟同一位客戶時可接續對話
 
 ## 第一次使用
 
 1. 到 Firebase Console 開啟 Authentication 的 Google 登入。
-2. 到 Firestore Rules 貼上本專案的 `firestore.rules`。
+2. 到 Firestore Rules 貼上本專案的 `firestore.rules`（本次新增了 Gemini 對話同步權限）。
 3. 回到網站，用你的 Google 帳號登入一次。
 4. 到 Firestore Database 找到：
 

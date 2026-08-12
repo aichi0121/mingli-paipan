@@ -516,6 +516,14 @@ box-shadow:0 10px 30px rgba(74,55,40,0.2);
 display:flex;
 flex-direction:column;
 }
+/* 報告頁右側有固定導覽列；問答窗往內縮，避免遮住導覽與內容。 */
+@media (min-width:701px){
+body:has(#screen-report:not(.hidden)) .gemini-card{
+right:92px;
+width:min(520px,calc(100vw - 124px));
+}
+body:has(#screen-report:not(.hidden)) .gemini-launcher{right:92px;}
+}
 .gemini-header{
 display:flex;
 align-items:flex-start;
@@ -534,6 +542,12 @@ font-size:0.78rem;
 line-height:1.7;
 color:#B89C7D;
 margin-bottom:10px;
+}
+.gemini-sync-status{
+min-height:1.2em;
+margin:-5px 0 7px!important;
+color:#8A806F!important;
+font-size:.72rem!important;
 }
 .gemini-close{
 width:30px;
@@ -1998,6 +2012,7 @@ details.kb-section summary::after{display:none;}
     </div>
     <button class="gemini-close" type="button" onclick="toggleGeminiChat(false)" aria-label="關閉 Gemini 問答">×</button>
   </div>
+  <p id="gemini-sync-status" class="gemini-sync-status" aria-live="polite"></p>
   <div id="gemini-chat-log" class="gemini-chat-log"></div>
   <textarea id="gemini-question" class="gemini-input" placeholder="例如：這個客戶如果問今年工作要注意什麼，我可以怎麼白話回答？"></textarea>
   <div class="gemini-actions">
@@ -2043,6 +2058,7 @@ let currentUser = null;
 let currentRole = 'guest';
 let currentReportClient = null;
 let geminiChatHistory = [];
+let geminiChatLoadId = 0;
 let cloudClients = [];
 let cloudStatusText = '';
 
@@ -2875,6 +2891,82 @@ document.getElementById('loading-overlay').classList.toggle('hidden',!show);
 if(msg) document.getElementById('loading-msg').textContent=msg;
 }
 
+function getGeminiChatLocalKey(client=currentReportClient){
+const clientId=String(client?.id||'');
+return clientId ? `doris_gemini_chat_${currentUser?.uid||'guest'}_${clientId}` : '';
+}
+
+function setGeminiSyncStatus(message=''){
+const el=document.getElementById('gemini-sync-status');
+if(el) el.textContent=message;
+}
+
+function normaliseGeminiHistory(history){
+return (Array.isArray(history)?history:[])
+  .filter(item=>item && (item.role==='user'||item.role==='assistant') && typeof item.text==='string')
+  .slice(-24)
+  .map(item=>({role:item.role,text:item.text.slice(0,12000)}));
+}
+
+function renderGeminiChatHistory(){
+const log=document.getElementById('gemini-chat-log');
+if(!log) return;
+log.innerHTML='';
+geminiChatHistory.forEach(item=>appendGeminiMessage(item.role,item.text));
+document.getElementById('btn-gemini-continue')?.classList.toggle('hidden',!getLastGeminiAnswer());
+}
+
+function saveGeminiChatLocal(){
+const key=getGeminiChatLocalKey();
+if(!key) return;
+localStorage.setItem(key,JSON.stringify({history:normaliseGeminiHistory(geminiChatHistory),updatedAt:Date.now()}));
+}
+
+async function saveGeminiChatToCloud(){
+const client=currentReportClient;
+if(!fbDb || !currentUser || !client?.id) return;
+const history=normaliseGeminiHistory(geminiChatHistory);
+await fbDb.collection('users').doc(currentUser.uid).collection('clients').doc(String(client.id))
+  .collection('geminiChats').doc('current').set({
+    history, clientId:String(client.id), updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+  },{merge:true});
+}
+
+function persistGeminiChat(){
+saveGeminiChatLocal();
+if(currentUser) saveGeminiChatToCloud().then(()=>setGeminiSyncStatus('對話已同步，可在其他裝置接續。')).catch(err=>{
+  console.warn('Gemini chat sync failed:',err);
+  setGeminiSyncStatus('對話暫存於此裝置；雲端同步稍後會再嘗試。');
+});
+}
+
+async function restoreGeminiChat(client){
+const requestId=++geminiChatLoadId;
+geminiChatHistory=[];
+const localKey=getGeminiChatLocalKey(client);
+try{
+  const saved=JSON.parse(localStorage.getItem(localKey)||'null');
+  geminiChatHistory=normaliseGeminiHistory(saved?.history);
+}catch(_){ }
+renderGeminiChatHistory();
+setGeminiSyncStatus(currentUser?'正在載入已同步的對話⋯':'登入後可在其他裝置接續此對話。');
+if(!fbDb || !currentUser || !client?.id) return;
+try{
+  const snap=await fbDb.collection('users').doc(currentUser.uid).collection('clients').doc(String(client.id))
+    .collection('geminiChats').doc('current').get();
+  if(requestId!==geminiChatLoadId || currentReportClient?.id!==client.id) return;
+  if(snap.exists){
+    geminiChatHistory=normaliseGeminiHistory(snap.data()?.history);
+    saveGeminiChatLocal();
+    renderGeminiChatHistory();
+  }
+  setGeminiSyncStatus(geminiChatHistory.length?'已載入同步對話。':'尚無已同步的對話。');
+}catch(err){
+  console.warn('Gemini chat restore failed:',err);
+  if(requestId===geminiChatLoadId) setGeminiSyncStatus('無法載入雲端對話，暫時顯示此裝置的紀錄。');
+}
+}
+
 function clearGeminiAnswer(){
 const q=document.getElementById('gemini-question');
 const log=document.getElementById('gemini-chat-log');
@@ -2883,6 +2975,13 @@ geminiChatHistory=[];
 if(q) q.value='';
 if(log) log.innerHTML='';
 if(continueBtn) continueBtn.classList.add('hidden');
+const key=getGeminiChatLocalKey();
+if(key) localStorage.removeItem(key);
+setGeminiSyncStatus('對話已清空。');
+if(fbDb && currentUser && currentReportClient?.id){
+  fbDb.collection('users').doc(currentUser.uid).collection('clients').doc(String(currentReportClient.id))
+    .collection('geminiChats').doc('current').delete().catch(err=>console.warn('Gemini chat clear failed:',err));
+}
 }
 
 function appendGeminiMessage(role,text,extraClass=''){
@@ -3309,6 +3408,7 @@ const text=await callGeminiAssistant({question,maxOutputTokens:3200,history:prio
   const finalText=text || 'Gemini 沒有回傳文字，請稍後再試。';
   setGeminiMessage(pending,finalText);
 geminiChatHistory.push({role:'user',text:question},{role:'assistant',text:finalText});
+persistGeminiChat();
   document.getElementById('btn-gemini-continue')?.classList.remove('hidden');
 }catch(err){
   console.error('Gemini ask error:', err);
@@ -3335,6 +3435,7 @@ const text=await callGeminiAssistant({question:userText,maxOutputTokens:2600,his
   const finalText=text || 'Gemini 沒有回傳補充內容，請稍後再試。';
   setGeminiMessage(pending,finalText);
 geminiChatHistory.push({role:'user',text:userText},{role:'assistant',text:finalText});
+persistGeminiChat();
 }catch(err){
   console.error('Gemini continue error:', err);
   setGeminiMessage(pending,'Gemini 補充失敗：'+err.message,'error');
@@ -3350,9 +3451,13 @@ function loadReport(id){
 const client=getClients().find(c=>c.id===id);
 if(!client) return;
 currentReportClient=client;
-clearGeminiAnswer();
+geminiChatHistory=[];
+document.getElementById('gemini-question') && (document.getElementById('gemini-question').value='');
+document.getElementById('gemini-chat-log') && (document.getElementById('gemini-chat-log').innerHTML='');
+document.getElementById('btn-gemini-continue')?.classList.add('hidden');
 renderReport(client);
 showScreen('screen-report');
+void restoreGeminiChat(client);
 }
 
 // ══════════════════════════════════════════════
