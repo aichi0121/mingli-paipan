@@ -5531,7 +5531,10 @@ document.getElementById('info-table')?.insertAdjacentHTML('beforeend',`
 </tr>
 <tr>
   <td class="label">喜用五行</td><td class="value">${yongshen}</td>
-  <td class="label">忌神／忌五行</td><td class="value">${xijiShen}／${jishenWuxing}</td>
+  <td class="label">忌神</td><td class="value">${xijiShen}</td>
+</tr>
+<tr>
+  <td class="label">忌五行</td><td class="value" colspan="3">${jishenWuxing}</td>
 </tr>`);
 const strengthSummary = isExtremeStrength()
   ? `你的地支同類五行達${sameBranchCount}個，且財星、官星在地支根氣不明顯，所以不是普通身強，而是先升級看作【${strongLabel}】。`
@@ -5540,6 +5543,14 @@ const strengthSummary = isExtremeStrength()
     : `月支【${yueDz}】對你的日主【${riWx}】支撐較少，所以這張盤先判定為【身弱】。`;
 const weightedList = items => items.map(item=>`<li>${item.label}【${item.char}${item.element}】${item.kind}，${item.weight?`得 ${item.weight} 分`:'日主位置不計分'}</li>`).join('');
 const strengthAgreement=strongLabel===weightedStrength.label;
+const plainStrengthText = value => String(value||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
+const originalStrengthInsights=[
+  plainStrengthText(new_strength),
+  plainStrengthText(new_xiyong),
+  plainStrengthText(new_jishen),
+  ...comboPriorityNotes().map(plainStrengthText),
+  ...transformedTenGodNotes().slice(0,4).map(plainStrengthText)
+].filter(Boolean);
 const integratedStrengthHtml=`
 <div class="weighted-strength-card integrated-strength-card">
   <h4>第一層｜命盤綜合整合分析</h4>
@@ -5555,6 +5566,8 @@ const integratedStrengthHtml=`
     <p><strong>本網站判讀依據：</strong>月支【${yueDz}${yueDzWx}】${isStrong?'對日主有直接生扶':'對日主直接生扶較少'}，所以以月令與全局氣勢先判為【${strongLabel}】。這套方法提醒你在高壓或高消耗情境中，要先確認自己的資源、節奏與承擔上限。</p>
     <p><strong>老師判讀依據：</strong>同我／生我的位置分累積【${weightedStrength.support} 分】，${weightedStrength.transformations.length?`且${weightedStrength.transformations.map(item=>`${item.name}使${item.label}${item.char}由${item.before}覆寫為${item.after}`).join('；')}。`:''}因此老師法判為【${weightedStrength.label}】。它凸顯的是地支根氣與可被啟動的支持，不是把其他五行反向扣分。</p>
     <p><strong>喜忌重點：</strong>本網站原判定下，喜用神為【${xiyongShen}】、喜用五行為【${yongshen}】；忌神為【${xijiShen}】、忌五行為【${jishenWuxing}】。這些是安排工作節奏、人際合作與資源選擇的方向，不是吉凶保證。</p>
+    <p><strong>命格特質：</strong>${originalStrengthInsights[0]||`以【${strongLabel}】來看，重點在於先辨識可支持自己的資源，再安排承擔與輸出節奏。`}</p>
+    ${originalStrengthInsights.slice(1).map(item=>`<p><strong>結構訊號：</strong>${item}</p>`).join('')}
     <p><strong>生活體感與策略：</strong>當責任、規範或高消耗任務密集時，先補足${supportWxByTarget[riWx]}（知識、方法、師長資源）與${riWx}（同儕、合作、行動節奏）。先建立專業方法與支援者，再承接成果與責任，比短期硬撐更能穩定發揮。</p>
   </div>
 </div>`;
