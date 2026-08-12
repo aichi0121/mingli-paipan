@@ -1287,10 +1287,10 @@ background:#D4B896;
 border-radius:2px;
 }
 .strength-method-note{margin:0 0 14px;color:#806F61;font-size:.84rem;line-height:1.7;}
-.weighted-strength-card{padding:18px;border:1px solid #E3D4C3;border-left:4px solid #A75B42;background:#FFFCF8;}
-.weighted-strength-card h4{margin:0 0 8px;color:#6E432D;font-size:1.02rem;}
+.weighted-strength-card{margin:0 0 16px;padding:20px;border:1px solid #E3D4C3;border-left:4px solid #A75B42;border-radius:8px;background:#FFFCF8;box-shadow:0 5px 18px rgba(75,55,39,.055);}
+.weighted-strength-card h4{margin:0 0 10px;color:#6E432D;font-family:'Noto Serif TC',serif;font-size:1.06rem;}
 .weighted-score-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0;}
-.weighted-score{padding:13px;border:1px solid #E8DDD0;background:#fff;}
+.weighted-score{padding:13px;border:1px solid #E8DDD0;border-radius:6px;background:#fff;}
 .weighted-score span{display:block;color:#806F61;font-size:.78rem;}
 .weighted-score strong{display:block;margin-top:5px;color:#4A3728;font-size:1.25rem;}
 .weighted-score small{display:block;margin-top:6px;color:#806F61;font-size:.75rem;line-height:1.55;}
@@ -1299,8 +1299,12 @@ border-radius:2px;
 .weighted-bar-support{background:#6F8D73;}.weighted-bar-drain{background:#BD765B;}
 .weighted-contributors{margin:10px 0 0;padding-left:1.2rem;color:#5E4C3E;font-size:.86rem;line-height:1.75;}
 .weighted-contributors li{margin:3px 0;}
-.integrated-strength-analysis{margin-top:14px;padding:16px 18px;border-top:2px solid #D9BE98;background:#FFF;}
-.integrated-strength-analysis h4{margin:0 0 8px;color:#6E432D;}.integrated-strength-analysis p{margin:7px 0;line-height:1.8;}
+.integrated-strength-analysis{display:grid;gap:10px;margin-top:16px;padding:0;border:0;background:transparent;}
+.integrated-strength-analysis h4{margin:0 0 8px;color:#6E432D;}
+.integrated-strength-analysis p{margin:0;padding:13px 15px;border-left:4px solid #B98B42;border-radius:0 6px 6px 0;background:#FFF;line-height:1.85;}
+.integrated-strength-analysis p:nth-of-type(2n){border-left-color:#6F8D73;background:#FAFCF9;}
+.integrated-strength-analysis p:nth-of-type(3n){border-left-color:#A66A4B;background:#FFF9F4;}
+.integrated-strength-analysis strong{color:#7B4B2A;}
 
 /* RWD */
 @media(max-width:600px){
@@ -3545,7 +3549,8 @@ document.getElementById('info-table').innerHTML=`
 </tr>
 <tr>
   <td class="label">起運日</td>
-  <td class="value" colspan="3">${bazi['大运']?.['起运日期']||'—'}（${bazi['大运']?.['起运年龄']||''}歲起運）</td>
+  <td class="value">${bazi['大运']?.['起运日期']||'—'}（${bazi['大运']?.['起运年龄']||''}歲起運）</td>
+  <td class="label">身強身弱</td><td class="value" id="info-strength-value">計算中</td>
 </tr>
 `;
 
@@ -5526,16 +5531,16 @@ const xijiShen = strengthKey==='身強' ? '印星、比劫' : '財星、官星�
 const xiyongShen = strengthKey==='身強' ? '食傷、財星、官星' : '印星、比劫';
 document.getElementById('info-table')?.insertAdjacentHTML('beforeend',`
 <tr>
-  <td class="label">身強身弱</td><td class="value"><strong>${strongLabel}</strong>（老師法：${weightedStrength.label}／${weightedStrength.support} 分）</td>
   <td class="label">喜用神</td><td class="value">${xiyongShen}</td>
-</tr>
-<tr>
   <td class="label">喜用五行</td><td class="value">${yongshen}</td>
-  <td class="label">忌神</td><td class="value">${xijiShen}</td>
 </tr>
 <tr>
-  <td class="label">忌五行</td><td class="value" colspan="3">${jishenWuxing}</td>
-</tr>`);
+  <td class="label">忌神</td><td class="value">${xijiShen}</td>
+  <td class="label">忌五行</td><td class="value">${jishenWuxing}</td>
+</tr>
+`);
+const strengthCell=document.getElementById('info-strength-value');
+if(strengthCell) strengthCell.innerHTML=`<strong>${strongLabel}</strong>（老師法：${weightedStrength.label}／${weightedStrength.support} 分）`;
 const strengthSummary = isExtremeStrength()
   ? `你的地支同類五行達${sameBranchCount}個，且財星、官星在地支根氣不明顯，所以不是普通身強，而是先升級看作【${strongLabel}】。`
   : isStrong
