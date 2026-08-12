@@ -2087,11 +2087,11 @@ const WX_COLOR = {木:'#4CAF50',火:'#E53935',土:'#FB8C00',金:'#B8860B',水:'#
 
 const SIMP_TO_TRAD = {
 '劫财':'劫財','伤官':'傷官','正财':'正財',
-'偏财':'偏財','七杀':'七殺','枭神':'梟神'
+'偏财':'偏財','七杀':'七殺','枭神':'梟神','马':'馬'
 };
 function toTrad(s){
 if(!s) return s;
-return s.replace(/劫财|伤官|正财|偏财|七杀|枭神/g, m=>SIMP_TO_TRAD[m]||m);
+return s.replace(/劫财|伤官|正财|偏财|七杀|枭神|马/g, m=>SIMP_TO_TRAD[m]||m);
 }
 
 // ══════════════════════════════════════════════
@@ -3044,19 +3044,24 @@ function getGeminiWeightedStrength(pillars,dayMaster){
 const dayElement=WX_MAP[dayMaster]||'';
 const resource={木:'水',火:'木',土:'火',金:'土',水:'金'}[dayElement]||'';
 const entries=[
-  ['年支','year','branch',12],['年干','year','stem',4],['月支（月令）','month','branch',33],['月干','month','stem',6],
-  ['日支','day','branch',18],['日干','day','stem',6],['時支','hour','branch',16],['時干','hour','stem',5]
+  ['時干','hour','stem',5],['日干','day','stem',0],['月干','month','stem',5],['年干','year','stem',5],
+  ['時支','hour','branch',10],['日支','day','branch',20],['月支','month','branch',35],['年支','year','branch',20]
 ];
-let support=0,drain=0;
+const branchValues=entries.filter(([, ,key])=>key==='branch').map(([,pillar])=>pillars?.[pillar]?.branch||'');
+const group=[
+  {branches:['亥','卯','未'],element:'木',name:'亥卯未三合／半合木'}, {branches:['寅','午','戌'],element:'火',name:'寅午戌三合／半合火'},
+  {branches:['申','子','辰'],element:'水',name:'申子辰三合／半合水'}, {branches:['巳','酉','丑'],element:'金',name:'巳酉丑三合／半合金'}
+].find(item=>item.branches.filter(branch=>branchValues.includes(branch)).length>=2);
+let support=0;
 const contributors=entries.map(([label,pillar,key,weight])=>{
   const char=pillars?.[pillar]?.[key]||'';
-  const element=WX_MAP[char]||'';
+  const element=key==='branch'&&group?.branches.includes(char)?group.element:(WX_MAP[char]||'');
   const kind=(element===dayElement||element===resource)?'生扶':'克耗';
-  if(kind==='生扶') support+=weight; else drain+=weight;
-  return `${label}${char}${element}${kind}+${weight}%`;
+  if(kind==='生扶') support+=weight;
+  return `${label}${char}${element}${kind}${weight?`+${weight}分`:''}`;
 });
-const label=support>=57?'身強傾向':support>=52?'中和偏強':support>=48?'中和／臨界盤':support>=43?'中和偏弱':'身弱傾向';
-return {support,drain,label,contributors,method:'可見天干地支位置加權；月支33%、日支18%、時支16%、年支12%，四柱天干合計21%。'};
+const label=support>=50?'身強':'身弱';
+return {support,nonSupport:100-support,label,contributors,transformations:group?`${group.name}：${group.branches.filter(branch=>branchValues.includes(branch)).join('、')}覆寫為${group.element}`:'無',method:'徐玉蘭老師位置分法：只計同我／生我的固定位置分，三合／半合成立時先覆寫地支五行再計分。'};
 }
 
 function getBaziTagsForGemini(){
@@ -3098,7 +3103,7 @@ return {
     name: client.name,
     gender: client.gender,
     solar: `${client.year}-${client.month}-${client.day} ${client.hour}:${client.minute}`,
-    zodiac: bazi['生肖']||''
+    zodiac: toTrad(bazi['生肖']||'')
   } : null,
   dayMaster,
   dayMasterElement: WX_MAP[dayMaster]||'',
@@ -3510,7 +3515,7 @@ const yue=bazi['月柱']||{};
 const ri=bazi['日柱']||{};
 const shi=bazi['时柱']||{};
 const lunar=bazi['农历']||'';
-const shengxiao=bazi['生肖']||'';
+const shengxiao=toTrad(bazi['生肖']||'');
 const riTg=(ri['天干']?.['天干'])||ri['天干']||'';
 const riZhuWx=WX_MAP[riTg]||'';
 const wxColor=WX_COLOR[riZhuWx]||'#999';
@@ -3890,34 +3895,45 @@ if(sameBranchCount >= 3 && yueDzWx === riWx && wealthRootCount === 0 && official
 }
 const strengthKey = isStrong ? '身強' : '身弱';
 
-// 老師加權計分法：保留月令優先法，另以可見天干地支的位置與距離計算能量比例。
-// 月支最重；日支近身次之；年支因距離較遠降權。各權重合計 100，便於閱讀與比較。
+// 老師加權計分法：只累加「同我／生我」，不以克耗反向扣分；再套用三合／半合覆寫地支五行。
+// 固定位置分：時干 5、月干 5、年干 5；時支 10、日支 20、月支 35、年支 20。
 function calculateWeightedStrength(){
   const positions=[
-    {label:'年支',char:nian['地支']?.['地支']||'',weight:12}, {label:'年干',char:nian['天干']?.['天干']||'',weight:4},
-    {label:'月支（月令）',char:yueDz,weight:33}, {label:'月干',char:yue['天干']?.['天干']||'',weight:6},
-    {label:'日支',char:riDz,weight:18}, {label:'日干',char:riTg,weight:6},
-    {label:'時支',char:shi['地支']?.['地支']||'',weight:16}, {label:'時干',char:shi['天干']?.['天干']||'',weight:5}
+    {label:'時干',char:shi['天干']?.['天干']||'',weight:5,type:'stem'}, {label:'日干',char:riTg,weight:0,type:'stem'},
+    {label:'月干',char:yue['天干']?.['天干']||'',weight:5,type:'stem'}, {label:'年干',char:nian['天干']?.['天干']||'',weight:5,type:'stem'},
+    {label:'時支',char:shi['地支']?.['地支']||'',weight:10,type:'branch'}, {label:'日支',char:riDz,weight:20,type:'branch'},
+    {label:'月支',char:yueDz,weight:35,type:'branch'}, {label:'年支',char:nian['地支']?.['地支']||'',weight:20,type:'branch'}
   ];
+  const branchChars=positions.filter(item=>item.type==='branch').map(item=>item.char);
+  const combinations=[
+    {branches:['亥','卯','未'],element:'木',name:'亥卯未三合／半合木'}, {branches:['寅','午','戌'],element:'火',name:'寅午戌三合／半合火'},
+    {branches:['申','子','辰'],element:'水',name:'申子辰三合／半合水'}, {branches:['巳','酉','丑'],element:'金',name:'巳酉丑三合／半合金'}
+  ];
+  const transformations=[];
+  combinations.forEach(group=>{
+    const matched=group.branches.filter(branch=>branchChars.includes(branch));
+    if(matched.length>=2){
+      positions.filter(item=>item.type==='branch'&&matched.includes(item.char)).forEach(item=>{
+        const before=WX_MAP[item.char]||'';
+        if(before!==group.element){ transformations.push({label:item.label,char:item.char,before,after:group.element,name:group.name}); item.elementOverride=group.element; }
+      });
+    }
+  });
   const supportElements=new Set([riWx,supportWxByTarget[riWx]]);
-  let support=0, drain=0;
-  const supporters=[], drainers=[];
+  let support=0;
+  const supporters=[], nonSupporters=[];
   positions.forEach(item=>{
-    const element=WX_MAP[item.char]||'';
-    if(!element || !item.weight) return;
-    const detail={...item,element,kind:supportElements.has(element)?'生扶':'克耗'};
+    const element=item.elementOverride||WX_MAP[item.char]||'';
+    const detail={...item,element,kind:supportElements.has(element)?'生扶':'未加分'};
     if(detail.kind==='生扶'){
       support+=item.weight;
       supporters.push(detail);
     }else{
-      drain+=item.weight;
-      drainers.push(detail);
+      nonSupporters.push(detail);
     }
   });
-  const supportPct=Math.round(support*10)/10;
-  const drainPct=Math.round(drain*10)/10;
-  const label=supportPct>=57?'身強傾向':supportPct>=52?'中和偏強':supportPct>=48?'中和／臨界盤':supportPct>=43?'中和偏弱':'身弱傾向';
-  return {support:supportPct,drain:drainPct,label,supporters,drainers,method:'可見天干地支位置加權：月支 33%、日支 18%、時支 16%、年支 12%；四柱天干合計 21%。'};
+  const label=support>=50?'身強':'身弱';
+  return {support,nonSupport:100-support,label,supporters,nonSupporters,transformations,method:'徐玉蘭老師位置分法：只計同我／生我的分數；時干、月干、年干各 5 分，時支 10 分、日支 20 分、月支 35 分、年支 20 分；三合／半合成立時覆寫相關地支五行後重新計分。'};
 }
 const weightedStrength=calculateWeightedStrength();
 
@@ -5505,25 +5521,25 @@ const strengthSummary = isExtremeStrength()
   : isStrong
     ? `月支【${yueDz}】對你的日主【${riWx}】有支撐，所以這張盤先判定為【身強】。`
     : `月支【${yueDz}】對你的日主【${riWx}】支撐較少，所以這張盤先判定為【身弱】。`;
-const weightedList = items => items.map(item=>`<li>${item.label}【${item.char}${item.element}】${item.kind}，權重 +${item.weight}%</li>`).join('');
+const weightedList = items => items.map(item=>`<li>${item.label}【${item.char}${item.element}】${item.kind}，${item.weight?`得 ${item.weight} 分`:'日主位置不計分'}</li>`).join('');
 const weightedStrengthHtml=`
 <p class="strength-method-note">本網站原判定採「月令與全局克耗優先」；以下提供另一套「位置加權計分」作為交叉閱讀。它不會改寫原有喜用神與報告邏輯。</p>
 <div class="weighted-strength-card">
   <h4>第一層｜老師加權計分（量化數據）</h4>
   <p class="strength-method-note">日主五行：<strong>${riTg}${riWx}</strong>。${weightedStrength.method}</p>
   <div class="weighted-score-grid">
-    <div class="weighted-score support"><span>生扶能量（${supportWxByTarget[riWx]}、${riWx}）</span><strong>${weightedStrength.support}%</strong></div>
-    <div class="weighted-score drain"><span>克耗能量（剋、洩、耗）</span><strong>${weightedStrength.drain}%</strong></div>
-    <div class="weighted-score"><span>加權能量評定</span><strong>${weightedStrength.label}</strong></div>
+    <div class="weighted-score support"><span>幫扶日主（${supportWxByTarget[riWx]}、${riWx}）</span><strong>${weightedStrength.support} 分</strong></div>
+    <div class="weighted-score drain"><span>未取得幫扶分數</span><strong>${weightedStrength.nonSupport} 分</strong></div>
+    <div class="weighted-score"><span>老師加權判定</span><strong>${weightedStrength.label}</strong></div>
     <div class="weighted-score"><span>原網站月令優先</span><strong>${strongLabel}</strong></div>
   </div>
-  <div class="weighted-bar" aria-label="生扶 ${weightedStrength.support}%，克耗 ${weightedStrength.drain}%"><span class="weighted-bar-support" style="width:${weightedStrength.support}%"></span><span class="weighted-bar-drain" style="width:${weightedStrength.drain}%"></span></div>
-  <ul class="weighted-contributors"><li><strong>生扶來源：</strong></li>${weightedList(weightedStrength.supporters)}<li><strong>克耗來源：</strong></li>${weightedList(weightedStrength.drainers)}</ul>
+  <div class="weighted-bar" aria-label="幫扶得分 ${weightedStrength.support} 分"><span class="weighted-bar-support" style="width:${weightedStrength.support}%"></span><span class="weighted-bar-drain" style="width:${weightedStrength.nonSupport}%"></span></div>
+  <ul class="weighted-contributors"><li><strong>幫扶得分來源：</strong></li>${weightedList(weightedStrength.supporters)}${weightedStrength.transformations.length?`<li><strong>三合／半合覆寫：</strong>${weightedStrength.transformations.map(item=>`${item.label}【${item.char}】${item.before}→${item.after}（${item.name}）`).join('；')}</li>`:''}<li><strong>未加分格：</strong></li>${weightedList(weightedStrength.nonSupporters)}</ul>
 </div>
 <div class="integrated-strength-analysis">
   <h4>第二層｜命盤綜合動態分析</h4>
   <p><strong>內在底氣：</strong>${weightedStrength.supporters.filter(item=>item.label.includes('支')).length ? `地支中的${weightedStrength.supporters.filter(item=>item.label.includes('支')).map(item=>`【${item.char}${item.element}】`).join('、')}提供根氣與回復力；這代表你不是沒有韌性，而是需要在對的支援下才能穩定發揮。` : '原局可見地支的生扶訊號較少，底氣更仰賴專業累積、休息與可靠的支持系統。'}</p>
-  <p><strong>外部環境：</strong>${weightedStrength.drainers.filter(item=>item.label.includes('月')).map(item=>`月柱【${item.char}${item.element}】`).join('、')||'命盤的克耗配置'}權重最高，表示現實任務、規範或資源壓力對你的體感影響較大。</p>
+  <p><strong>外部環境：</strong>${weightedStrength.nonSupporters.filter(item=>item.label.includes('月')).map(item=>`月柱【${item.char}${item.element}】`).join('、')||'命盤中未取得幫扶分的配置'}不會在老師算法中扣分，但仍可作為現實任務、規範或資源壓力的觀察線索。</p>
   <p><strong>生活體感：</strong>月令優先法判為【${strongLabel}】，加權法判為【${weightedStrength.label}】；兩者放在一起看，重點不是非強即弱，而是「外部壓力」與「內在可調度的根氣」何時失衡、何時重新接上。</p>
   <p><strong>策略：</strong>優先補足${supportWxByTarget[riWx]}（學習、方法、專業資源）與${riWx}（同儕、合作、行動節奏）的支持，再承接財務、責任或高消耗任務；接近臨界盤時尤其避免長期單打獨鬥。</p>
 </div>`;
@@ -5905,10 +5921,11 @@ const aiReportTags={
       label:strongLabel,tier:strengthTier,isStrong,monthBranch:yueDz,monthElement:yueDzWx,sameElementBranches:sameBranchCount,
       primaryMethod:'月令與全局克耗優先（本網站原判定）',
       weightedMethod:{
-        label:weightedStrength.label,support:weightedStrength.support,drain:weightedStrength.drain,
+        label:weightedStrength.label,support:weightedStrength.support,nonSupport:weightedStrength.nonSupport,
         method:weightedStrength.method,
         supporters:weightedStrength.supporters.map(item=>`${item.label}${item.char}${item.element}+${item.weight}%`),
-        drainers:weightedStrength.drainers.map(item=>`${item.label}${item.char}${item.element}+${item.weight}%`)
+        nonSupporters:weightedStrength.nonSupporters.map(item=>`${item.label}${item.char}${item.element}`),
+        transformations:weightedStrength.transformations.map(item=>`${item.label}${item.char}${item.before}→${item.after}（${item.name}）`)
       },
       interpretationRule:'原判定與加權結果可不同。不得把其中一種稱為唯一正確；若結果接近或不同，應寫成外部壓力與內在根氣並存的動態平衡，並給出具體調度策略。'
     },
