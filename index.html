@@ -638,6 +638,30 @@ padding:14px;
 .gemini-launcher{right:16px;bottom:16px;}
 }
 
+/* 手機問答採獨立全螢幕層，避免與右側報告導覽重疊；16px 可避免 iOS 聚焦輸入框時自動放大。 */
+@media(max-width:700px){
+  .gemini-card.active{
+    position:fixed;
+    z-index:300;
+    top:0!important;
+    right:0!important;
+    bottom:0!important;
+    left:0!important;
+    width:100%!important;
+    height:100dvh!important;
+    max-height:100dvh!important;
+    box-sizing:border-box;
+    padding:calc(env(safe-area-inset-top,0px) + 14px) 14px calc(env(safe-area-inset-bottom,0px) + 14px)!important;
+    border-radius:0!important;
+  }
+  body:has(.gemini-card.active) .report-nav,
+  body:has(.gemini-card.active) .chapter-nav-panel,
+  body:has(.gemini-card.active) .gemini-launcher{display:none!important;}
+  .gemini-input{font-size:16px!important;line-height:1.55;}
+  .gemini-actions{gap:6px;}
+  .gemini-actions .btn{min-height:42px;padding:8px 10px;font-size:.82rem;}
+}
+
 /* 基本訊息表格 */
 .info-table{width:100%;border-collapse:collapse;}
 .info-table td{
@@ -2059,7 +2083,10 @@ const AI_ADVISOR_SYSTEM_PROMPT = `你是一位精通子平八字的專業命理�
 2.【活化上方報告，拒絕死板照抄】不要照搬靜態規則；將十神、大運干支、流年沖合等結構轉化為現代生活情境與具體事件。
 3.【精準推論，拒絕心靈雞湯】避免抽象、模稜兩可或純心理安慰；提出清晰推論與具體行動建議。涉及時間點時，務必指出具體西元年份與年齡。
 4.【靈活應答機制】過去事件著重大運交接與流年沖合引起的轉折；未來運勢、事業、財運著重趨勢、優勢與風險；感情、子女、人際結合命盤氣勢與現代生活型態；流年注意事項提供具體避坑與應對策略。
-5.【固定格式】未指定格式時，第一行必須直接輸出「一、結論」，接著「二、命盤依據」，最後「三、實用建議」；只能使用這三個全形中文標題與自然段落，禁止 Markdown 的 #、###、星號清單或 1.／2.／3. 編號。`;
+5.【固定格式】未指定格式時，第一行必須直接輸出「一、結論」，接著「二、命盤依據」，最後「三、實用建議」；只能使用這三個全形中文標題與自然段落，禁止 Markdown 的 #、###、星號清單或 1.／2.／3. 編號。
+6.【並行解法】命盤不是唯一決策，不得用「不要做」取代現實問題處理；除非有明確安全、法律或財務風險，任何職涯、兼職、關係或生活困境都必須先提出折衷的並行方案：短期先止血／降低壓力、中期保留正職並累積技能或收入、長期再朝命盤較適合的方向調整。命盤只用來協助挑選低耗損、可持續的做法與避雷項目。
+7.【現金流優先】只要使用者明確提到沒錢、經濟壓力、急需收入、兼職或副業，先處理眼前 1～3 個月的現金流，不能只回答「不建議兼職」或只建議經營長期帳號引流。必須提出可同時進行的短期收入方案、適合避開的兼職型態，以及保留正職／專業累積的安排；命盤不能否定基本生活需求。
+8.【保險內容經營與收費界線】保險從業人員可以經營公開內容帳號，透過免費的保單知識、風險教育、案例觀念與日常內容建立信任、引導潛在客戶依公司正常流程對接，這是內容引流／品牌曝光，不是付費諮詢。禁止把這件事說成或建議成「帳號付費諮詢、收費保險顧問、會員付費問保單」，也不得用改名或話術包裝收取保險諮詢費。若討論收費服務，必須先說明是否與保險商品服務無關，並建議確認公司法遵／主管規範。`;
 const GITHUB_RAW = 'https://raw.githubusercontent.com/aichi0121/mingli-paipan/main/data/';
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyBHUerxO5VyQA_taGIJxD0vYv1-scdgfM0",
