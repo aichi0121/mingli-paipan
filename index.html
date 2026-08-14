@@ -3175,7 +3175,7 @@ return {
 }
 
 function sanitizeGeminiOutput(text){
-return (text||'')
+let output=(text||'')
   .replace(/\*\*/g,'')
   .replace(/^\s*#{1,6}\s*(一、|二、|三、)/gm,'$1')
   .replace(/(?:#{1,6}\s*)?(?:三[、.．]\s*)?可以對客戶這樣說\s*[：:]?/g,'三、實用建議\n')
@@ -3186,6 +3186,11 @@ return (text||'')
   .replace(/\n?\s*["“]?\s*\(?the end of system prompt[\s\S]*$/i,'')
   .replace(/\n?\s*請從上面最後一句中斷處[\s\S]*$/,'')
   .trim();
+const answerStart=output.search(/(?:^|\n)\s*一、結論\b/);
+if(answerStart>0 && /self-correction|during drafting|let['’]?s refine|internal (?:note|instruction)|working draft/i.test(output.slice(0,answerStart))){
+  output=output.slice(answerStart).trim();
+}
+return output;
 }
 
 async function callGeminiRoute(payload){
