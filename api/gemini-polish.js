@@ -15,7 +15,7 @@ function safeString(value, limit = 12000) {
 }
 
 function sanitizeGeminiOutput(text) {
-  return String(text || '')
+  let output = String(text || '')
     .replace(/\*\*/g, '')
     .replace(/^\s*#{1,6}\s*(一、|二、|三、)/gm, '$1')
     .replace(/(?:#{1,6}\s*)?(?:三[、.．]\s*)?可以對客戶這樣說\s*[：:]?/g, '三、實用建議\n')
@@ -25,6 +25,13 @@ function sanitizeGeminiOutput(text) {
     .replace(/\n?\s*My continuation:[\s\S]*$/i, '')
     .replace(/\n?\s*["“]?\s*\(?the end of system prompt[\s\S]*$/i, '')
     .trim();
+
+  // 某些模型會錯把 drafting / self-correction 的中間工作文字回傳；只保留正式回答起點。
+  const answerStart = output.search(/(?:^|\n)\s*一、結論\b/);
+  if (answerStart > 0 && /self-correction|during drafting|let['’]?s refine|internal (?:note|instruction)|working draft/i.test(output.slice(0, answerStart))) {
+    output = output.slice(answerStart).trim();
+  }
+  return output;
 }
 
 function tryParseJson(text) {
