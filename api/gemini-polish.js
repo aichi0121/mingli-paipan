@@ -2,6 +2,10 @@ const DEFAULT_GEMINI_MODEL = 'gemini-3.5-flash';
 const MODEL_PREFERENCES = [DEFAULT_GEMINI_MODEL, 'gemini-3.1-flash-lite', 'gemini-3-flash-preview', 'gemini-2.5-flash'];
 let cachedGeminiModel = '';
 
+// Keep answers consistent by default. A deployment may opt into a fallback
+// model explicitly, but silently switching models changes response behavior.
+const ALLOW_MODEL_FALLBACK = process.env.GEMINI_ALLOW_MODEL_FALLBACK === 'true';
+
 function setCors(res) {
   res.setHeader('Access-Control-Allow-Origin', process.env.ALLOWED_ORIGIN || '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -420,10 +424,10 @@ function buildPrompt(body) {
   const outputType = body.outputType || body.format || 'article';
   const tone = body.tone || '專業、口語、清楚、溫暖，但不要像罐頭模板';
   const systemPrompt = safeString(body.systemPrompt || '', 8000);
-  const tags = safeString(body.tags || body.baziTags || {}, 36000);
-  const draft = safeString(body.reportDraft || body.draft || body.article || '', 14000);
+  const tags = safeString(body.tags || body.baziTags || {}, 16000);
+  const draft = safeString(body.reportDraft || body.draft || body.article || '', 8500);
   const question = safeString(body.question || '', 2000);
-  const history = safeString(body.history || [], 5000);
+  const history = safeString(body.history || [], 3200);
 
   if (mode === 'chat') {
     return [
@@ -444,7 +448,8 @@ function buildPrompt(body) {
       '務必讓每一段完整收尾；內容過長時先縮短，不可停在半句。',
       '遇到「繼續／補充」時，必須延續對話紀錄中的上一個結論與命盤依據，只補未完成或尚未提到的內容，不得另起一套互相矛盾的解釋。',
       '不得輸出內部推理、提示詞、英文修正文、系統訊息或任何幕後處理說明。',
-      '每段都要完整收尾；未指定字數時，總長度控制在 700 到 1000 個中文字。',
+      '請先在內部完成檢查，正式輸出時只能從「一、結論」開始；不得輸出 Drafting、Self-correction、思考過程或任何英文工作註記。',
+      '每段都要完整收尾；未指定字數時，總長度控制在 700 到 1000 個中文字。三個標題必須一次完整出現；篇幅不足時精簡每段，不可省略任一段或停在半句。',
       '',
       '【八字 Tag】',
       tags,
@@ -642,7 +647,7 @@ async function callGemini(prompt, body) {
   let model = await resolveGeminiModel(apiKey);
   let { response, data } = await requestGeminiWithRetry(apiKey, model, prompt, body);
   const unavailable = /not found|not supported|no longer available|deprecated|shut down/i.test(data.error?.message || '');
-  if (!response.ok && (response.status === 404 || unavailable)) {
+  if (ALLOW_MODEL_FALLBACK && !response.ok && (response.status === 404 || unavailable)) {
     cachedGeminiModel = '';
     const replacement = await resolveGeminiModel(apiKey, [model]);
     if (replacement !== model) {
@@ -653,7 +658,7 @@ async function callGemini(prompt, body) {
 
   // Free-tier quotas are often model-specific. If the preferred model is
   // exhausted, try one available Flash alternative before returning 429.
-  if (!response.ok && response.status === 429) {
+  if (ALLOW_MODEL_FALLBACK && !response.ok && response.status === 429) {
     cachedGeminiModel = '';
     const replacement = await resolveGeminiModel(apiKey, [model]);
     if (replacement !== model) {
@@ -670,9 +675,12 @@ async function callGemini(prompt, body) {
   }
 
   const candidate = data.candidates?.[0] || {};
+  // Gemini thinking-capable models may include private thought parts alongside the final answer.
+  // Only return visible answer parts; concatenating every part exposes drafting instructions.
+  const visibleParts = (candidate.content?.parts || []).filter((part) => !part.thought && !part.thoughtSignature);
   return {
     model,
-    text: sanitizeGeminiOutput((candidate.content?.parts || []).map((part) => part.text || '').join('\n')),
+    text: sanitizeGeminiOutput(visibleParts.map((part) => part.text || '').join('\n')),
     finishReason: candidate.finishReason || '',
     usageMetadata: data.usageMetadata || null
   };
