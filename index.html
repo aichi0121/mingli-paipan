@@ -2953,14 +2953,14 @@ function normaliseGeminiHistory(history){
 return (Array.isArray(history)?history:[])
   .filter(item=>item && (item.role==='user'||item.role==='assistant') && typeof item.text==='string')
   .slice(-24)
-  .map(item=>({role:item.role,text:item.text.slice(0,12000)}));
+  .map(item=>({role:item.role,text:item.text.slice(0,12000),hidden:!!item.hidden}));
 }
 
 function renderGeminiChatHistory(){
 const log=document.getElementById('gemini-chat-log');
 if(!log) return;
 log.innerHTML='';
-geminiChatHistory.forEach(item=>appendGeminiMessage(item.role,item.text));
+geminiChatHistory.filter(item=>!item.hidden).forEach(item=>appendGeminiMessage(item.role,item.text));
 document.getElementById('btn-gemini-continue')?.classList.toggle('hidden',!getLastGeminiAnswer());
 }
 
@@ -3070,7 +3070,7 @@ const header=client ? `客戶：${client.name}，性別：${client.gender}，生
 return [header,'基本訊息：'+info,'四柱排盤：'+bazi,'大運流年：'+dayun,'目前可見報告：'+allowedReport]
   .join('\n\n')
   .replace(/\s+/g,' ')
-  .slice(0,18000);
+  .slice(0,8500);
 }
 
 function getGeminiWeightedStrength(pillars,dayMaster){
@@ -3459,13 +3459,17 @@ setTimeout(()=>{
 
 async function callGeminiAssistant({question,maxOutputTokens=3200,history=geminiChatHistory}){
 if(!canUseGemini()) throw new Error('Gemini 對話僅限管理員使用。');
+const compactHistory=normaliseGeminiHistory(history).slice(-8).map(item=>({
+  role:item.role,
+  text:item.text.slice(-1400)
+}));
 const result=await callGeminiRoute({
   mode:'chat',
   outputType:'article',
   systemPrompt:AI_ADVISOR_SYSTEM_PROMPT,
   tags:getBaziTagsForGemini(),
   reportDraft:getReportContextForGemini(),
-  history,
+  history:compactHistory,
   question,
   maxOutputTokens
 });
@@ -3488,7 +3492,7 @@ if(q) q.value='';
 const pending=appendGeminiMessage('assistant','正在整理回答中⋯');
 if(btn) btn.disabled=true;
 try{
-const text=await callGeminiAssistant({question,maxOutputTokens:3200,history:priorHistory});
+const text=await callGeminiAssistant({question,maxOutputTokens:3600,history:priorHistory});
   const finalText=text || 'Gemini 沒有回傳文字，請稍後再試。';
   setGeminiMessage(pending,finalText);
 geminiChatHistory.push({role:'user',text:question},{role:'assistant',text:finalText});
@@ -3511,14 +3515,13 @@ if(!lastAnswer){
 }
 const userText='請只接續上一則回答尚未完成的地方。若上一則停在半句，直接從中斷處接續；不得重寫、推翻或新增與前文衝突的結論與命盤依據。若上一則已完整，只補充尚未提到的一項具體說法與一項行動建議，避免重複。';
 const priorHistory=[...geminiChatHistory];
-appendGeminiMessage('user',userText);
 const pending=appendGeminiMessage('assistant','繼續補充中⋯');
 if(btn) btn.disabled=true;
 try{
 const text=await callGeminiAssistant({question:userText,maxOutputTokens:2600,history:priorHistory});
   const finalText=text || 'Gemini 沒有回傳補充內容，請稍後再試。';
   setGeminiMessage(pending,finalText);
-geminiChatHistory.push({role:'user',text:userText},{role:'assistant',text:finalText});
+geminiChatHistory.push({role:'user',text:userText,hidden:true},{role:'assistant',text:finalText});
 persistGeminiChat();
 }catch(err){
   console.error('Gemini continue error:', err);

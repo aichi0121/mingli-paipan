@@ -11,7 +11,7 @@ POST /api/gemini-polish
 - 主報告完成本機排盤後，自動接收十神數量、質變標籤、合沖、大運流年與風水交集
 - 回傳完整版的情境化串聯分析，以及快速版的客戶關鍵字摘要
 - 接收報告草稿或客戶提問
-- 用 Gemini 1.5 Flash 潤飾後回傳 JSON 或文章
+- 用指定的 Gemini Flash 模型潤飾後回傳 JSON 或文章
 - API Key 放在後端環境變數，不放在 `index.html`
 
 主報告不把姓名與出生日期送給 Gemini；本機精算結果與老師原始觀點仍是判斷依據。若 API 暫時失敗，網頁會保留本機完整版與快速版，不會卡在載入畫面。同一命盤同一年度會使用版本化快取，避免重複消耗免費額度。
@@ -29,6 +29,12 @@ GEMINI_API_KEY=你的 Google AI Studio API Key
 ```text
 GEMINI_MODEL=gemini-3.5-flash
 ALLOWED_ORIGIN=https://aichi0121.github.io
+```
+
+後端預設會固定使用同一個模型，不會因為一次請求失敗而悄悄換模型，避免回答格式與品質飄移。若你確實要在額度不足時允許改用備援模型，才另外設定：
+
+```text
+GEMINI_ALLOW_MODEL_FALLBACK=true
 ```
 
 如果只是自己測試，`ALLOWED_ORIGIN` 可以先不設定。
