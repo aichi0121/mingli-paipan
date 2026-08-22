@@ -3280,7 +3280,7 @@ return {
 
 let aiReportRequestId=0;
 let aiReportPending=false;
-const AI_REPORT_CACHE_VERSION='2026-08-23-v5.9-stable-report-cache';
+const AI_REPORT_CACHE_VERSION='2026-08-23-v6.0-personalized-liuri-summary';
 let lastAiReportTags=null;
 function aiEscape(value){
 return String(value??'').replace(/[&<>"']/g,ch=>({
@@ -5870,13 +5870,28 @@ function clashDetails(triggerBranch, targets){
   if(!opposing) return [];
   return targets.filter(item=>item.branch===opposing).map(item=>({trigger:triggerBranch,opposing,label:item.label,branch:item.branch}));
 }
+function tenGodLabelsForElement(element){
+  const gods=TG_ARR.filter(stem=>WX_MAP[stem]===element)
+    .map(stem=>toTrad(getShishen(riTg,stem)))
+    .filter(Boolean);
+  return [...new Set(gods)].join('／')||'五行作用';
+}
+function effectiveDailyCardStatus(element){
+  const elementStatus=elementDayTone(element);
+  // 卡片是「今天可否運用」而非固定吉日清單：今日為忌時不能仍亮綠燈。
+  if(todayPanelTone==='red') return {tone:'red',label:'今日防範'};
+  if(todayPanelTone==='amber'&&elementStatus.tone==='green') return {tone:'amber',label:'今日宜穩健'};
+  return elementStatus;
+}
 function dailyCard({icon,title,element,good,bad}){
-  const status=elementDayTone(element);
-  const text=status.tone==='green' ? good : status.tone==='red' ? bad : '依現實條件安排；先確認時間、預算與身心餘裕。';
+  const status=effectiveDailyCardStatus(element);
+  const relation=tenGodLabelsForElement(element);
+  const preference=elementDayTone(element).tone==='green'?'喜用':elementDayTone(element).tone==='red'?'忌神':'中性／需調整';
+  const text=status.tone==='green' ? good : status.tone==='red' ? bad : '今天有可用能量但環境仍需調整；先確認時間、預算與身心餘裕。';
   return `<div class="liuri-card tone-${status.tone}">
     <div class="liuri-card-icon">${icon}</div><div class="liuri-card-title">${title}</div>
     <div class="liuri-status">${status.label}</div>
-    <div class="liuri-card-days">對應五行：${element}<br>${text}</div>
+    <div class="liuri-card-days">對應五行：${element}（${relation}／${preference}）<br>${text}</div>
   </div>`;
 }
 const nowForLiuri=new Date();
@@ -5911,17 +5926,23 @@ const clashWarnings=[
 const todayHasContextRisk=flowMonthStatus.tone==='red'||clashWarnings.length>0;
 const todayPanelTone=todayBaseTone==='green'&&todayHasContextRisk ? 'amber' : todayBaseTone;
 const flowRangeLabel=flowMonthRange(flowMonth,nowForLiuri);
-const followUpNotes=[
-  flowMonthStatus.tone==='red'||todayPanelTone==='red'
-    ? '交通與規則：停車、行車、帳單、合約與期限都多做一次確認；避免臨停、僥倖或最後一刻才處理。'
-    : '交通與規則：照原定計畫前進即可，但仍保留時間緩衝並確認停車、付款與約定細節。',
-  clashWarnings.length
-    ? '移動與防護：本月／今日有地支相沖訊號，出入低矮空間、搬動物品、使用器材時放慢節奏；重要移動預留備案。'
-    : '移動與防護：目前沒有抓到與重點宮位直接六沖，仍以睡眠、專注與安全習慣作為基本保護。',
+const isWeakChart=!isStrong;
+const followUpNotes=clashWarnings.length ? [
+  '交通與規則：停車、行車、帳單、合約與期限都多做一次確認；避免臨停、僥倖或最後一刻才處理。',
+  '移動與防護：本月／今日有地支相沖訊號，出入低矮空間、搬動物品、使用器材時放慢節奏；重要移動預留備案。',
   todayPanelTone==='red'
     ? '金錢與決策：先處理必要支出與既定責任；非必要的大額消費、衝動下單或未看清條款的承諾，延後一晚再決定。'
-    : '金錢與決策：適合完成既定收支、溝通或整理，但重大決定仍須以合約、預算與實際資訊為準。',
-  '這些提示是安排節奏與降低風險的參考，不是事件預告；身體受傷、交通違規或財務決策仍以安全、法規與專業意見為優先。'
+    : '金錢與決策：可完成既定收支與溝通；重大決定仍以合約、預算與實際資訊為準。'
+] : [
+  '氣場平穩：目前沒有偵測到流月、流日與重點宮位的直接六沖，可按既定節奏推進專案與交流，維持規律作息即可。',
+  flowMonthStatus.tone==='green'
+    ? (isWeakChart?'本月安排：先把支持你的資源、合作與學習排進行程，再穩定推進已準備好的工作。':'本月安排：適合主動推進、洽談合作與展現專業，但仍把重要承諾寫成具體期限。')
+    : flowMonthStatus.tone==='red'
+      ? '本月安排：用減量與確認取代硬撐；先完成既定責任，再決定是否新增支出、任務或合作。'
+      : '本月安排：保留彈性並累積資源，先做可驗收的小步推進，不必急著一次定下所有方向。',
+  todayPanelTone==='red'
+    ? '金錢與決策：先處理必要支出與既定責任；非必要的大額消費、衝動下單或未看清條款的承諾，延後一晚再決定。'
+    : '金錢與決策：適合完成既定收支、溝通或整理；重大決定仍以合約、預算與實際資訊為準。'
 ];
 const sec11Html = `
 <div class="alert-box">
@@ -5935,7 +5956,7 @@ const sec11Html = `
 <div class="section-title">流月分析｜【${flowMonth.stem}${flowMonth.branch}】（${flowRangeLabel}）</div>
 <div class="liuri-today-panel tone-${flowMonthStatus.tone}"><strong>目前流月</strong>：${flowMonthText}</div>
 ${clashWarnings.length ? `<div class="liuri-warning"><strong>⚠️ 地支相沖提醒：</strong>${clashWarnings.join('；')}。氣場較容易出現臨時變動、摩擦或行程干擾；行車、停車、器材使用與金錢規則請提早確認。</div>` : ''}
-<div class="section-title">流日行動提示</div>
+<div class="section-title">流日行動提示（今日狀態已同步至卡片燈號）</div>
 <div class="liuri-grid">
   ${dailyCard({icon:'💰',title:elementDayTone(caiStar).tone==='red'?'財務防範日':'財務行動日',element:caiStar,good:'適合核對收款、預算與既定交易。',bad:'避免衝動消費、墊款與未確認條款。'})}
   ${dailyCard({icon:'💼',title:elementDayTone(guanStar).tone==='red'?'工作壓力日':'工作推進日',element:guanStar,good:'適合提案、溝通與完成既定進度。',bad:'規則、期限與責任要先寫清楚，別硬接。'})}
@@ -5943,7 +5964,7 @@ ${clashWarnings.length ? `<div class="liuri-warning"><strong>⚠️ 地支相沖
   ${dailyCard({icon:'🏥',title:elementDayTone(healthCautionWx).tone==='red'?'健康防護日':'身心調整日',element:healthCautionWx,good:'安排休息、運動與規律飲食，維持節奏。',bad:`留意${WX_ORGAN[riWx]?.split('、')[0]||'身心狀態'}與過勞，避免冒險或趕時間。`})}
 </div>
 <div class="section-title" style="margin-top:18px;">後續注意事項</div>
-<div class="liuri-today-panel tone-${clashWarnings.length||flowMonthStatus.tone==='red'?'red':'amber'}"><strong>${flowRangeLabel} 前，建議這樣安排：</strong><br>${followUpNotes.map((note,index)=>`${index+1}. ${note}`).join('<br>')}</div>
+<div class="liuri-today-panel tone-${clashWarnings.length||flowMonthStatus.tone==='red'?'red':flowMonthStatus.tone}"><strong>${flowRangeLabel} 前，建議這樣安排：</strong><br>${followUpNotes.map((note,index)=>`${index+1}. ${note}`).join('<br>')}<br>${followUpNotes.length+1}. 這些提示是安排節奏與降低風險的參考，不是事件預告；身體受傷、交通違規或財務決策仍以安全、法規與專業意見為優先。</div>
 <p class="liuri-note">判讀順序：喜忌五行 → 流月／流日干支 → 原局、目前大運與流月的六沖檢查。綠燈代表較能運用，黃燈代表需調整，紅燈代表先防範，均不取代現實安全判斷。</p>
 `;
 
@@ -6238,7 +6259,9 @@ const aiReportTags={
       flowMonth:{ganzhi:`${flowMonth.stem}${flowMonth.branch}`,range:flowRangeLabel,stemElement:flowMonthStemWx,branchElement:flowMonthBranchWx,tone:flowMonthStatus.tone},
       flowDay:{ganzhi:`${todayGanzhi.stem}${todayGanzhi.branch}`,stemElement:todayStemWx,branchElement:todayBranchWx,baseTone:todayBaseTone,contextRisk:todayHasContextRisk},
       clashes:clashWarnings,
-      rule:'流日先判喜忌，再疊加流月與六沖。流日本身為喜用時，即使流月或六沖有風險，也要寫成「日氣有支撐、環境宜穩健防範」，不得把它改寫成全忌神日或通用得財日。'
+      clashCount:clashWarnings.length,
+      summaryMode:isWeakChart&&flowMonthStatus.tone==='red'?'身弱遇忌月：減量、防守、避免衝動、多做確認':!isWeakChart&&flowMonthStatus.tone==='green'&&!clashWarnings.length?'身強遇喜月：推進、變現、積極溝通、展現專業':'平穩或混合：穩紮穩打、累積資源、順勢而為',
+      rule:'流日先判喜忌，再疊加流月與六沖。流日本身為喜用時，即使流月或六沖有風險，也要寫成「日氣有支撐、環境宜穩健防範」，不得把它改寫成全忌神日或通用得財日；沒有六沖時，不得加入交通、拖吊或碰撞模板。'
     },
     interpretationRule:'大運與流年是階段性作用，只能寫成目前形成、補入或引動，不得宣稱為原局既有。'
   },
