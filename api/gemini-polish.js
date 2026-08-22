@@ -232,6 +232,7 @@ function chapterStatusFallbacks(tags) {
   const health = domains.health || {};
   const wealth = domains.wealth || {};
   const career = domains.career || {};
+  const daily = timing.dailyGuidance || {};
   const interactions = interactionSummary(chart.stemBranchInteractions);
   const usefulElements = listText(chart.usefulElements, '能讓全盤恢復平衡的能量');
   const dominantElements = listText(health.dominantElements, '較旺的五行');
@@ -256,7 +257,9 @@ function chapterStatusFallbacks(tags) {
     '⑨': domains.relationship?.decision ? `關係定位是「${domains.relationship.decision.type}」：${domains.relationship.decision.partner}。` : `關係中重視${relationship.spousePalace || '夫妻宮'}所代表的安全感、承諾與相處界線。`,
     '⑩': `${children.gender || '此命盤'}的判讀規則是「${childRule}」，原局抓到${children.childStarCount ?? 0}個子女訊號；作品另看${children.workStarRule || '專業輸出'}，目前有${children.workStarCount ?? children.outputCount ?? 0}個訊號，兩條線不混算。`,
     '⑪': `原局以${dominantElements}較突出、${missingElements}較需補位，壓力優先反映在${health.dayMasterOrgans || '睡眠與消化'}；${pressureText}是保養重點。`,
-    '⑫': `得財日優先看【${wealth.element || '財星五行'}】，工作機會看【${career.officialElement || '官星五行'}】，關係互動看【${relationship.spouseElement || '配偶星五行'}】，健康則依${health.dayMasterOrgans || '本命臟腑'}調整節奏。`,
+    '⑫': daily.flowDay?.ganzhi
+      ? `流日【${daily.flowDay.ganzhi}】${daily.flowDay.baseTone === 'green' ? '本身有喜用支撐' : '需依喜忌調整'}${daily.flowDay.contextRisk ? `；但${daily.flowMonth?.ganzhi ? `流月【${daily.flowMonth.ganzhi}】` : '流月'}與地支互動使環境宜穩健防範` : ''}。${daily.flowMonth?.range ? `本月區間為${daily.flowMonth.range}。` : ''}`
+      : `得財日優先看【${wealth.element || '財星五行'}】，工作機會看【${career.officialElement || '官星五行'}】，關係互動看【${relationship.spouseElement || '配偶星五行'}】，健康則依${health.dayMasterOrgans || '本命臟腑'}調整節奏。`,
     '⑬': `${topDirections}；主章只保留這兩個交集，不必把所有方位與擺件同時啟動。`
   };
 }
@@ -269,6 +272,7 @@ function chapterActionFallbacks(tags) {
   const annual = timing.annual || {};
   const children = domains.children || {};
   const health = domains.health || {};
+  const daily = timing.dailyGuidance || {};
   const usefulElements = listText(chart.usefulElements, '適合你的平衡方向');
   const positions = Array.isArray(domains.fengShui?.topIntersections) ? domains.fengShui.topIntersections : [];
   const firstDirection = positions[0]?.direction || '最重要的交集方位';
@@ -293,7 +297,9 @@ function chapterActionFallbacks(tags) {
     '⑨': '固定安排一次不處理工作與雜事的對話，把需求、界線與現實分工直接說清楚。',
     '⑩': `${children.birthOrderText ? '胎次只視為傳統命理傾向；' : ''}作品方面把專業整理成可重複交付的模組，子女時機另配合實際人生規劃與流年判斷。`,
     '⑪': `固定照顧${health.dayMasterOrgans || '睡眠與消化'}；若已有持續不適，直接交由合格醫療專業評估，不以命理取代診斷。`,
-    '⑫': '把適合的日子用於收款、提案或重要溝通，把健康注意日留給減量與休息，不因單一天象取消必要決策。',
+    '⑫': daily.flowMonth?.range
+      ? `在${daily.flowMonth.range}前，先確認停車、行程、付款、期限與合約細節；流日有支撐時可完成既定安排，但不以僥倖方式承接高風險決策。`
+      : '把適合的日子用於收款、提案或重要溝通，把健康注意日留給減量與休息，不因單一天象取消必要決策。',
     '⑬': `先整理${firstDirection}${secondDirection ? `與${secondDirection}` : ''}的雜物與光線，各放一項對應用途的物品即可，其餘老師明細留在折疊區查閱。`
   };
 }
@@ -715,14 +721,24 @@ module.exports = async function handler(req, res) {
     const wantsJson = (body.outputType || body.format) === 'json';
 
     if ((body.mode || 'polish') === 'polish' && wantsJson) {
-      const coreBody = { ...body, mode: 'polish-core', maxOutputTokens: Math.min(Number(body.maxOutputTokens) || 4200, 4200) };
+      const coreBody = { ...body, mode: 'polish-core', maxOutputTokens: Math.min(Number(body.maxOutputTokens) || 6000, 6000) };
       const coreResult = await callGemini(buildPrompt(coreBody), coreBody);
       const coreData = tryParseJson(coreResult.text);
       if (!coreData?.summary) {
-        const error = new Error('Gemini 全盤情境解讀回傳不完整，未以本機摘要冒充 AI 內容。請稍後重新生成。');
-        error.statusCode = 502;
-        error.code = 'GEMINI_CORE_INCOMPLETE';
-        throw error;
+        // Gemini may spend its response budget on reasoning before it emits JSON.
+        // Keep the calculated report usable and cacheable instead of returning 502.
+        const fallback = enforceStructuredFacts(createFallbackReport(tags), tags);
+        res.status(200).json({
+          ok: true,
+          model: coreResult.model,
+          outputType: 'json',
+          text: coreResult.text || '',
+          json: fallback,
+          usedFallback: true,
+          finishReason: coreResult.finishReason,
+          usageMetadata: coreResult.usageMetadata
+        });
+        return;
       }
 
       let chapterResult = null;
