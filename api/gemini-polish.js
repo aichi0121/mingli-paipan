@@ -233,6 +233,16 @@ function chapterStatusFallbacks(tags) {
   const wealth = domains.wealth || {};
   const career = domains.career || {};
   const daily = timing.dailyGuidance || {};
+  const isWeakChart = String(chart.strength?.label || '').includes('弱');
+  const flowTone = daily.flowMonth?.tone || 'amber';
+  const hasClash = Array.isArray(daily.clashes) && daily.clashes.length > 0;
+  const dailySummary = daily.flowDay?.ganzhi
+    ? (isWeakChart && flowTone === 'red'
+      ? `你目前以減量與防守為先：流日【${daily.flowDay.ganzhi}】${daily.flowDay.baseTone === 'green' ? '雖有喜用支撐' : '需先依喜忌調整'}，但${daily.flowMonth?.ganzhi ? `流月【${daily.flowMonth.ganzhi}】` : '本月'}的壓力較明顯${hasClash ? '，又有地支相沖' : ''}，避免衝動承諾與過度消耗。`
+      : !isWeakChart && flowTone === 'green' && !hasClash
+        ? `流日【${daily.flowDay.ganzhi}】與本月氣場較能配合，可把握已準備好的提案、變現與專業溝通，但仍以可驗收的步驟推進。`
+        : `流日【${daily.flowDay.ganzhi}】${daily.flowDay.baseTone === 'green' ? '本身有喜用支撐' : '需依喜忌調整'}${daily.flowDay.contextRisk ? `；但${daily.flowMonth?.ganzhi ? `流月【${daily.flowMonth.ganzhi}】` : '流月'}${hasClash ? '與地支相沖' : '的環境條件'}使安排宜穩健防範` : '，適合穩紮穩打、累積資源'}。`)
+    : '';
   const interactions = interactionSummary(chart.stemBranchInteractions);
   const usefulElements = listText(chart.usefulElements, '能讓全盤恢復平衡的能量');
   const dominantElements = listText(health.dominantElements, '較旺的五行');
@@ -258,7 +268,7 @@ function chapterStatusFallbacks(tags) {
     '⑩': `${children.gender || '此命盤'}的判讀規則是「${childRule}」，原局抓到${children.childStarCount ?? 0}個子女訊號；作品另看${children.workStarRule || '專業輸出'}，目前有${children.workStarCount ?? children.outputCount ?? 0}個訊號，兩條線不混算。`,
     '⑪': `原局以${dominantElements}較突出、${missingElements}較需補位，壓力優先反映在${health.dayMasterOrgans || '睡眠與消化'}；${pressureText}是保養重點。`,
     '⑫': daily.flowDay?.ganzhi
-      ? `流日【${daily.flowDay.ganzhi}】${daily.flowDay.baseTone === 'green' ? '本身有喜用支撐' : '需依喜忌調整'}${daily.flowDay.contextRisk ? `；但${daily.flowMonth?.ganzhi ? `流月【${daily.flowMonth.ganzhi}】` : '流月'}與地支互動使環境宜穩健防範` : ''}。${daily.flowMonth?.range ? `本月區間為${daily.flowMonth.range}。` : ''}`
+      ? `${dailySummary}${daily.flowMonth?.range ? `本月區間為${daily.flowMonth.range}。` : ''}`
       : `得財日優先看【${wealth.element || '財星五行'}】，工作機會看【${career.officialElement || '官星五行'}】，關係互動看【${relationship.spouseElement || '配偶星五行'}】，健康則依${health.dayMasterOrgans || '本命臟腑'}調整節奏。`,
     '⑬': `${topDirections}；主章只保留這兩個交集，不必把所有方位與擺件同時啟動。`
   };
@@ -512,7 +522,7 @@ function buildPrompt(body) {
       '第⑦到⑨章採用資料中的明確判型；第⑩章嚴格依性別與 birthOrderSequence，不可自行改胎次；健康須核對五行數量。',
       '章節專屬要求：⑤直接說明這十年要累積什麼；⑥直接說今年要完成什麼；⑦指出收入增長方式；⑧明確選定上班、接案或創業型態；⑨指出伴侶與相處需求；⑪指出最先受壓的身體系統；⑫說明流日如何實際安排。',
       '⑧範例：現況可寫「你更適合以個人專業與口碑承接複雜案件，不必靠擴大團隊證明能力」；行動可寫「整理一項代表性服務，補齊案例、流程與報價後集中曝光」。不得直接複製 decision.reason。',
-      '⑫ 流日擇吉方向是個人化規則，必須優先依 timing.dailyGuidance。不得再寫「得財日優先看水、工作機會看木」這類通用十神模板。若 flowDay.baseTone 是 green 且 contextRisk 為 true，現況定性必須表達「今日流日本身有喜用支撐，但流月或地支相沖使環境需穩健防範」；行動處方需具體落在交通、法規、金錢或行程確認。若資料含 flowMonth.range，需保留該國曆節氣範圍。',
+      '⑫ 流日擇吉方向是個人化規則，必須優先依 timing.dailyGuidance。不得再寫「得財日優先看水、工作機會看木」這類通用十神模板。依【身強弱 × 流月 tone × 是否 clashes】改句型：身弱遇 red 月強調減量、防守、避免衝動與多做確認；身強遇 green 月且無沖時強調推進、變現、積極溝通與展現專業；其他平穩盤強調穩紮穩打、累積資源。若 flowDay.baseTone 是 green 且 contextRisk 為 true，現況定性必須表達「今日流日本身有喜用支撐，但流月或地支相沖使環境需穩健防範」；若沒有 clashes，不得硬塞交通、拖吊、碰撞警語，行動處方改為既定節奏、規律作息或小步推進。若資料含 flowMonth.range，需保留該國曆節氣範圍。',
       '正確範例：{"number":"①","title":"日主與五行特質","bullets":[{"label":"現況定性","value":"你是一個踏實、內斂且具包容力的人，習慣先消化情緒再承擔責任。"},{"label":"行動處方","value":"做決定前先確認自己的需求，避免無止境滿足他人。"}]}',
       '只回傳合法 JSON，不要 Markdown、code fence 或額外文字：',
       '{"chapterSummaries":[{"number":"①","title":"日主與五行特質","bullets":[{"label":"現況定性","value":"一句白話結論"},{"label":"行動處方","value":"一項具體行動"}]}]}',
