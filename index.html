@@ -3262,7 +3262,7 @@ return {
 
 let aiReportRequestId=0;
 let aiReportPending=false;
-const AI_REPORT_CACHE_VERSION='2026-08-23-v5.8-personal-daily-guidance';
+const AI_REPORT_CACHE_VERSION='2026-08-23-v5.9-stable-report-cache';
 let lastAiReportTags=null;
 function aiEscape(value){
 return String(value??'').replace(/[&<>"']/g,ch=>({
@@ -3398,7 +3398,7 @@ const domainHtml=aiDomainAnalysisHtml(data);
 const full=document.getElementById('ai-full-report');
 const quick=document.getElementById('ai-quick-report');
 if(full){
-  full.innerHTML=`<div class="ai-report-heading">全盤情境化串聯</div>${keywordHtml?`<div class="ai-keyword-grid">${keywordHtml}</div>`:''}<div class="ai-analysis-item"><h4>命盤計算摘要</h4><p>${aiEscape(calculatedSummary)}</p></div><div class="ai-analysis-item"><h4>Gemini 情境解讀</h4><p>${aiEscape(data.summary)}</p></div>${domainHtml?`<div class="ai-analysis-grid">${domainHtml}</div>`:''}${data.teacherFriendlyScript?`<div class="ai-analysis-item"><h4>諮詢講稿</h4><p>${aiEscape(data.teacherFriendlyScript)}</p></div>`:''}<div class="ai-report-note">統計與計算摘要由本機排盤固定產生；Gemini 只負責串聯解讀，不會改寫統計數字。老師原始觀點仍以本頁知識庫為準。${model?` 模型：${aiEscape(model)}`:''}</div>`;
+  full.innerHTML=`<div class="ai-report-heading">全盤情境化串聯</div>${keywordHtml?`<div class="ai-keyword-grid">${keywordHtml}</div>`:''}<div class="ai-analysis-item"><h4>命盤計算摘要</h4><p>${aiEscape(calculatedSummary)}</p></div><div class="ai-analysis-item"><h4>Gemini 情境解讀</h4><p>${aiEscape(data.summary)}</p></div>${domainHtml?`<div class="ai-analysis-grid">${domainHtml}</div>`:''}${data.teacherFriendlyScript?`<div class="ai-analysis-item"><h4>諮詢講稿</h4><p>${aiEscape(data.teacherFriendlyScript)}</p></div>`:''}<div class="ai-report-note">統計與計算摘要由本機排盤固定產生；Gemini 只負責串聯解讀，不會改寫統計數字。老師原始觀點仍以本頁知識庫為準。${model?` 模型：${aiEscape(model)}`:''}</div><button type="button" class="btn-secondary" onclick="regenerateAiReport()">重新生成 Gemini 全盤報告</button><p class="ai-report-note">適用於流年切換、命盤資料更新，或想取得新的情境解讀；流月與流日每天會自動更新第⑫章，不需要重跑全盤。</p>`;
   full.classList.remove('ai-report-loading');
   renderChapterSummariesIntoReport(data.chapterSummaries);
 }
@@ -3442,8 +3442,20 @@ try{localStorage.removeItem(aiReportCacheKey(lastAiReportTags));}catch(_){}
 });
 void enhanceReportWithGemini(lastAiReportTags);
 }
+function regenerateAiReport(){
+  if(!lastAiReportTags || aiReportPending) return;
+  if(!confirm('要重新生成 Gemini 全盤報告嗎？這會覆蓋目前儲存的全盤情境解讀。')) return;
+  try{localStorage.removeItem(aiReportCacheKey(lastAiReportTags));}catch(_){}
+  const el=document.getElementById('ai-full-report');
+  if(el) el.innerHTML='<div class="ai-report-heading">全盤情境化串聯</div><div class="kb-loading">正在重新比對命盤結構與流年交集⋯</div>';
+  void enhanceReportWithGemini(lastAiReportTags);
+}
 function aiReportCacheKey(tags,version=AI_REPORT_CACHE_VERSION){
-const source=version+'|'+JSON.stringify(tags);
+// 流日每天都會變；它只影響第⑫章，不能讓整份 Gemini 全盤報告每天失去快取。
+const stableTags=JSON.parse(JSON.stringify(tags||{}));
+if(Array.isArray(stableTags.rawChapters)) stableTags.rawChapters=stableTags.rawChapters.filter(chapter=>String(chapter?.number||'')!=='⑫');
+if(stableTags.timing) delete stableTags.timing.dailyGuidance;
+const source=version+'|'+JSON.stringify(stableTags);
 let hash=2166136261;
 for(let i=0;i<source.length;i++){
   hash^=source.charCodeAt(i);
