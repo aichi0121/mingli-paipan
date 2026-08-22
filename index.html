@@ -2118,7 +2118,10 @@ details.kb-section summary::after{display:none;}
 const CURRENT_YEAR = new Date().getFullYear();
 const LS_KEY = 'doris_clients';
 const GEMINI_API_ROUTE = window.DORIS_GEMINI_API_ROUTE || localStorage.getItem('doris_gemini_api_route') || 'https://mingli-paipan.vercel.app/api/gemini-polish';
-const BOOKING_URL = window.DORIS_BOOKING_URL || localStorage.getItem('doris_booking_url') || '';
+// 可在部署設定 window.DORIS_LINE_OFFICIAL_URL，或在瀏覽器設定 doris_line_official_url。
+// 預約按鈕優先導向 LINE 官方帳號；保留舊的 BOOKING_URL 作為相容備援。
+const LINE_OFFICIAL_URL = window.DORIS_LINE_OFFICIAL_URL || localStorage.getItem('doris_line_official_url') || '';
+const BOOKING_URL = LINE_OFFICIAL_URL || window.DORIS_BOOKING_URL || localStorage.getItem('doris_booking_url') || '';
 const AI_ADVISOR_SYSTEM_PROMPT = `你是一位精通子平八字的專業命理顧問。
 使用者上方已經閱讀過系統程式自動產生的命盤基礎數據與條文報告。你的任務是作為「一對一諮詢顧問」，協助使用者解讀報告重點、將條文轉化為生活實用建議，並解答使用者的追加提問。
 
@@ -6037,6 +6040,34 @@ const healthDiagnosis=!isStrong
       : `你的底氣不差，但習慣撐到事情做完才休息；${coreOrgan}與規律作息是最不能被延後的保養重點。`;
 const healthRisk='健康警訊：若疲累已持續影響生活，應以專業醫療評估為準，不要只用命理解釋身體訊號。';
 
+// 快速版的問題與解鎖線索必須由命盤結構生成，不能只換姓名套同一組文案。
+const loveQuestion=spouseCount===0
+  ? `夫妻星訊號不明顯的你，關係為何常停在「還沒真正開始」？`
+  : spouseCount>=3
+    ? `配偶星有${spouseCount}個訊號：為什麼越在意，關係裡越容易反覆評估？`
+    : `你的夫妻宮【${riDz}】最在意什麼，才會讓你願意真正靠近一個人？`;
+const careerQuestion=guanEntries.length>=3
+  ? `官星有${guanEntries.length}個：你是在累積職位，還是在替別人承擔過量責任？`
+  : shiShangEntries.length>=2
+    ? `食傷有${shiShangEntries.length}個：怎麼把你的專業輸出真正換成收入與定位？`
+    : `【${curDyGz}${curDyShen}】大運下，下一步該守住穩定還是主動換位置？`;
+const familyQuestion=jieCaiEntries.length>=2
+  ? `劫財有${jieCaiEntries.length}個：哪些人情、家人或合作關係正在模糊你的金錢界線？`
+  : yinEntries.length+guanEntries.length>=4
+    ? `印星與官星合計${yinEntries.length+guanEntries.length}個：哪些「應該懂事」的責任其實不必再由你承擔？`
+    : `你的年柱與月柱，如何影響你現在對家庭責任與安全感的選擇？`;
+const healthQuestion=!isStrong
+  ? `身弱結構遇上【${curDyGz}${curDyShen}】大運，壓力通常先落在哪一種生活節奏？`
+  : guanEntries.length>=3
+    ? `官星壓力偏重時，你的身體會用哪一種方式提醒你別再硬撐？`
+    : `你的【${riTg}${riWx}】體質在${lyYear}年，最需要守住哪一個恢復節奏？`;
+const quickPainCards=[
+  {tone:'love',icon:'💕',title:'感情真正卡住的點',question:loveQuestion,diagnosis:loveDiagnosis,risk:loveRisk,preview:[`夫妻宮【${riDz}】真正要的安全感是什麼？`,`哪一類對象最容易觸動你的靠近與退縮？`,`${lyYear}年哪個關係課題需要先說清楚？`]},
+  {tone:'career',icon:'💼',title:'職涯的下一個分岔點',question:careerQuestion,diagnosis:careerDiagnosis,risk:careerRisk,preview:[`【${curDyGz}${curDyShen}】十年真正要累積的是什麼？`,`${lyYear}年適合守住、轉換，還是開始打造第二收入？`,`你的工作價值怎麼從忙碌變成可被定價的成果？`]},
+  {tone:'family',icon:'🏠',title:'責任與界線的來源',question:familyQuestion,diagnosis:familyDiagnosis,risk:familyRisk,preview:['哪些責任是愛，哪些其實已變成消耗？','如何拒絕才不會落入愧疚或關係拉扯？','原生家庭模式會怎麼影響你的伴侶與職涯選擇？']},
+  {tone:'health',icon:'🏥',title:'壓力最先落在哪裡',question:healthQuestion,diagnosis:healthDiagnosis,risk:healthRisk,preview:[`壓力為什麼先反映在${coreOrgan}、睡眠或恢復力？`,`${lyYear}年哪些月份要主動減量與安排休息？`,`最適合你的恢復方法是補能量、疏通，還是建立界線？`]}
+];
+
     function quickPainCard({tone,icon,title,question,diagnosis,risk,preview}){
       const encodedTitle=encodeURIComponent(title);
       const encodedQuestion=encodeURIComponent(question);
@@ -6053,22 +6084,19 @@ const healthRisk='健康警訊：若疲累已持續影響生活，應以專業�
 }
 
 const quickPainHtml=`<div class="quick-pain-grid">
-  ${quickPainCard({tone:'love',icon:'💕',title:'戀愛與親密關係',question:'為什麼越在意，越不容易把真正需求說出口？',diagnosis:loveDiagnosis,risk:loveRisk,preview:['容易被哪一型伴侶吸引？','關係轉折會落在哪個時間點？','怎麼說，對方才聽得懂？']})}
-  ${quickPainCard({tone:'career',icon:'💼',title:'職場與定位',question:'你現在是在累積身價，還是只是在替別人扛責任？',diagnosis:careerDiagnosis,risk:careerRisk,preview:['正職、接案或創業，哪一條更適合？','職涯轉折的年份與月份','如何把能力換成職稱與收入？']})}
-  ${quickPainCard({tone:'family',icon:'🏠',title:'原生家庭',question:'哪些責任其實不是你的，卻一直被你背在身上？',diagnosis:familyDiagnosis,risk:familyRisk,preview:['你承接了誰的期待？','哪一種家庭互動最消耗你？','如何設界線又不陷入內疚？']})}
-  ${quickPainCard({tone:'health',icon:'🏥',title:'健康與壓力',question:'你的身體通常會先替哪一種壓力說話？',diagnosis:healthDiagnosis,risk:healthRisk,preview:['壓力最容易反映在哪裡？','今年哪些階段需要降低負荷？','適合你的恢復與保養節奏']})}
-</div><p class="quick-boundary-note">快速版提供的是命盤傾向與風險辨識，不取代醫療、心理、法律或財務專業判斷。</p>`;
+  ${quickPainCards.map(quickPainCard).join('')}
+</div><p class="quick-boundary-note">每張警訊都依此人的十神、宮位、大運與流年資料生成；快速版提供的是命盤傾向與風險辨識，不取代醫療、心理、法律或財務專業判斷。</p>`;
 
 const quickHooks=[
-  `<strong>感情：</strong>你真正需要的是什麼類型的伴侶，又為何總在關係裡慢一步說出需求？`,
-  `<strong>職場：</strong>【${curDyGz}${curDyShen}】大運遇上【${lyGz}${lyStar}】後，哪個階段會真正改變你的工作定位？`,
-  `<strong>原生家庭：</strong>哪些看似理所當然的責任，正在悄悄影響你的選擇與安全感？`,
-  `<strong>健康：</strong>壓力最容易先落在${coreOrgan}、睡眠，還是情緒恢復上？`
+  `<strong>感情：</strong>${loveQuestion}`,
+  `<strong>職場：</strong>${careerQuestion}`,
+  `<strong>責任與家庭：</strong>${familyQuestion}`,
+  `<strong>健康：</strong>${healthQuestion}`
 ];
 
 const quickRadarHtml=`
 <div class="quick-diagnostic">
-  <p class="quick-intro">這不是把命盤一次說完，而是先讓你看見目前最明顯的三股力量，以及它們為什麼會影響你的選擇。</p>
+  <p class="quick-intro">這不是通用性格測驗。以下三項指數直接取自你的命盤結構、【${curDyGz}${curDyShen}】大運與${lyYear}年【${lyGz}${lyStar}】流年，先指出最需要優先處理的失衡點。</p>
   <div class="quick-radar-layout">
     <div class="quick-radar" role="img" aria-label="底氣、事業爆發力與財富留存力雷達圖">
       <svg viewBox="0 0 200 190" aria-hidden="true">
@@ -6330,33 +6358,11 @@ if(canViewTeacherReport()) void enhanceReportWithGemini(aiReportTags);
 
     async function requestPrivateConsultation(topic='完整報告',question=''){
       await recordQuickQuestion(topic,question);
-      if(question && canUseGemini()){
-        const prompt=`【客戶命盤資料】
-${getReportContextForGemini()}
-
-【問題】
-${topic} — ${question}
-
-【回答格式要求】
-請一次完整輸出，包含：
-1. 結論（心理層面分析）
-2. 命盤依據（十神、宮位解析）
-3. 給客戶的實用建議（口語化、有溫度）
-字數約 800-1000 字，請一次輸出完畢，不要要求補充。`;
-        toggleGeminiChat(true);
-        const input=document.getElementById('gemini-question');
-        if(input){
-          input.value=prompt;
-          input.focus();
-        }
-        void askGeminiAboutReport();
-        return;
-      }
       if(BOOKING_URL){
-        window.location.assign(BOOKING_URL);
+        window.open(BOOKING_URL,'_blank','noopener');
         return;
       }
-      alert('預約連結尚未設定，請聯繫管理員設定 DORIS_BOOKING_URL。');
+      alert('LINE 官方帳號連結尚未設定，請聯繫管理員設定 DORIS_LINE_OFFICIAL_URL。');
     }
 function switchTab(tab,btn){
 if(tab === 'full' && !canViewTeacherReport()){
