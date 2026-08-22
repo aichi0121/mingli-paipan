@@ -3262,7 +3262,7 @@ return {
 
 let aiReportRequestId=0;
 let aiReportPending=false;
-const AI_REPORT_CACHE_VERSION='2026-07-22-v5.7-clean-chapter-decisions';
+const AI_REPORT_CACHE_VERSION='2026-08-23-v5.8-personal-daily-guidance';
 let lastAiReportTags=null;
 function aiEscape(value){
 return String(value??'').replace(/[&<>"']/g,ch=>({
@@ -5808,6 +5808,16 @@ function getBaziFlowMonth(date){
   const monthOffset=(DZ_ARR.indexOf(boundary.branch)-DZ_ARR.indexOf('寅')+12)%12;
   return {stem:TG_ARR[(yinStemStart+monthOffset)%10],branch:boundary.branch,boundary};
 }
+function flowMonthRange(flow,date){
+  const currentYear=date.getFullYear();
+  const startYear=flow.boundary.previousYear ? currentYear-1 : currentYear;
+  const start=new Date(startYear,flow.boundary.month,flow.boundary.day);
+  const boundaryIndex=SOLAR_MONTH_BOUNDARIES.findIndex(item=>item.branch===flow.branch);
+  const next=SOLAR_MONTH_BOUNDARIES[(boundaryIndex+1)%SOLAR_MONTH_BOUNDARIES.length];
+  const end=new Date(currentYear+(next.month<=flow.boundary.month?1:0),next.month,next.day);
+  const termNames={丑:'小寒',寅:'立春',卯:'驚蟄',辰:'清明',巳:'立夏',午:'芒種',未:'小暑',申:'立秋',酉:'白露',戌:'寒露',亥:'立冬',子:'大雪'};
+  return `${start.getMonth()+1}/${start.getDate()} ${termNames[flow.branch]} ～ ${end.getMonth()+1}/${end.getDate()} ${termNames[next.branch]}`;
+}
 function elementDayTone(element){
   const favorable=(yongshen.match(/[木火土金水]/g)||[]).includes(element);
   const unfavorable=(jishenWuxing.match(/[木火土金水]/g)||[]).includes(element);
@@ -5843,7 +5853,7 @@ const focusBranches=[
 const flowMonthClashes=clashDetails(flowMonth.branch,focusBranches);
 const todayClashes=clashDetails(todayGanzhi.branch,[...focusBranches,{label:'流月',branch:flowMonth.branch}]);
 const todayElementTones=[elementDayTone(todayStemWx),elementDayTone(todayBranchWx)];
-const todayRiskTone=(todayClashes.length||todayElementTones.filter(item=>item.tone==='red').length>=2) ? 'red'
+const todayBaseTone=todayElementTones.filter(item=>item.tone==='red').length>=1 ? 'red'
   : todayElementTones.some(item=>item.tone==='red'||item.tone==='amber') ? 'amber' : 'green';
 const formatDate=`${nowForLiuri.getFullYear()}年${nowForLiuri.getMonth()+1}月${nowForLiuri.getDate()}日`;
 const flowMonthElementTones=[elementDayTone(flowMonthStemWx),elementDayTone(flowMonthBranchWx)];
@@ -5858,14 +5868,17 @@ const clashWarnings=[
   ...flowMonthClashes.map(item=>`流月【${flowMonth.branch}】與${item.label}【${item.branch}】形成${flowMonth.branch}${item.branch}沖`),
   ...todayClashes.map(item=>`流日【${todayGanzhi.branch}】與${item.label}【${item.branch}】形成${todayGanzhi.branch}${item.branch}沖`)
 ];
+const todayHasContextRisk=flowMonthStatus.tone==='red'||clashWarnings.length>0;
+const todayPanelTone=todayBaseTone==='green'&&todayHasContextRisk ? 'amber' : todayBaseTone;
+const flowRangeLabel=flowMonthRange(flowMonth,nowForLiuri);
 const followUpNotes=[
-  flowMonthStatus.tone==='red'||todayRiskTone==='red'
+  flowMonthStatus.tone==='red'||todayPanelTone==='red'
     ? '交通與規則：停車、行車、帳單、合約與期限都多做一次確認；避免臨停、僥倖或最後一刻才處理。'
     : '交通與規則：照原定計畫前進即可，但仍保留時間緩衝並確認停車、付款與約定細節。',
   clashWarnings.length
     ? '移動與防護：本月／今日有地支相沖訊號，出入低矮空間、搬動物品、使用器材時放慢節奏；重要移動預留備案。'
     : '移動與防護：目前沒有抓到與重點宮位直接六沖，仍以睡眠、專注與安全習慣作為基本保護。',
-  todayRiskTone==='red'
+  todayPanelTone==='red'
     ? '金錢與決策：先處理必要支出與既定責任；非必要的大額消費、衝動下單或未看清條款的承諾，延後一晚再決定。'
     : '金錢與決策：適合完成既定收支、溝通或整理，但重大決定仍須以合約、預算與實際資訊為準。',
   '這些提示是安排節奏與降低風險的參考，不是事件預告；身體受傷、交通違規或財務決策仍以安全、法規與專業意見為優先。'
@@ -5875,11 +5888,11 @@ const sec11Html = `
   <strong>📌 ${client.name} 的個人化流日提示（${lyYear}年）</strong><br>
   先依你的喜用【${yongshen}】與忌五行【${jishenWuxing}】判斷，再疊加流月、流日與地支相沖；不再把財星、官星直接當成通用吉日。
 </div>
-<div class="liuri-today-panel tone-${todayRiskTone}">
+<div class="liuri-today-panel tone-${todayPanelTone}">
   <strong>今日流日｜${formatDate}【${todayGanzhi.stem}${todayGanzhi.branch}】</strong><br>
-  天干【${todayGanzhi.stem}${todayStemWx}】、地支【${todayGanzhi.branch}${todayBranchWx}】。${todayRiskTone==='green' ? '今天的五行與命盤喜用較能配合，可安排已準備好的行動。' : todayRiskTone==='red' ? '今天有忌五行或相沖疊加，優先降低出錯與耗損，不用硬撐或冒險。' : '今天以確認細節、保留彈性為主，避免在壓力下倉促決定。'}
+  天干【${todayGanzhi.stem}${todayStemWx}】、地支【${todayGanzhi.branch}${todayBranchWx}】。${todayBaseTone==='green' ? `今日流日本身有喜用支撐${todayHasContextRisk?'，但受流月與地支相沖影響，仍以穩健防範為主。':'，可安排已準備好的行動。'}` : todayBaseTone==='red' ? '今日五行落在需防範的範圍，優先降低出錯與耗損，不用硬撐或冒險。' : '今天以確認細節、保留彈性為主，避免在壓力下倉促決定。'}
 </div>
-<div class="section-title">流月分析｜【${flowMonth.stem}${flowMonth.branch}】</div>
+<div class="section-title">流月分析｜【${flowMonth.stem}${flowMonth.branch}】（${flowRangeLabel}）</div>
 <div class="liuri-today-panel tone-${flowMonthStatus.tone}"><strong>目前流月</strong>：${flowMonthText}</div>
 ${clashWarnings.length ? `<div class="liuri-warning"><strong>⚠️ 地支相沖提醒：</strong>${clashWarnings.join('；')}。氣場較容易出現臨時變動、摩擦或行程干擾；行車、停車、器材使用與金錢規則請提早確認。</div>` : ''}
 <div class="section-title">流日行動提示</div>
@@ -5890,7 +5903,7 @@ ${clashWarnings.length ? `<div class="liuri-warning"><strong>⚠️ 地支相沖
   ${dailyCard({icon:'🏥',title:elementDayTone(healthCautionWx).tone==='red'?'健康防護日':'身心調整日',element:healthCautionWx,good:'安排休息、運動與規律飲食，維持節奏。',bad:`留意${WX_ORGAN[riWx]?.split('、')[0]||'身心狀態'}與過勞，避免冒險或趕時間。`})}
 </div>
 <div class="section-title" style="margin-top:18px;">後續注意事項</div>
-<div class="liuri-today-panel tone-${clashWarnings.length||flowMonthStatus.tone==='red'?'red':'amber'}"><strong>到下一個節氣交接前，建議這樣安排：</strong><br>${followUpNotes.map((note,index)=>`${index+1}. ${note}`).join('<br>')}</div>
+<div class="liuri-today-panel tone-${clashWarnings.length||flowMonthStatus.tone==='red'?'red':'amber'}"><strong>${flowRangeLabel} 前，建議這樣安排：</strong><br>${followUpNotes.map((note,index)=>`${index+1}. ${note}`).join('<br>')}</div>
 <p class="liuri-note">判讀順序：喜忌五行 → 流月／流日干支 → 原局、目前大運與流月的六沖檢查。綠燈代表較能運用，黃燈代表需調整，紅燈代表先防範，均不取代現實安全判斷。</p>
 `;
 
@@ -6153,6 +6166,15 @@ const aiReportTags={
   timing:{
     currentLuck:{ganzhi:curDyGz,tenGod:curDyShen,element:curDyWx,ageRange:`${curDyAge}～${curDyEnd}`,isResource:['正印','偏印'].includes(curDyShen)},
     annual:{year:Number(lyYear),ganzhi:lyGz,stem:lyTg,branch:lyDz,element:lyWx,tenGod:lyStar,relation:lyRelation,isResource:['正印','偏印'].includes(lyStar)},
+    dailyGuidance:{
+      date:formatDate,
+      favorableElements:yongshen,
+      unfavorableElements:jishenWuxing,
+      flowMonth:{ganzhi:`${flowMonth.stem}${flowMonth.branch}`,range:flowRangeLabel,stemElement:flowMonthStemWx,branchElement:flowMonthBranchWx,tone:flowMonthStatus.tone},
+      flowDay:{ganzhi:`${todayGanzhi.stem}${todayGanzhi.branch}`,stemElement:todayStemWx,branchElement:todayBranchWx,baseTone:todayBaseTone,contextRisk:todayHasContextRisk},
+      clashes:clashWarnings,
+      rule:'流日先判喜忌，再疊加流月與六沖。流日本身為喜用時，即使流月或六沖有風險，也要寫成「日氣有支撐、環境宜穩健防範」，不得把它改寫成全忌神日或通用得財日。'
+    },
     interpretationRule:'大運與流年是階段性作用，只能寫成目前形成、補入或引動，不得宣稱為原局既有。'
   },
   domains:{
