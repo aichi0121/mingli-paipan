@@ -676,11 +676,20 @@ async function callGemini(prompt, body) {
 
   const candidate = data.candidates?.[0] || {};
   // Gemini thinking-capable models may include private thought parts alongside the final answer.
-  // Only return visible answer parts; concatenating every part exposes drafting instructions.
-  const visibleParts = (candidate.content?.parts || []).filter((part) => !part.thought && !part.thoughtSignature);
+  // `thoughtSignature` is also attached to some normal output parts in newer Gemini APIs,
+  // so it must not be used as a reason to discard text. Only `thought: true` is private.
+  const visibleParts = (candidate.content?.parts || []).filter((part) => part.thought !== true);
+  const visibleText = visibleParts.map((part) => part.text || '').join('\n');
+  const text = sanitizeGeminiOutput(visibleText);
+  if (!text) {
+    const err = new Error('Gemini 沒有回傳可顯示的正式內容，請稍後重新生成。');
+    err.statusCode = 502;
+    err.code = 'GEMINI_EMPTY_RESPONSE';
+    throw err;
+  }
   return {
     model,
-    text: sanitizeGeminiOutput(visibleParts.map((part) => part.text || '').join('\n')),
+    text,
     finishReason: candidate.finishReason || '',
     usageMetadata: data.usageMetadata || null
   };
